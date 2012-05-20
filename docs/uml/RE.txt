@@ -24,6 +24,12 @@ RE
 
 1.3 Der NAO kann einen Bercher gefüllt mit Wasser tragen können und verschüttet dabei nichts
 
+1.4 Der NAO positioniert sich neu. nicht nach dem er hingefallen ist.
+
+1.4.1 Der NAO bestimmt die Position des NXT
+
+1.4.2 Der NAO bewegt sich zum NXT und orientiert sich daran.
+
 2. NXT
 
 2.1 Der NXT kann zu einem gegebenen Punkt fahren
@@ -101,6 +107,22 @@ RE
 4.4 NAO walk
 
 4.4.1 Der NAO muss in 5 minuten das Ziel erreichen
+
+4.4.2 Der NAO wählt einen Pfad
+
+4.4.2.1 Der NAO unterteilt den Pfad in Sektionen von jeweils 1m
+
+4.4.2.2 Der NAO bestimmt jeweil am Ende einer Sektion einen Punkt fuer einen NXT an dem er sich orientieren kann.
+
+4.4.3 Der NAO läuft Sektion für Sektion
+
+4.4.3.1 Der NAO teilt dem MCC mit, an welchem Punkt er einen NXT braucht.
+
+4.4.3.2 Wenn der NAO die Bestätigung hat das der NXT an dem Punkt angekommen ist lokalisiert er ihn und korrigiert ihn ggf.
+
+4.4.3.3 Der NAO durchläuft die Sektion bis zum Ende
+
+4.4.3.4 Wenn der NAO am Ziel angekommen ist stellt er den Becher ab, sonst durchläuft er die nächste Sektion.
 
 4.5 Gesamtanforderungen
 
