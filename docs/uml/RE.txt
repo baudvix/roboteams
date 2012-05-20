@@ -1,54 +1,74 @@
 RE
 
-1. Nao
+1. NAO
 
-1.1 möchte den NXT tracken
+1.1 Der NAO möchte den NXT orten
 
-1.1.1 hat freies sichtfeld auf den NXT
+1.1.1 Der NAO hat ein freies Sichtfeld auf den NXT
 
-1.1.1.1 der NXT ist in einem Abstand von 30 - 100 cm
+1.1.1.1 Der NXT ist in einem Abstand von 30 - 100 cm
 
-1.1.1.1.1 muss den NXT auf 10 cm identifizieren können
+1.1.1.1.1 Der NAO muss den NXT auf 10 cm identifizieren können
 
-1.1.1.2 der NXT ist nicht ineinem Abstand von 30-100cm
+1.1.1.2 Der NXT ist nicht in einem Abstand von 30 - 100 cm
 
-1.1.1.2.1 meldet den fehler das der NXT nicht gen gewünschten Radius ist
+1.1.1.2.1 Der NAO meldet dem MCC den Fehler, dass der NXT nicht im gewünschten Radius ist
 
-1.1.2 hat kein freies sichtfeld auf den NXT
+1.1.2 Der NAO hat kein freies sichtfeld auf den NXT
 
-1.1.2.1 meldet dem MCC den fehler, dass der NXT nciht gesehen werden kann
+1.1.2.1 Der NAO meldet dem MCC den Fehler, dass der NXT nicht gesehen werden kann
 
-1.2 fällt hin
+1.2 Der NAO fällt hin
 
-1.2.1 muss sich mit hilfe der NXTs auf 10cm genau kallibrieren können
+1.2.1 Der NAO kann sich mit der Hilfe der NXTs auf 10 cm genau kallibrieren
+
+1.3 Der NAO kann einen Bercher gefüllt mit Wasser tragen können und verschüttet dabei nichts
 
 2. NXT
 
-2.1 möchte zu einem Punkt fahren
+2.1 Der NXT kann zu einem gegebenen Punkt fahren
 
-2.1.1 muss auf eine genauigkeit von 20cm diesen finden
+2.1.1 Der NXT findet den Punkt mit einer Genauigkeit von 20 cm
 
-2.1.2 muss maximal eine Minute für einen Meter Luftlinie Brauchen
+2.1.2 Der NXT braucht für 1 m Luftlinie maximal 1 min
 
-2.2 hat einein Punkt gescannt
+2.2 Der NXT identifiziert Hindernisse in einem Bereich von 120° in einer Entfernung von 30 - 200 cm
+
+2.3 Der NXT kann das MCC nach einer Kalibrierung fragen.
+
+2.3.1 Der NXT kann dafür seine Position verändern
 
 3. MCC
 
-3.1 kommunikation
+3.1 Kommunikation
 
-3.1.1 muss mit 1 oder 2 Naos komunizieren können
+3.1.1 Das MCC kann mit 1 oder 2 NAOs kommunizieren.
 
-3.1.2 muss mit n NXTs kommunizieren können
+3.1.2 Das MCC kann mit mehreren NXTs kommunizieren.
 
-3.2 phasensteuerung
+3.1.3 Die Kommunikation läuft über TCP in vorgegebenen Protokoll
 
-3.2.1 steuert die Phasen indem er die übergangsbedingungen überwacht und den Robotern diese Mitteilt
+3.2 Phasensteuerung
 
-3.3 baut eine Karte und sendet diese an die roboter
+3.2.1 Das MCC steuert die Phasen indem er die Übergangsbedingungen überwacht und den Robotern die aktuelle Phase Mitteilt.
 
-3.4 erhällt fließend die gescannten punkte und den Winkel der Karte von den NXTs
+3.3 Das MCC generiert eine Karte aus den Messungen der NXTs
 
-3.5 steuert die kallibrierung der nxts durch die naos
+3.3.1 Das MCC kann die Karten in vereinfachter Form an die Roboter schicken.
+
+3.3.2 Das MCC kann nach eine Kalibrierung Fehler herrausrechnen
+
+3.3.3 Das MCC kann die Wahrscheinlichkeit bestimmen, mit der an einem bestimmten Ort ein Hindernis ist.
+
+3.4 Das MCC erhällt die Position des NXT und die Position des gemessenen Punktes.
+
+3.5 Das MCC steuert die Kallibrierung der NXTs
+
+3.5.1 Das MCC leitet die Anfrage an die NAOs weiter
+
+3.5.1.1 Bei Misserfolg versucht das MCC die Position dex NXT zu korrigieren
+
+3.5.1.2 Bei Erfolg teilt das MCC dem NXT die Position und die Ausrichtung mit
 
 4. Statusanforderungen
 
@@ -62,44 +82,42 @@ RE
 
 4.2 Erkunden
 
-4.2.1 die Anforderungen müssen innerhalb von 15 min erfüllt werden
+4.2.1 Die Erkundung muss innerhalb von 15 min ausgeführt sein. Sie ist erfolgreich, wenn:
 
-4.2.1.1 target found
+4.2.1.1 Das Ziel gefunden wurde (target found)
 
-4.2.1.2 path found
+4.2.1.2 Ein oder mehrere Wege gefunden wurde(n) (path found)
 
-4.2.1.3 boundery complete
+4.2.1.3 Die Grenzen der Umgebung identifiziert wurden (boundery complete)
 
-4.2.1.4 80% explored
+4.2.1.4 Die Karte zu 80% erkundet wurde (80% explored)
 
-4.2.2 die NXTs können den MCC nach der kallibrierung fragen
+4.2.2 der MCC steuert die NXTs indem er Ihnen punkte zum erkunden sendet und eine Bestätigung beim ankommen erhällt
 
-4.2.3 der MCC steuert die NXTs indem er Ihnen punkte zum erkunden sendet und eine Bestätigung beim ankommen erhällt
+4.3 Verifikation
 
-4.2.4 der NXT muss in 5 minuten den Pfad erfolgreich verifizieren können
+4.3.1 Der NXT verifiziert den Pfad in 5 min
 
-4.3 nao walk
+4.4 NAO walk
 
-4.3.1 der nao muss in 5 minuten das Ziel erreichen
+4.4.1 Der NAO muss in 5 minuten das Ziel erreichen
 
-4.4 Gesamtanforderungen
+4.5 Gesamtanforderungen
 
-4.4.1 das systhem terminiert nach 30 minuten mit folgenden erfüllten bedingungen
+4.5.1 Das System terminiert nach 30 min mit folgenden erfüllten Bedingungen
 
-4.4.1.1 der Nao ist erfolgreich beim Ziel mit den Becher angekommen
+4.5.1.1 Der NAO ist mit dem Becher am Ziel angekommen
 
-5. Benutzer Kritärien
+5. Benutzer Kriterien
 
-5.1 der Benutzer muss die mission starten können
+5.1 Der Benutzer startet die Mission
 
-5.2 der Nao muss am Zielpunkt mit dem Becher ankommen
+5.2 Das System muss bis auf dem Systemstart ohne menschlichen Eingriff terminieren
 
-5.3 das Systhem muss bis auf dem systhemstart ohne menschlichen eingriff terminieren
+5.3 Das System muss in 30 min terminieren
 
-5.4 das Systhem muss in 30 minuten terminieren
+5.5 Es werden 2 NAOs und mehrere NXTs verwendet
 
-5.5 es werden 2 Naos und n NSCs verwendet
-
-5.6 das spielfeld ist 3 mal 3 cm groß
+5.6 Das Spielfeld ist 3 mal 3 m groß.
 
 5.7 Die minimale größe der Hindernisse entspricht einem Ziegelstein
