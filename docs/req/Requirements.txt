@@ -1,0 +1,96 @@
+﻿Systemanforderungen
+
+	1. NAO
+
+		1.1 Der NAO muss den NXT orten können
+
+			1.1.1 Beide NAO's haben ein freies Sichtfeld auf den NXT, sonst muss der NAO dem MCC den Fehler, dass der NXT nicht gesehen werden kann, melden
+			
+			1.1.2 Der NXT ist in einem Abstand von 30 - 100 cm, sonst muss der NAO dem MCC den Fehler, dass der NXT nicht im gewünschten Radius ist, melden
+
+			1.1.3 Die NAO's müssen den NXT auf 2 cm genau identifizieren können
+
+
+
+		1.2 Der NAO muss sich zu Beginn nach dem Aufstehen und wenn er hinfällt mit Hilfe der NXT's auf 2 cm genau kalibrieren können
+
+			1.2.1 Der NAO hat ein freies Sichtfeld auf 2 NXT's, sonst muss der NAO dem MCC den Fehler, dass er einen oder beide NXT's nicht sehen kann, melden
+		
+			1.2.2 Die NXT's sind in einem Abstand von 30 - 100 cm, sonst muss der NAO dem MCC den Fehler, dass ein oder beide NXT's nicht im gewünschten Radius sind, melden
+
+		1.3 Der NAO muss sich anhand von Orientierungspunkten (Steine, NXT's, Tags??) einem gegebenen Pfad mit einem Fehler von höchstens 5 cm folgen können
+
+
+
+	2. NXT
+
+		2.1 Der NXT muss zu einem gegebenen Punkt fahren können mit einer maximalen Abweichung von 10 cm
+
+		2.2 Der NXT darf für 1 m Luftlinie maximal 1 min brauchen
+
+		2.3 Der NXT muss das Ziel identifizieren können wenn er darüber fährt
+
+		2.4 Der NXT muss selbstständig Kollisionen verarbeiten können, so dass er anschließend weiter fahren kann
+
+		2.5 Der NXT muss sich selbstständig, effektiv in einem unbekannten Gebiet bewegen können
+		
+		2.6 Der NXT muss seine Position, den Winkel seiner aktuellen Ausrichtung und ob er sich auf dem Ziel befindet oder nicht laufend an das MCC übermitteln können
+
+
+
+	3. MCC
+
+		3.1 Das MCC muss mit 2 NAO's kommunizieren können
+
+		3.2 Das MCC muss mit bis zu 5 NXT's kommunizieren können
+		
+		3.3 Das MCC muss die 5 Zustände "Initial", "AutonomicExploration", "GuidedExploration", "PathVerification" und "NAOWalk" mit folgenden Zustandsübergangsanforderungen verwalten können:
+			 - "Initial": Tritt nach Beginn der Mission ein
+			 - "AutonomicExploration": Tritt ein nachdem die NAO's stehen, kalibriert sind und die NXT's ihre absolute Position erhalten haben
+			 - "GuidedExploration": Tritt nach 5 Minuten des vorherigen Zustands ein
+			 - "PathVerification": Tritt ein nachdem das Ziel gefunden wurde, ein Pfad dorthin berechnet wurde und 80% des Gebiets erkundet wurden
+			 - "NAOWalk": Tritt ein nachdem die vorherige Phase erfolgreich abgeschlossen wurde; sonst wird die "GuidedExploration" wiederholt
+
+			3.3.1 Das MCC muss den NAO's und den NXT's die aktuelle Missionsphase mitteilen können
+
+		3.4 Das MCC muss eine Karte aus den Messungen der NXT's generieren können
+
+			3.4.1 Das MCC kann die Karten in vereinfachter Form an die Roboter schicken können
+
+			3.4.2 Das MCC muss nach einer Kalibrierung die Messfehler mit Hilfe der Abweichung, die die Kalibrierung ergeben hat, verringern können	
+
+		3.5 Das MCC muss mit Hilfe der beiden NAO's einen NXT kalibrieren können
+
+			3.5.1 Wenn ein oder beide NAO's den Fehler melden, dass der NXT nicht in Sichtweite ist, muss das MCC dem NXT eine neue Position geben können, die das Problem möglicherweise behebt
+			
+			3.5.2 Wenn ein oder beide NAO's den Fehler melden, dass der NXT nicht im Sichtfeld ist, muss das MCC dem NXT eine neue Position geben können, die das Problem möglicherweise behebt
+
+			3.5.3 Nach erfolgter Kalibrierung, muss das MCC dem NXT seine aktuelle Position und Ausrichtung senden können
+			
+		
+
+	4. NAOWalk
+
+		4.1 Das MCC muss einen Pfad bestimmen und diesen an den NAO übermitteln können
+
+		4.2 Der NAO muss mit Hilfe von zwei NXT's zum Ziel laufen können
+		
+		4.3 Der NAO muss den Becher am Ziel platzieren können
+
+
+	
+Benutzeranforderungen
+
+	1. Der Benutzer muss die Roboter auf initiale Positionen bringen, so dass alle NXT's im Sichtfeld beider NAO's sind
+
+	2. Der Benutzer muss die Mission starten können
+
+	3. Die Mission muss bis auf den Systemstart ohne menschlichen Eingriff ablaufen und nach maximal 30 Minuten erfolgreich beendet sein
+
+	4. Es müssen 2 NAOs und bis zu 5 NXT's verwendet werden
+
+	5. Das Spielfeld muss eine Größe von 5m * 5m haben
+
+	6. Die verwendeten Hindernisse müssen Kalkziegelsteine für 89 Cent von Hellweg sein
+
+	7. Der NAO muss einen Becher zum Zielpunkt tragen können ohne diesen zu verlieren
