@@ -2,15 +2,14 @@
 
 	1. NAO
 
-		1.1 Der NAO muss den NXT orten können
+		1.1 Der NAO soll helfen können die NXT's zu kalibrieren
 
-			1.1.1 Beide NAO's haben ein freies Sichtfeld auf den NXT, sonst muss der NAO dem MCC den Fehler, dass der NXT nicht gesehen werden kann, melden
-			
-			1.1.2 Der NXT ist in einem Abstand von 30 - 100 cm, sonst muss der NAO dem MCC den Fehler, dass der NXT nicht im gewünschten Radius ist, melden
-
-			1.1.3 Die NAO's müssen den NXT auf 2 cm genau identifizieren können
+			1.1.1 Die NXT's tragen TAGs die gemäß der Bedienungsanleitung vom NAO optisch erkennbar sind, wenn der NXT in einem Abstand von 30 - 100 cm vom NAO ist
 
 
+			1.1.2 Der NAO muss das ganze ihm mögliche Sichtfeld absuchen können in dem er im Stehen sein Kopf bewegt
+
+			1.1.3 Wenn ein NAO ein freies Sichtfeld auf den NXT hat, sendet er dem MCC auf Anfrage Informationen über die relative Lage, sonst muss der NAO dem MCC den Fehler, dass der NXT nicht gesehen werden kann, melden
 
 		1.2 Der NAO muss sich zu Beginn nach dem Aufstehen und wenn er hinfällt mit Hilfe der NXT's auf 2 cm genau kalibrieren können
 
@@ -61,17 +60,20 @@
 
 		3.5 Das MCC muss mit Hilfe der beiden NAO's einen NXT kalibrieren können
 
-			3.5.1 Wenn ein oder beide NAO's den Fehler melden, dass der NXT nicht in Sichtweite ist, muss das MCC dem NXT eine neue Position geben können, die das Problem möglicherweise behebt
-			
-			3.5.2 Wenn ein oder beide NAO's den Fehler melden, dass der NXT nicht im Sichtfeld ist, muss das MCC dem NXT eine neue Position geben können, die das Problem möglicherweise behebt
+			3.5.1 Das MCC muss die Funktion kalibrieren bereit stellen, Die eine Anfrage an die beiden NAO's stellt einen bestimmten NXT zu kalibrieren
 
-			3.5.3 Nach erfolgter Kalibrierung, muss das MCC dem NXT seine aktuelle Position und Ausrichtung senden können
+			3.5.2 Wenn beide NAO's relavtive Koordinaten für den NXT liefern, dann ermittelt das MCC die absolute Position des NXTs und teilt ihm diese mit
+
+			3.5.3 Nach erfolgter Kalibrierung, sendet das MCC dem NXT seine aktuelle Koordinaten.
+
+			3.5.4 Das MCC muss den NXT auf 2 cm genau identifizieren können
 			
+			3.5.5 Wenn ein oder beide NAO's den Fehler melden, dass der NXT nicht in Sichtfeld ist, muss das MCC dem NXT eine neue Position geben können, die das Problem möglicherweise behebt
+
 		
-
 	4. NAOWalk
 
-		4.1 Das MCC muss einen Pfad bestimmen und diesen an den NAO übermitteln können
+		4.1 Das MCC muss einen Pfad zum Ziel bestimmen und diesen an den NAO übermitteln können
 
 		4.2 Der NAO muss mit Hilfe von zwei NXT's zum Ziel laufen können
 		
@@ -87,10 +89,20 @@ Benutzeranforderungen
 
 	3. Die Mission muss bis auf den Systemstart ohne menschlichen Eingriff ablaufen und nach maximal 30 Minuten erfolgreich beendet sein
 
-	4. Es müssen 2 NAOs und bis zu 5 NXT's verwendet werden
+	4. Es sollen 2 NAOs und bis zu 5 NXT's verwendet werden
 
-	5. Das Spielfeld muss eine Größe von 5m * 5m haben
+	5. Das Spielfeld soll eine Größe von 3m * 3m haben
 
-	6. Die verwendeten Hindernisse müssen Kalkziegelsteine für 89 Cent von Hellweg sein
+	6. Auf dem Spielfeld befinden sich Hindernisse
 
-	7. Der NAO muss einen Becher zum Zielpunkt tragen können ohne diesen zu verlieren
+		6.1 Die verwendeten Hindernisse sind so zu plazieren, dass mindestens ein möglicher Weg vom NAO zum Ziel existiert
+
+		6.2 Die Hindernisse sind von den NXT's erkennbar, d.h. sie dürfen sich nicht verschieben oder umfallen, wenn der NXT dagegen fährt
+
+		6.3 Die Größe der Hindernisse entsprechen den Kalkziegelsteinen von Hellweg für 89 Cent
+
+	7. Am Ende der Mission muss ein Becher auf dem Zielpunkt positioniert sein
+
+		7.1 Der Durchmesser des Ziels beträgt mindestens 15 cm.
+
+		7.2 Im Umfeld von 30 cm um das Ziel befinden sich keine Hindernisse.
