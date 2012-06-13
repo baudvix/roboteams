@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jun 05 18:37:12 2012
+class SimpleMap(object):
 
-@author: Cordt
-"""
+    def __init__(self, nxtPosition, naoPosition):
+        self.__nxtPosition = nxtPosition
+        self.__naoPosition = naoPosition
+        self.__firstMapSection = MapSection()
+        self.__targetPosition = firstMapSection
 
-class SimpleMap:
-    def __init__(self, nxtPosition, naoPosition, firstMapSection):
-        self.nxtPosition = nxtPosition
-        self.naoPosition = naoPosition
-        self.firstMapSection = firstMapSection
+    def getFirstMapSection(self):
+        return self.firstMapSection
