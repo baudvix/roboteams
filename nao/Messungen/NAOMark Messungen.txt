@@ -1,0 +1,92 @@
+I
+
+Position bei Messung 1:
+-> Entfernung zum Marker: 1.5m (Kameraentfernung)
+-> Position: front
+
+Messwert
+mark  ID: 84
+  alpha -0.041 - beta -0.025
+  width 0.044 - height 0.044
+
+
+Position bei Messung 2:
+-> Entfernung zum Marker: 1.5m (Kameraentfernung)
+-> Position: 40cm links von front
+
+Messwert
+mark  ID: 116
+  alpha -0.271 - beta -0.009
+  width 0.047 - height 0.047
+
+
+Position bei Messung 3:
+-> Entfernung zum Marker: 1.5m (Kameraentfernung)
+-> Position: 40cm rechts von front
+
+Messwert
+mark  ID: 84
+  alpha 0.171 - beta -0.051
+  width 0.044 - height 0.044
+
+------------------------------------------------
+II
+
+Position bei Messung 1:
+-> Entfernung zum Marker: 1.0m (Kameraentfernung&Höhe)
+-> Position: front
+
+mark  ID: 80
+  alpha -0.029 - beta -0.069
+  width 0.063 - height 0.063
+Test terminated successfully.
+
+
+Position bei Messung 2:
+-> Entfernung zum Marker: 1.0m (Kameraentfernung)
+-> Position: 40cm links von front
+winkel = -10° (-9.8° tatsächlich)
+
+mark  ID: 80
+  alpha -0.236 + winkel! - beta -0.054 + winkel!
+  width 0.060 - height 0.060
+
+
+Position bei Messung 3:
+-> Entfernung zum Marker: 1.0m (Kameraentfernung)
+-> Position: 40cm rechts von front
+winkel = 0°!!
+
+mark  ID: 80
+  alpha 0.351 +winkel! - beta -0.076 +winkel!
+  width 0.063 - height 0.063
+
+------------------------------------------------
+III
+
+Position bei Messung 1:
+-> Entfernung zum Marker: 1.6m (Kameraentfernung&Höhe)
+-> Position: front
+
+mark  ID: 80
+  alpha -0.0469037294 - beta -0.1352453232
+  width 0.0416922234 - height 0.0416922234
+
+Position bei Messung 2:
+-> Entfernung zum Marker: 1.6m (Kameraentfernung)
+-> Position: 40cm links von front
+winkel = 0° (0° tatsächlich)
+
+mark  ID: 80
+  alpha -0.3050372005 - beta -0.1334063858
+  width 0.0442979857 - height 0.0442979857
+
+
+Position bei Messung 3:
+-> Entfernung zum Marker: 1.6m (Kameraentfernung)
+-> Position: 40cm rechts von front
+winkel = 0° (0° tatsächlich)
+
+mark  ID: 80
+  alpha 0.2262128592 - beta -0.1426010728
+  width 0.0416922234 - height 0.0416922234
