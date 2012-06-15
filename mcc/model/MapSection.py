@@ -6,6 +6,18 @@ class MapSection(object):
         self.__topGrid = None
         self.__bottomGrid = None
 
+        self.__GRID_HEIGHT = 100
+        self.__GRID_WIDTH = 100
+
+        self.__grid = []
+
+        # initialize grid with zeros
+        for i in range(0, self.__GRID_HEIGHT):
+            self.__grid.append([])
+            for j in range(0, self.__GRID_WIDTH):
+                self.__grid[i].append(0)
+
+
     def setRightGrid(self, rightGrid):
         if rightGrid in MapSection:
             self.__rightGrid = rightGrid
@@ -41,3 +53,15 @@ class MapSection(object):
 
     def getBottomGrid(self):
         return self.__bottomGrid
+
+    def updateGrid(self):
+        pass
+
+    def printGrid(self):
+        line = ""
+        for i in range(0, 10):
+            for j in range(0, 10):
+                line += str(self.__grid[i][j]) + "\t"
+
+            print line
+            line = ""

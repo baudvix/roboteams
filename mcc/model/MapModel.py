@@ -1,4 +1,4 @@
-import MapSection
+from mcc.model import MapSection
 from mcc.util import Point
 
 class MapModel(object):
