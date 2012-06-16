@@ -422,15 +422,3 @@ class MapSection(object):
 
         for i in range (0, len(points)):
             self.__grid[points[i][0]][points[i][1]] += 1
-
-    def print_grid(self):
-        """
-        Auxiliary function which prints the current grid in the console.
-
-        """
-        line = ""
-        for i in range(0, MapSection.__grid_height):
-            for j in range(0, MapSection.__grid_width):
-                line += str(self.__grid[i][j]) + "\t"
-            print line
-            line = ""
