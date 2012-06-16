@@ -216,7 +216,7 @@ class MapModel(object):
             for i in range(0, offset_y, -1):
                 tmp_map_section = tmp_map_section.bottom_grid
 
-        tmp_map_section.update_grid([x_abs, y_abs])
+        tmp_map_section.update_grid([[x_abs, y_abs]])
 
 
 class MapSection(object):
