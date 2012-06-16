@@ -20,9 +20,9 @@ class Simulator(object):
         direction = 0
 
         #generate List
-        for i in range(10):
+        for i in range(100):
             # adding Point to List
-            #self.nxtList.append(point)
+            #
 
             # compute new Point
 
@@ -46,7 +46,6 @@ class Simulator(object):
             pointX += dx
             pointY += dy
             yaw = dr
-            #point = Point(point.x_coord+dx, point.y_coord+dy, point.yaw+dr)
-
-            print pointX.__str__() +" "+ pointY.__str__()+" "+yaw.__str__()
+            point = Point(pointX.__int__(), pointY.__int__(), yaw)
+            self.nxtList.append(point)
 
