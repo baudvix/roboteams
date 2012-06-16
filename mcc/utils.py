@@ -10,7 +10,7 @@ class Point(object):
 
     """
 
-    def __init__(self, x_coord, y_coord, yaw):
+    def __init__(self, x_coord, y_coord, yaw=0):
         """
         Creates a point in the map
 
@@ -26,7 +26,7 @@ class Point(object):
 
         """
         if (type(x_coord) == type(1)) and (type(y_coord) == type(1)) \
-                                      and (type(yaw) == type(1.0)):
+            and (type(yaw) == type(1.0) or type(yaw) == type(1)):
             self.__x_coord = x_coord
             self.__y_coord = y_coord
             self.__yaw = yaw
@@ -109,7 +109,7 @@ class Point(object):
             :raises TypeError: If the type of the arguments is not float
 
             """
-            if type(yaw) != type(1.0):
+            if type(yaw) != type(1.0) or type(yaw) != type(1):
                 raise TypeError("Type \"float\" excepted, but",
                                 type(yaw), " given.")
 
