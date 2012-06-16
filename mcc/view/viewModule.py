@@ -20,7 +20,7 @@ class View:
         self.log('button Clicked')
 
     def log(self,text):
-        self.label.text += text+'\n'
+        self.label.text = text+'\n'+self.label.text
 
     def getPoint(self):
         r = random.randint(0,10)
@@ -40,7 +40,7 @@ class View:
 
         for x in range(200):
             for y in range(200):
-                point = self.getPoint()
+                point = self.map.get_point(x,y)
 
                 if(point == 0):
                     if  (x*201+y)%2==0:
@@ -48,17 +48,19 @@ class View:
                     else:
                         color = (90, 90, 90)
                 elif(point == 1):
-                    color = (254, 250, 232)
+                    color = (148, 91, 91)
                 elif(point == 2):
-                    color = (230, 255, 210)
+                    color = (223, 223, 87)
                 else:
-                    color = (155, 255, 76)
+                    color = (25, 210, 25)
 
 
 
                 pygame.draw.rect(parent, color, (2+3*x, 2+3*y, 3, 3))
 
-    def __init__(self):
+    def __init__(self, map):
+
+        self.map = map
 
         pygame.init()
         self.screen = screen = pygame.display.set_mode((1024, 760), pygame.DOUBLEBUF)
