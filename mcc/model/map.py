@@ -5,7 +5,7 @@ Module for the map model
 
 from mcc import utils
 
-class MapModel:
+class MapModel(object):
     """
     Class for the MapModel. Contains the reference to the first map section
     which contains the position of the NAO.
@@ -24,8 +24,7 @@ class MapModel:
         self.__first_map_section = MapSection()
         self.__target_position = None
 
-    @property
-    def first_map_section(self):
+    def get_first_map_section(self):
         """
         Getter method for first_map_section
 
@@ -35,8 +34,7 @@ class MapModel:
         """
         return self.__first_map_section
 
-    @first_map_section.setter
-    def first_map_section(self, map_section):
+    def set_first_map_section(self, map_section):
         """
         Setter method for first_map_section
 
@@ -51,8 +49,9 @@ class MapModel:
 
         self.__first_map_section = map_section
 
-    @property
-    def target_position(self):
+    first_map_section = property(get_first_map_section, set_first_map_section)
+
+    def get_target_position(self):
         """
         Getter method for target_position
 
@@ -62,8 +61,7 @@ class MapModel:
         """
         return self.target_position
 
-    @target_position.setter
-    def target_position(self, target_position):
+    def set_target_position(self, target_position):
         """
         Setter method for target_position
 
@@ -72,11 +70,13 @@ class MapModel:
         :raises TypeError: If the type of the arguments is not Point
         
         """
-        if type(target_position) != type(utils.Point(0, 0)):
+        if type(target_position) != type(utils.Point(0, 0, 0)):
             raise TypeError("Type \"Point\" excepted, but",
                             type(target_position), " given.")
 
         self.__target_position = target_position
+
+    target_position = property(get_target_position, set_target_position)
 
     def add_map_section(self, offset_x, offset_y):
         """
@@ -128,13 +128,106 @@ class MapModel:
             raise ValueError("Can't add MapSection with this offset - \
                              position is occupied.")
 
+    def get_point(self, x_coord, y_coord):
+        """
+        Returns the value of a given point and creates a map section, if
+        necessary
+
+        :param x_coord: the x-coordinate of which the value shall be returned
+        :type x_coord: int
+        :param y_coord: the y-coordinate of which the value shall be returned
+        :type y_coord: int
+        :return: the value of the point
+        :rtype: int
+
+        """
+        if type(x_coord) != type(1) or type(y_coord) != type(1):
+            raise TypeError("Type \"int\" excepted, but", type(x_coord), ", ",
+                            type(y_coord), " given.")
+
+        offset_x = x_coord / MapSection.get_grid_width()
+        offset_y = y_coord / MapSection.get_grid_height()
+        x_abs = x_coord % MapSection.get_grid_width()
+        y_abs = y_coord % MapSection.get_grid_height()
+
+        # make sure that the grid exists; pass if it already does
+        try:
+            self.add_map_section(offset_x, offset_y)
+        except ValueError:
+            pass
+
+        tmp_map_section = self.__first_map_section
+
+        if offset_x > 0:
+            for i in range(0, offset_x):
+                tmp_map_section = tmp_map_section.right_grid
+        elif offset_x < 0:
+            for i in range(0, offset_x, -1):
+                tmp_map_section = tmp_map_section.left_grid
+        if offset_y > 0:
+            for i in range(0, offset_y):
+                tmp_map_section = tmp_map_section.top_grid
+        elif offset_y < 0:
+            for i in range(0, offset_y, -1):
+                tmp_map_section = tmp_map_section.bottom_grid
+
+        return tmp_map_section.get_point_value(x_abs, y_abs)
+
+
+
+    def increase_point(self, x_coord, y_coord):
+        """
+        Increases the value of a given point and creates a map section, if
+        necessary
+
+        :param x_coord: the x-coordinate of which the value shall be increased
+        :type x_coord: int
+        :param y_coord: the y-coordinate of which the value shall be increased
+        :type y_coord: int
+
+        """
+        if type(x_coord) != type(1) or type(y_coord) != type(1):
+            raise TypeError("Type \"int\" excepted, but", type(x_coord), ", ",
+                type(y_coord), " given.")
+
+        offset_x = x_coord / MapSection.get_grid_width()
+        offset_y = y_coord / MapSection.get_grid_height()
+        x_abs = x_coord % MapSection.get_grid_width()
+        y_abs = y_coord % MapSection.get_grid_height()
+
+        # make sure that the grid exists; pass if it already does
+        try:
+            self.add_map_section(offset_x, offset_y)
+        except ValueError:
+            pass
+
+        tmp_map_section = self.__first_map_section
+
+        if offset_x > 0:
+            for i in range(0, offset_x):
+                tmp_map_section = tmp_map_section.right_grid
+        elif offset_x < 0:
+            for i in range(0, offset_x, -1):
+                tmp_map_section = tmp_map_section.left_grid
+        if offset_y > 0:
+            for i in range(0, offset_y):
+                tmp_map_section = tmp_map_section.top_grid
+        elif offset_y < 0:
+            for i in range(0, offset_y, -1):
+                tmp_map_section = tmp_map_section.bottom_grid
+
+        tmp_map_section.update_grid([x_abs, y_abs])
+
 
 class MapSection(object):
     """
     Class for the MapSection. Contains the references to the bordering grids
-    and the grid which is defined by 'GRID_HEIGHT' and 'GRID_WIDTH'.
+    and the grid which is defined by 'grid_height' and 'grid_width'
 
     """
+    __grid_height = 100
+    __grid_width = 100
+
     def __init__(self):
         """
         Creates a map section
@@ -149,19 +242,15 @@ class MapSection(object):
         self.__top_grid = None
         self.__bottom_grid = None
 
-        self.__GRID_HEIGHT = 10
-        self.__GRID_WIDTH = 10
-
         self.__grid = []
 
         # initialize grid with zeros
-        for i in range(0, self.__GRID_HEIGHT):
+        for i in range(0, MapSection.__grid_height):
             self.__grid.append([])
-            for j in range(0, self.__GRID_WIDTH):
+            for j in range(0, MapSection.__grid_width):
                 self.__grid[i].append(0)
 
-    @property
-    def right_grid(self):
+    def get_right_grid(self):
         """
         Getter method for right_grid
     
@@ -169,10 +258,9 @@ class MapSection(object):
         :rtype: MapSection
         
         """ 
-        return self.__bottom_grid
+        return self.__right_grid
 
-    @right_grid.setter
-    def right_grid(self, right_grid):
+    def set_right_grid(self, right_grid):
         """
         Setter method for right_grid
 
@@ -188,8 +276,9 @@ class MapSection(object):
 
         self.__right_grid = right_grid
 
-    @property
-    def left_grid(self):
+    right_grid = property(get_right_grid, set_right_grid)
+
+    def get_left_grid(self):
         """
         Getter method for left_grid
     
@@ -199,8 +288,7 @@ class MapSection(object):
         """
         return self.__left_grid
 
-    @left_grid.setter
-    def left_grid(self, left_grid):
+    def set_left_grid(self, left_grid):
         """
         Setter method for left_grid
 
@@ -216,8 +304,9 @@ class MapSection(object):
 
         self.__left_grid = left_grid
 
-    @property
-    def top_grid(self):
+    left_grid = property(get_left_grid, set_left_grid)
+
+    def get_top_grid(self):
         """
         Getter method for top_grid
     
@@ -227,8 +316,7 @@ class MapSection(object):
         """
         return self.__top_grid
 
-    @top_grid.setter
-    def top_grid(self, top_grid):
+    def set_top_grid(self, top_grid):
         """
         Setter method for top_grid
 
@@ -244,8 +332,9 @@ class MapSection(object):
 
         self.__top_grid = top_grid
 
-    @property
-    def bottom_grid(self):
+    top_grid = property(get_top_grid, set_top_grid)
+
+    def get_bottom_grid(self):
         """
         Getter method for bottom_grid
     
@@ -255,8 +344,7 @@ class MapSection(object):
         """
         return self.__bottom_grid
 
-    @bottom_grid.setter
-    def bottom_grid(self, bottom_grid):
+    def set_bottom_grid(self, bottom_grid):
         """
         Setter method for bottom_grid
 
@@ -272,9 +360,51 @@ class MapSection(object):
 
         self.__bottom_grid = bottom_grid
 
+    bottom_grid = property(get_bottom_grid, set_bottom_grid)
+
+    def get_grid_height():
+        """
+        Getter method for grid_height
+
+        :return: the grids height
+        :rtype: int
+
+        """
+        return MapSection.__grid_height
+
+    get_grid_height = staticmethod(get_grid_height)
+
+    def get_grid_width():
+        """
+        Getter method for grid_width
+
+        :return: the grids width
+        :rtype: int
+
+        """
+        return MapSection.__grid_width
+
+    get_grid_width = staticmethod(get_grid_width)
+
+    def get_point_value(self, x_coord, y_coord):
+        """
+        :param x_coord: x_coord where the value shall be retrieved of
+        :type x_coord: int
+        :param y_coord: y_coord where the value shall be retrieved of
+        :type y_coord: int
+        :raises TypeError: If the type of the arguments is not a Point
+
+        """
+        if type(x_coord) != type(1) or type(y_coord) != type(1):
+            raise TypeError("Type \"int\" excepted, but", type(x_coord),
+                            ", ", type(y_coord), " given.")
+
+        return self.__grid[x_coord][y_coord]
+
+
     def update_grid(self, points):
         """
-        Updates the grid by increasing the values of the given points.
+        Updates the grid by increasing the values of the given points
 
         :param points: points that shall be updated
         :type points: [[int, int]]
@@ -283,7 +413,7 @@ class MapSection(object):
         
         """
         if type(points) != type([]):
-            raise TypeError("Type \"list\" excepted, but",  type(points),
+            raise TypeError("Type \"list\" excepted, but", type(points),
                             " given.")
 
         for i in range (0, len(points)):
@@ -299,8 +429,8 @@ class MapSection(object):
 
         """
         line = ""
-        for i in range(0, self.__GRID_HEIGHT):
-            for j in range(0, self.__GRID_WIDTH):
+        for i in range(0, MapSection.__grid_height):
+            for j in range(0, MapSection.__grid_width):
                 line += str(self.__grid[i][j]) + "\t"
             print line
             line = ""
