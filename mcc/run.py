@@ -1,6 +1,6 @@
-from viewModule import View
 import os,pygame
 from pygame.locals import *
+from view.viewModule import View
 
 def main():
     clock = pygame.time.Clock()
