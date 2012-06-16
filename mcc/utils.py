@@ -25,6 +25,9 @@ class Point(object):
         :raises TypeError: If the type of the arguments is not integer
 
         """
+        self.x_coord = x_coord
+        self.y_coord = y_coord
+        self.yaw = yaw
         if (type(x_coord) == type(1)) and (type(y_coord) == type(1)) \
             and (type(yaw) == type(1.0) or type(yaw) == type(1)):
             self.__x_coord = x_coord

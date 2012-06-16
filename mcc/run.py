@@ -17,11 +17,10 @@ def main():
     map = MapModel()
 
     # Fill Map with simulated content
-    #for p in sim.nxtList:
-    #    map.increase_point(p.x_coord, p.y_coord)
-    map.increase_point(100,100)
-    map.increase_point(100,101)
-    map.increase_point(100,102)
+    for p in sim.nxtList:
+        for x in range(5):
+            for y in range(5):
+                map.increase_point(p.x_coord-2+x, p.y_coord-2+y)
 
     clock = pygame.time.Clock()
     view = View(map)
@@ -37,7 +36,13 @@ def main():
             if event.type == QUIT:
                 return
 
+        p = sim.goPoint()
+        for x in range(5):
+            for y in range(5):
+                map.increase_point(p.x_coord-2+x, p.y_coord-2+y)
 
+
+        view.log( p.x_coord.__str__()+" "+p.y_coord.__str__() )
         view.update(events)
 
 

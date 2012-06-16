@@ -20,7 +20,7 @@ class View:
         self.log('button Clicked')
 
     def log(self,text):
-        self.label.text += text+'\n'
+        self.label.text = text+'\n'+self.label.text
 
     def getPoint(self):
         r = random.randint(0,10)
@@ -48,11 +48,11 @@ class View:
                     else:
                         color = (90, 90, 90)
                 elif(point == 1):
-                    color = (254, 250, 232)
+                    color = (148, 91, 91)
                 elif(point == 2):
-                    color = (230, 255, 210)
+                    color = (223, 223, 87)
                 else:
-                    color = (155, 255, 76)
+                    color = (25, 210, 25)
 
 
 
