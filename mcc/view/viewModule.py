@@ -7,7 +7,6 @@ from ocempgui.widgets import *
 from pygame.locals import *
 from pygame.surface import Surface
 
-
 __author__ = 'mhhf'
 
 
