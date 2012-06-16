@@ -1,10 +1,14 @@
 import os,pygame
 from pygame.locals import *
+from simulator.simulator import Simulator
 from view.viewModule import View
 
 def main():
     clock = pygame.time.Clock()
     view = View()
+
+    sim = Simulator()
+    sim.generateList()
 
     #Main Loop
     while 1:
