@@ -59,7 +59,7 @@ class MapModel(object):
         :rtype: Point
         
         """
-        return self.target_position
+        return self.__target_position
 
     def set_target_position(self, target_position):
         """
