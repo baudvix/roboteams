@@ -12,8 +12,14 @@ class Explorer():
     def __init__(self, mac, outbox=5, inbox=11):
         self.brick = find_one_brick(host=mac, method=Method(usb=False, bluetooth=True))
         self.message_id = 0
+        self.remote_message_id = 0
         self.outbox = outbox
         self.inbox = inbox
+        self.com_state = 0 
+        #com_state:
+        #    0: warte - nichts gesendet, nichts empfangen
+        #    1: m gesendet, r noch nicht empfangen
+        #    2: m empfangen, r gesendet, warte auf a
         
     def __del__(self):
         pass
@@ -50,12 +56,26 @@ class Explorer():
         count = 0
         while(True):
             if count%100 == 0:
-                dbg_print("DispatcherSchleife Durchlauf: "+str(count))
+                dbg_print("DispatcherSchleife Durchlauf: "+str(count),3)
             try:
-                local_box, message = robo.recv_message()
+                local_box, message = self.recv_message()
                 dbg_print((local_box, message),3)
-                #message auswerten und dispatchen
-                
+                try: 
+                    typ, id, payload = str(message).split(';')
+                except:
+                    dbg_print("message-parsing-error: falsches Format")
+                    
+                if self.com_state == 0: #warten auf m
+                    if typ == 'm':
+                        self.remote_message_id = id
+                        # irgendetwas mit payload machen
+                        self.send_message('r;'+str(self.remote_message_id)+';;')
+                elif self.com_state == 1: #m gesendet, warte r
+                    pass
+                elif self.com_state == 2: #m empfangen, r gesendet, warte auf a
+                    pass
+                else:
+                    dbg_print("com_state - Fehler im Zustandsautomaten")
             except:
                 pass
             count += 1

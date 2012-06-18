@@ -1,0 +1,59 @@
+//SLAVE
+#define BT_CONN 1
+#define INBOX 5
+#define OUTBOX 1
+
+string typ,id;
+int pos;
+
+sub BTCheck(int conn) // läuft :)
+{
+ if(!BluetoothStatus(conn)==NO_ERR)
+ {
+  TextOut(5,LCD_LINE2,"Error");
+  Wait(1000);
+  Stop(true);
+ }
+}
+
+sub splitMsg(string msg) //klappt noch nicht ganz wie geplant, nachbesserung nötig
+{
+
+ string tmp;
+ pos = Pos(msg,";");
+ typ = SubStr(msg,0,1);
+ id = SubStr(msg,pos,1);
+}
+
+sub checkInbox() // todo
+{
+ string in;
+
+ while(true)
+ {
+  ReceiveRemoteString(INBOX, true, in);
+  if(StrLen (in) != 0)
+  {
+   TextOut(10,LCD_LINE3,in);
+   splitMsg(in);
+   if(typ == "m")
+   {
+    string tmp,tmp2;
+    tmp = NumToStr(pos);
+    tmp2 = StrCat("r;",tmp,";response");
+    SendResponseString(OUTBOX,tmp2);
+   }
+  }
+  else
+  {
+   TextOut(10,LCD_LINE3,"nothing");
+  }
+  Wait(1000);
+ }
+}
+
+task main()
+{
+ BTCheck(0); //check master connection
+ checkInbox();
+}
