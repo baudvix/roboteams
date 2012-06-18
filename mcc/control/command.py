@@ -1,66 +1,97 @@
-from twisted.protocols import amp
+from twisted.protocols.amp import Command, Integer, String, AmpList, Float
+
 
 #Commands from NXT or NAO to MCC
+class Register(Command):
+    """
+    Roboter registers itself at the Mission Control Center with his type and color
+    """
+    arguments = [('type', Integer()),
+                 ('color', Integer())]
+    response = [('handle', Integer())]
 
-class Register(amp.Command):
+
+class Activate(Command):
     """
-        Roboter registers itself at the Mission Control Center with his type and color
+    Roboter activates itself at the Mission Control Center.
     """
-    arguments = [('type', amp.Integer()), ('color', amp.Integer())]
-    response = [('handle', amp.Integer()), ('port', amp.Integer()))]
+    arguments = [('handle', Integer())]
+    response = [('ACK', String())]
+
 
 #Commands from NAO to MCC
+class NXTCalibrated(Command):
+    arguments = [('handle', Integer()),
+                 ('nxt_handle', Integer()),
+                 ('x', Integer()),
+                 ('y', Integer()),
+                 ('yaw', Integer())]
+    response = [('ACK', String())]
 
-class NxtCalibrated(amp.Command):
-    arguments = [('handle', amp.Integer()), ('nxthandle', amp.Integer()), ('x', amp.Integer()), ('y', amp.Integer()), ('yaw', amp.Integer())]
-    response = [('ACK', amp.String())]
 
-class NxtSpotted(amp.Command):
-    arguments = [('handle', amp.Integer()), ('nxthandle', amp.Integer())]
-    response = [('ACK', amp.String())]
+class NXTSpotted(Command):
+    arguments = [('handle', Integer()),
+                 ('nxt_handle', Integer())]
+    response = [('ACK', String())]
+
 
 #Commands from NXT to MCC
+class SendData(Command):
+    arguments = [('handle', Integer()),
+                 ('pointTag', Integer()),
+                 ('x', Integer()),
+                 ('y', Integer()),
+                 ('yaw', Float())]
+    response = [('ACK', String())]
 
-class SendData(amp.Command):
-    arguments = [('handle', amp.Integer()), ('pointTag', amp.Integer()), ('x', amp.Integer()), ('y', amp.Integer()), ('yaw', amp.Float())]
-    response = [('ACK', amp.String())]
 
-class ArrivedPoint(amp.Command):
-    arguments = [('handle', amp.Integer()), ('x', amp.Integer()), ('y', amp.Integer())]
-    response = [('ACK', amp.String())]
+class ArrivedPoint(Command):
+    arguments = [('handle', Integer()),
+                 ('x', Integer()),
+                 ('y', Integer())]
+    response = [('ACK', String())]
 
 
 #Commands from MCC to NXT or NAO
+class UpdateState(Command):
+    arguments = [('state', Integer())]
+    response = [('ACK', String())]
 
-class UpdateState(amp.Command):
-    arguments = [('state', amp.Integer())]
-    response = [('ACK', amp.String())]
 
-class UpdatePosition(amp.Command):
-    arguments = [('x', amp.Integer()), ('y', amp.Integer()), ('yaw', amp.Integer())]
-    response = [('ACK', amp.String())]
+class UpdatePosition(Command):
+    arguments = [('x', Integer()),
+                 ('y', Integer()),
+                 ('yaw', Integer())]
+    response = [('ACK', String())]
 
-class SendMap(amp.Command):
-    arguments = [('map', amp.AmpList([('value', amp.Integer()), ('type', amp.Integer())]))]
-    response = [('ACK', amp.String())]
+
+class SendMap(Command):
+    arguments = [('map', AmpList([('value', Integer()),
+                                  ('type', Integer())]))]
+    response = [('ACK', String())]
+
 
 #Commands from MCC to NAO
+class NXTMissing(Command):
+    arguments = [('nxt_handle', Integer()),
+                 ('color', Integer())]
+    response = [('ACK', String())]
 
-class NxtMissing(amp.Command):
-    arguments = [('nxthandle', amp.Integer())]
-    response = [('ACK', amp.String())]
 
-class PerformCalibration(amp.Command):
-    arguments = [('nxthandle', amp.Integer())]
-    response = [('ACK', amp.String())]
+class PerformCalibration(Command):
+    arguments = [('nxt_handle', Integer()),
+                 ('color', Integer())]
+    response = [('ACK', String())]
 
-class SendPath(amp.Command):
-    arguments = [('path', amp.AmpList([('x', amp.Integer()), ('y', amp.Integer())]))]
-    response = [('ACK'), amp.String()]
+
+class SendPath(Command):
+    arguments = [('path', AmpList([('x', Integer()),
+                                   ('y', Integer())]))]
+    response = [('ACK'), String()]
 
 
 #Commands from MCC to NXT
-
-class GoToPoint(amp.Command):
-    arguments = [('x', amp.Integer()), ('y', amp.Integer())]
-    response = [('ACK', amp.String())]
+class GoToPoint(Command):
+    arguments = [('x', Integer()),
+                 ('y', Integer())]
+    response = [('ACK', String())]

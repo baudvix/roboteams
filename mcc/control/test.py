@@ -1,10 +1,9 @@
 from twisted.internet import reactor
+import random
 
-def aSillyBlockingMethod(x):
-    import time
-    time.sleep(2)
-    print x
+def loopPrinting():
+    print chr(random.randint(97, 122))
+    reactor.callLater(1.0, loopPrinting)
 
-# run method in thread
-reactor.callInThread(aSillyBlockingMethod, "2 seconds have passed")
+loopPrinting()
 reactor.run()

@@ -1,10 +1,64 @@
 from time import gmtime
+import Queue
 
-__author__ = 'mhhf'
+class EmptyError(Exception):
+    pass
+
+class RoboterBase():
+
+    def __init__(self, handle):
+        self.__in_queue = Queue.Queue()
+        self.__out_queue = Queue.Queue()
+        self.__active = False
+        self.__handle = handle
+        self.__connection = None
+
+    def is_active(self):
+        return self.__active
+
+    def set_active(self, active):
+        self.__active = active
+
+    active = property(is_active, set_active)
+
+
+    def get_connection(self):
+        return self.__connection
+
+    def set_connection(self, connection):
+        self.__connection = connection
+
+    deffer = property(get_connection, set_connection)
+
+    def get_handle(self):
+        return self.__handle
+
+    def set_handle(self, handle):
+        self.__handle = handle
+
+    handle = property(get_handle, set_handle)
+
+    def put_out(self, *args, **kw):
+        self.__out_queue.put((args, kw), True)
+
+    def get_out(self):
+        if self.__out_queue.empty():
+            raise EmptyError("Out-Queue is empty")
+        else:
+            return self.__out_queue.get(True)
+
+    def put_in(self, *args, **kw):
+        self.__out_queue.put((args, kw), True)
+
+    def get_in(self):
+        if self.__in_queue.empty():
+            raise EmptyError("In-Queue is empty")
+        else:
+            return self.__out_queue.get(True)
 
 class NXTModel(object):
     """
-        Modell of an NXT
+        Model of an NXT
     """
     def __init__(self, position_point):
         """
@@ -24,7 +78,11 @@ class NXTModel(object):
             :param tag: Found Point tag of the Point
             :type tag: Enum
         """
-        self.free_space = self.FreeSpace(point, tag, self.free_space)
+        self.free_space = FreeSpace(point, tag, self.free_space)
+
+    def updateTrace(self,point):
+
+        self.trace = self.trace.addNewPoint(point)
 
 
 class Trace(object):
