@@ -1,21 +1,39 @@
 import sys
 import time
+import threading
+import mutex
 from nxt_debug import dbg_print, DEBUGLEVEL
 from threading import Thread
-#LEGO
 import nxt.direct
 from nxt.brick import Brick, FileFinder
 from nxt.locator import find_one_brick
 from nxt.locator import Method
 
+class pseudoBrick():
+    def __init__(self):
+        self.liste = [(11, 'r;6;bla')]
+    
+    def start_program(self, app):
+        pass
+    
+    def message_write(self, outbox, message):
+        dbg_print("message write: "+message,2)
+        time.sleep(1.0/10)
+
+    def message_read(self, inbox1, inbox2, leeren):
+        time.sleep(5)
+        return self.liste.pop()
+
 class Explorer():
-    def __init__(self, mac, outbox=5, inbox=11):
-        self.brick = find_one_brick(host=mac, method=Method(usb=False, bluetooth=True))
+    def __init__(self, mac, outbox=5, inbox=1):
+        self.brick = pseudoBrick()#find_one_brick(host=mac, method=Method(usb=False, bluetooth=True))
         self.message_id = 0
         self.remote_message_id = 0
         self.outbox = outbox
-        self.inbox = inbox
-        self.com_state = 0 
+        self.inbox = 10 + inbox
+        self.timelist = []
+        self.mutex = mutex.mutex()
+        self.com_state = 1 #FIXME:0 fuer test =1
         #com_state:
         #    0: warte - nichts gesendet, nichts empfangen
         #    1: m gesendet, r noch nicht empfangen
@@ -46,12 +64,35 @@ class Explorer():
         
     def send_message(self, message):
         robo.brick.message_write(self.outbox, message)
+        typ, t_id, payload = str(message).split(';')
+        id = int(t_id)
+        dbg_print('timelist.append: '+str((time.time(), typ, id, payload)),3)
+        self.timelist.append((time.time(), typ, id, payload))
 
     def recv_message(self):
         return robo.brick.message_read(self.inbox, self.inbox, True)
 
     def dispatch(self):
+        def r(self):
+            dbg_print("r lock",3)
+            for tupel in self.timelist:
+                if tupel[2] == self.message_id:
+                    self.timelist.remove(tupel)
+            self.com_state = 0
+            self.send_message('a;'+str(self.message_id)+';;')
+            dbg_print("r unlock",3) 
+            
+        def a(self):
+            dbg_print("a lock",3)
+            for tupel in self.timelist:
+                if tupel[2] == self.remote_message_id:
+                    self.timelist.remove(tupel)   
+            dbg_print("a unlock",3) 
+        
         dbg_print("run dispatch",2)
+        dbg_print("run timer",2)
+        t = Thread(target=self.timer, args=())
+        t.start()
         dbg_print("BT-Empfang",1)
         count = 0
         while(True):
@@ -61,7 +102,9 @@ class Explorer():
                 local_box, message = self.recv_message()
                 dbg_print((local_box, message),3)
                 try: 
-                    typ, id, payload = str(message).split(';')
+                    dbg_print("dispatcher timelist: "+str(self.timelist),3)
+                    typ, t_id, payload = str(message).split(';')
+                    id = int(t_id)
                 except:
                     dbg_print("message-parsing-error: falsches Format")
                     
@@ -70,15 +113,47 @@ class Explorer():
                         self.remote_message_id = id
                         # irgendetwas mit payload machen
                         self.send_message('r;'+str(self.remote_message_id)+';;')
-                elif self.com_state == 1: #m gesendet, warte r
-                    pass
+                        
+                    else:
+                        dbg_print("com_state - Fehler im Zustandsautomaten")
+                elif self.com_state == 1: #m gesendet, warte r, sende a
+                    if typ == 'r' and id == self.message_id:
+                        self.mutex.lock(r, self)
+                        self.mutex.unlock()
+                        
+                        self.message_id += 1
+                        self.message_id %= 10
+                    else:
+                        dbg_print("com_state - Fehler im Zustandsautomaten")
                 elif self.com_state == 2: #m empfangen, r gesendet, warte auf a
-                    pass
+                    if typ == 'a' and id == self.remote_message_id:
+                        
+                        self.mutex.lock(a, self)
+                        self.mutex.unlock()
+                    else:
+                        dbg_print("com_state - Fehler im Zustandsautomaten")
                 else:
                     dbg_print("com_state - Fehler im Zustandsautomaten")
             except:
                 pass
             count += 1
+            
+    def timer(self):
+        def t(self):
+            dbg_print("timer lock",3)
+            dbg_print("timer timelist: "+str(self.timelist),3)
+            for tupel in self.timelist:
+                if tupel[0] <= time.time():
+                    self.timelist.remove(tupel)
+                    dbg_print("timelist: "+str(self.timelist),3)
+                    self.send_message(tupel[1]+';'+str(tupel[2])+';'+tupel[3])
+            dbg_print("timer unlock",3)  
+
+        while(True):
+            time.sleep(3)
+            self.mutex.lock(t,self)          
+            self.mutex.unlock()    
+    
 
 if __name__ == '__main__':
     dbg_print('suche robo',1)
@@ -91,8 +166,8 @@ if __name__ == '__main__':
     robo.start_app("bt_test.rxe")
     dispatcher1 = Thread(target=robo.dispatch, args=())
     dispatcher1.start()
-    dispatcher1.join()    
-    robo.message_id = 66
+        
+    robo.message_id = 6
     robo.send_message('m;'+str(robo.message_id)+';HansWurst')
-    
+    dispatcher1.join()
     print("fertig")

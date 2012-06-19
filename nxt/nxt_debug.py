@@ -1,4 +1,4 @@
-DEBUGLEVEL = 3
+DEBUGLEVEL = 4
 
 def dbg_print(element, dbglevel=0):
     if dbglevel == 0:
