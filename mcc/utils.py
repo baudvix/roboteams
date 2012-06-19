@@ -117,3 +117,17 @@ class Point(object):
         self.__yaw = yaw
 
     yaw = property(get_yaw, set_yaw)
+
+
+class Color():
+
+    def __init__(self):
+        self.color_map = {'red': 0, 'blue': 1, 'green': 2, 'yellow': 3, 'black': 4}
+
+    def to_number(self, color):
+        return self.color_map[color]
+
+    def to_string(self, color):
+        for key, value in self.color_map.items():
+            if value == color:
+                return key

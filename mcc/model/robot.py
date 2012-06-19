@@ -4,7 +4,7 @@ import Queue
 class EmptyError(Exception):
     pass
 
-class RoboterBase():
+class RobotBase():
 
     def __init__(self, handle):
         self.__in_queue = Queue.Queue()
@@ -55,6 +55,13 @@ class RoboterBase():
             raise EmptyError("In-Queue is empty")
         else:
             return self.__out_queue.get(True)
+
+
+class RobotNXT(RobotBase):
+
+    def __init__(self, handle, color):
+        RobotBase.__init__(self, handle)
+        self.color = color
 
 class NXTModel(object):
     """

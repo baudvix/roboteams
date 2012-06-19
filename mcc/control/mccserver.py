@@ -85,7 +85,9 @@ class MCCServer(object):
         print 'Error: %s:%s\n%s' % (self.host, self.port, error)
 
     def run(self):
-        print chr(random.randint(97, 122))
+        """
+
+        """
 
 def main():
     server = MCCServer()
