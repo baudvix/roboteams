@@ -1,3 +1,8 @@
+"""
+map holds a model of the map, where the data of the NXT is finally stored
+"""
+
+from mcc import utils
 
 class MapModel(object):
     """
@@ -95,22 +100,22 @@ class MapModel(object):
         tmp_map_section = self.__first_map_section
 
         if offset_x > 0:
-            for i in range(0, offset_x):
+            for _ in range(0, offset_x):
                 if tmp_map_section.right_grid is None:
                     tmp_map_section.right_grid = MapSection()
                 tmp_map_section = tmp_map_section.right_grid
         elif offset_x < 0:
-            for i in range(0, offset_x, -1):
+            for _ in range(0, offset_x, -1):
                 if tmp_map_section.left_grid is None:
                     tmp_map_section.left_grid = MapSection()
                 tmp_map_section = tmp_map_section.left_grid
         if offset_y > 0:
-            for i in range(0, offset_y):
+            for _ in range(0, offset_y):
                 if tmp_map_section.top_grid is None:
                     tmp_map_section.top_grid = MapSection()
                 tmp_map_section = tmp_map_section.top_grid
         elif offset_y < 0:
-            for i in range(0, offset_y, -1):
+            for _ in range(0, offset_y, -1):
                 if tmp_map_section.bottom_grid is None:
                     tmp_map_section.bottom_grid = MapSection()
                 tmp_map_section = tmp_map_section.bottom_grid
@@ -241,7 +246,7 @@ class MapSection(object):
         # initialize grid with zeros
         for i in range(0, MapSection.__grid_height):
             self.__grid.append([])
-            for j in range(0, MapSection.__grid_width):
+            for _ in range(0, MapSection.__grid_width):
                 self.__grid[i].append(0)
 
     def get_right_grid(self):

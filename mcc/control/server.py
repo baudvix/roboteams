@@ -1,26 +1,35 @@
 from twisted.protocols import amp
 from twisted.internet import reactor, task, defer
-from twisted.internet.protocol import _InstanceFactory, Factory
+from twisted.internet.protocol import Factory
 
 from mcc.control import command
-#from mcc.model import roboter
+from mcc.model import robot
 
-import random
 
 class MCCProtocol(amp.AMP):
 
-    def register(self, type, color=None):
-        print 'Got a new roboter: type=%d color=%d' % (type, color)
-        return {'handle': 0}
+    def register(self, robot_type, color=None):
+        print 'NEW robot: type=%d color=%d' % (robot_type, color)
+        if robot_type == NXT_TYPE:
+            self.factory.robots.append(robot.RobotNXT(self.factory.last_handle, self, color))
+        else:
+            self.factory.robots.append(robot.RobotNAO(self.factory.last_handle, self))
+        self.factory.last_handle += 1
+        return {'handle': (self.factory.last_handle - 1)}
     command.Register.responder(register)
 
     def activate(self, handle):
-        print '#%d Roboter activated' % handle
-        return {'ACK': 'got activate'}
+        for robo in self.factory.robots:
+            if robo.handle == handle:
+                robo.active = True
+                print '#%d activated' % handle
+                return {'ACK': 'got activate'}
+        raise command.CommandHandleError('No robot with handle=' + handle)
     command.Activate.responder(activate)
 
     def nxt_calibrated(self, handle, nxt_handle, x, y, yaw):
-        print '#%d NXT calibrated #%d (%d, %d, %d)' % (handle, nxt_handle, x, y, yaw)
+        print '#%d NXT calibrated #%d (%d, %d, %d)' % (handle, nxt_handle, x,
+                                                       y, yaw)
         return {'ACK': 'got calibrated'}
     command.NXTCalibrated.responder(nxt_calibrated)
 
@@ -30,7 +39,8 @@ class MCCProtocol(amp.AMP):
     command.NXTSpotted.responder(nxt_spotted)
 
     def send_data(self,handle, point_tag, x, y, yaw):
-        print '#%d Send data %d: (%d, %d, %d)' % (handle, point_tag, x, y, yaw)
+        print '#%d Send data %d: (%d, %d, %d)' % (handle, point_tag, x, y,
+                                                  yaw)
         return{'ACK': 'got data'}
     command.SendData.responder(send_data)
 
@@ -39,11 +49,7 @@ class MCCProtocol(amp.AMP):
         return {'ACK': 'got arrival'}
     command.ArrivedPoint.responder(arrived_point)
 
-    def connectionMade(self):
-        self.factory.clients.append(self)
-
     def connectionLost(self, reason):
-        self.factory.clients.remove(self)
         print 'Connection Lost to Client ', reason
 
 class MCCFactory(Factory):
@@ -51,13 +57,15 @@ class MCCFactory(Factory):
     protocol = MCCProtocol
 
     def __init__(self, reactor, instance, deferred):
-        self.tmp = 'TODO'
-        self.clients = []
+        self.last_handle = 0
+        self.robots = []
 
 
 class MCCServer(object):
 
     def __init__(self):
+        #TODO start a thread for heavy calculation
+        #TODO start a thread for view
         self.protocol = None
         self.host = 'localhost'
         self.port = 5000

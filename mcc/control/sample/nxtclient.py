@@ -63,7 +63,7 @@ class NXTClient():
         self.color = color
         self.handle = None
         self.active = False
-        self.type = 1
+        self.robot_type = 1
         self.connect()
         loop = task.LoopingCall(self.run)
         loop.start(1.0)
@@ -85,7 +85,7 @@ class NXTClient():
     def connected(self, protocol):
         self.protocol = protocol
         print 'connected to mcc'
-        deffered = protocol.callRemote(command.Register, type=self.type, color=self.color)
+        deffered = protocol.callRemote(command.Register, robot_type=self.robot_type, color=self.color)
         deffered.addCallback(self.activate)
         deffered.addErrback(self.failure)
 

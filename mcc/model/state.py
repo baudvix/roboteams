@@ -1,4 +1,7 @@
-
+"""
+state represents the MetaStateMachine with its definitions for the trigger to
+get to the next state.
+"""
 
 class StateMachine(object):
     """

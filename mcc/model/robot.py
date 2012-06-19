@@ -6,12 +6,12 @@ class EmptyError(Exception):
 
 class RobotBase():
 
-    def __init__(self, handle):
+    def __init__(self, handle, connection):
         self.__in_queue = Queue.Queue()
         self.__out_queue = Queue.Queue()
         self.__active = False
         self.__handle = handle
-        self.__connection = None
+        self.__connection = connection
 
     def is_active(self):
         return self.__active
@@ -20,15 +20,6 @@ class RobotBase():
         self.__active = active
 
     active = property(is_active, set_active)
-
-
-    def get_connection(self):
-        return self.__connection
-
-    def set_connection(self, connection):
-        self.__connection = connection
-
-    deffer = property(get_connection, set_connection)
 
     def get_handle(self):
         return self.__handle
@@ -59,10 +50,15 @@ class RobotBase():
 
 class RobotNXT(RobotBase):
 
-    def __init__(self, handle, color):
-        RobotBase.__init__(self, handle)
+    def __init__(self, handle, connection, color):
+        RobotBase.__init__(self, connection, handle)
         self.color = color
 
+
+class RobotNAO(RobotBase):
+
+    def __init__(self, handle, connection):
+        RobotBase.__init__(self, connection, handle)
 
 class NXTModel(object):
     """

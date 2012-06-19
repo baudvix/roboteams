@@ -2,7 +2,7 @@
 Module for the model
 
 """
-from mcc.view.view import *
+from mcc.view.view import View
 from state import StateMachine
 from map import MapModel
 

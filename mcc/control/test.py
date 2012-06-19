@@ -1,9 +1,15 @@
-from twisted.internet import reactor
-import random
+from twisted.internet import reactor, threads
 
-def loopPrinting():
-    print chr(random.randint(97, 122))
-    reactor.callLater(1.0, loopPrinting)
+def aSillyBlockingMethodOne(x):
+    import time
+    time.sleep(2)
+    print x
 
-loopPrinting()
+def aSillyBlockingMethodTwo(x):
+    print x
+
+# run both methods sequentially in a thread
+commands = [(aSillyBlockingMethodOne, ["Calling First"], {})]
+commands.append((aSillyBlockingMethodTwo, ["And the second"], {}))
+threads.callMultipleInThread(commands)
 reactor.run()
