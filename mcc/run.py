@@ -1,7 +1,6 @@
 import pygame
 from pygame.constants import QUIT
-from mcc.mvc.controller import Controller
-from mcc.mvc.view import View
+from mcc.control.controller import Controller
 
 def main():
     """

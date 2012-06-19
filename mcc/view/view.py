@@ -20,7 +20,7 @@ class View:
         pygame.display.set_caption('MCC - Mission Control Center')
 
         #Create the background
-        graphTile = pygame.image.load('mvc/assets/background.jpg').convert()
+        graphTile = pygame.image.load('mcc/view/assets/background.jpg').convert()
         graphRect = graphTile.get_rect()
         background = pygame.Surface(screen.get_size())
         background.blit(graphTile, graphRect)

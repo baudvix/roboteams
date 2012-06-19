@@ -3,8 +3,8 @@ Module for the controller
 
 """
 
-from mcc.mvc.model import *
-from mcc.mvc.view import View
+from mcc.model.map import MapModel
+from mcc.view.view import View
 
 #TODO Only for simulation
 from mcc.simulator.simulator import Simulator
