@@ -1,9 +1,41 @@
 """
-Module for the map model
+Module for the model
 
 """
 
+from time import gmtime
+
+from mcc.mvc.view import *
 from mcc import utils
+
+class Model(object):
+    """
+    Class for the model. Contains the references to the MapModel,the NAOModels,
+    the NXTModels, the views and the state machine
+
+    """
+
+    def __init__(self):
+        """
+        Creates a model
+
+        :return: 'Model' with an initial map model ('map_model'), a view
+                 ('view') and a state machine ('state_machine')
+        :rtype: Model
+
+        """
+        self.__map_model = MapModel()
+        self.__nao_model = [None]
+        self.__nxt_model = [None]
+        self.__view = View(self.__map_model)
+        self.__state_machine = StateMachine()
+
+    def register_nao(self):
+        pass
+
+    def register_nxt(self):
+        pass
+
 
 class MapModel(object):
     """
@@ -30,7 +62,7 @@ class MapModel(object):
 
         :return: first map section in the map model
         :rtype: MapSection
-        
+
         """
         return self.__first_map_section
 
@@ -41,7 +73,7 @@ class MapModel(object):
         :param map_section: map section to replace the current
         :type map_section: MapSection
         :raises TypeError: If the type of the arguments is not MapSection
-        
+
         """
         if type(map_section) != type(MapSection()):
             raise TypeError("Type \"MapSection\" excepted,\
@@ -57,7 +89,7 @@ class MapModel(object):
 
         :return: position of the target in the map model
         :rtype: Point
-        
+
         """
         return self.__target_position
 
@@ -68,11 +100,11 @@ class MapModel(object):
         :param target_position: point to replace the current target position
         :type target_position: Point
         :raises TypeError: If the type of the arguments is not Point
-        
+
         """
         if type(target_position) != type(utils.Point(0, 0, 0)):
             raise TypeError("Type \"Point\" excepted, but",
-                            type(target_position), " given.")
+                type(target_position), " given.")
 
         self.__target_position = target_position
 
@@ -90,11 +122,11 @@ class MapModel(object):
         :type offset_y: int
         :raises TypeError: If the type of the arguments is not integer
         :raises ValueError: If the offset is (0,0) or already occupied
-        
+
         """
         if (type(offset_x) != type(1)) or (type(offset_y) != type(1)):
             raise TypeError("Type \"int\" excepted, but", type(offset_x),
-                            ", ", type(offset_y), " given.")
+                ", ", type(offset_y), " given.")
         if offset_x == 0 and offset_y == 0:
             raise ValueError("Can't add MapSection at position (0,0).")
 
@@ -143,7 +175,7 @@ class MapModel(object):
         """
         if type(x_coord) != type(1) or type(y_coord) != type(1):
             raise TypeError("Type \"int\" excepted, but", type(x_coord), ", ",
-                            type(y_coord), " given.")
+                type(y_coord), " given.")
 
         offset_x = x_coord / MapSection.get_grid_width()
         offset_y = y_coord / MapSection.get_grid_height()
@@ -235,7 +267,7 @@ class MapSection(object):
         :return: 'MapSection' right -, left-, top- and bottom-grid
                  which are initially all None
         :rtype: MapSection
-        
+
         """
         self.__right_grid = None
         self.__left_grid = None
@@ -253,26 +285,26 @@ class MapSection(object):
     def get_right_grid(self):
         """
         Getter method for right_grid
-    
+
         :return: the grid which is concatenated at the right of this grid
         :rtype: MapSection
-        
-        """ 
+
+        """
         return self.__right_grid
 
     def set_right_grid(self, right_grid):
         """
         Setter method for right_grid
 
-        :param right_grid: grid to replace the reference to the current 
-                           right grid 
+        :param right_grid: grid to replace the reference to the current
+                           right grid
         :type right_grid: MapSection
         :raises TypeError: If the type of the arguments is not MapSection
-        
+
         """
         if type(right_grid) != type(MapSection()):
             raise TypeError("Type \"MapSection\" excepted, but",
-                            type(right_grid), " given.")
+                type(right_grid), " given.")
 
         self.__right_grid = right_grid
 
@@ -281,10 +313,10 @@ class MapSection(object):
     def get_left_grid(self):
         """
         Getter method for left_grid
-    
+
         :return: the grid which is concatenated at the left of this grid
         :rtype: MapSection
-        
+
         """
         return self.__left_grid
 
@@ -292,15 +324,15 @@ class MapSection(object):
         """
         Setter method for left_grid
 
-        :param left_grid: grid to replace the reference to the current 
-                           left grid 
+        :param left_grid: grid to replace the reference to the current
+                           left grid
         :type left_grid: MapSection
         :raises TypeError: If the type of the arguments is not MapSection
-        
+
         """
         if type(left_grid) != type(MapSection()):
             raise TypeError("Type \"MapSection\" excepted, but",
-                            type(left_grid), " given.")
+                type(left_grid), " given.")
 
         self.__left_grid = left_grid
 
@@ -309,10 +341,10 @@ class MapSection(object):
     def get_top_grid(self):
         """
         Getter method for top_grid
-    
+
         :return: the grid which is concatenated at the top of this grid
         :rtype: MapSection
-        
+
         """
         return self.__top_grid
 
@@ -320,15 +352,15 @@ class MapSection(object):
         """
         Setter method for top_grid
 
-        :param top_grid: grid to replace the reference to the current 
-                           top grid 
+        :param top_grid: grid to replace the reference to the current
+                           top grid
         :type top_grid: MapSection
         :raises TypeError: If the type of the arguments is not MapSection
-        
+
         """
         if type(top_grid) != type(MapSection()):
             raise TypeError("Type \"MapSection\" excepted, but",
-                            type(top_grid), " given.")
+                type(top_grid), " given.")
 
         self.__top_grid = top_grid
 
@@ -337,10 +369,10 @@ class MapSection(object):
     def get_bottom_grid(self):
         """
         Getter method for bottom_grid
-    
+
         :return: the grid which is concatenated at the bottom of this grid
         :rtype: MapSection
-        
+
         """
         return self.__bottom_grid
 
@@ -348,15 +380,15 @@ class MapSection(object):
         """
         Setter method for bottom_grid
 
-        :param bottom_grid: grid to replace the reference to the current 
-                           bottom grid 
+        :param bottom_grid: grid to replace the reference to the current
+                           bottom grid
         :type bottom_grid: MapSection
         :raises TypeError: If the type of the arguments is not MapSection
-        
+
         """
         if type(bottom_grid) != type(MapSection()):
             raise TypeError("Type \"MapSection\" excepted, but",
-                            type(bottom_grid), " given.")
+                type(bottom_grid), " given.")
 
         self.__bottom_grid = bottom_grid
 
@@ -397,7 +429,7 @@ class MapSection(object):
         """
         if type(x_coord) != type(1) or type(y_coord) != type(1):
             raise TypeError("Type \"int\" excepted, but", type(x_coord),
-                            ", ", type(y_coord), " given.")
+                ", ", type(y_coord), " given.")
 
         return self.__grid[x_coord][y_coord]
 
@@ -410,11 +442,11 @@ class MapSection(object):
         :type points: [[int, int]]
         :raises TypeError: If the type of the arguments is not a list of
                            integer tuple
-        
+
         """
         if type(points) != type([]):
             raise TypeError("Type \"list\" excepted, but", type(points),
-                            " given.")
+                " given.")
 
         for i in range (0, len(points)):
             if len(points[i]) != 2:
@@ -422,3 +454,91 @@ class MapSection(object):
 
         for i in range (0, len(points)):
             self.__grid[points[i][0]][points[i][1]] += 1
+
+
+class NXTModel(object):
+    """
+        Model of an NXT
+    """
+    def __init__(self, position_point):
+        """
+            Constructor of the NXTModel
+        """
+        self.typ = None
+        self.last_calibration = None
+        self.position = position_point
+        self.free_space = None
+        self.trace = None
+
+    def updatePosition(self, point, tag):
+        """
+            updatePosition adds a position of the NXT to the FreeSpace Stack
+            :param point: Point of the NXT
+            :type point: Point
+            :param tag: Found Point tag of the Point
+            :type tag: Enum
+        """
+        self.free_space = FreeSpace(point, tag, self.free_space)
+
+
+class Trace(object):
+    """
+        The precessed NXT information as a Que
+    """
+
+    def __init__(self, position_point):
+        """
+            Constructor of the Trace Class
+            :param position_point: Point of the NXT
+            :type position_point: Point
+        """
+        self.position = position_point
+        self.next = None
+        Trace.last = self
+
+    def addNewPoint(self, position_point):
+        """
+            adds a new Point to the Que
+            :param position_point: point which is added to the Que
+            :type position_point: Point
+        """
+        new_trace = Trace(position_point)
+        self.next = new_trace
+        return  new_trace
+
+
+class FreeSpace(object):
+    """
+        Model of the unprocessed data
+    """
+
+    def __init__(self, position_point, position_tag, parent_point):
+        """
+            Constructor of the FreeSpace class
+            :param position_point: position of the Point
+            :type position_point: Point
+            :param position_tag: tag of the Point
+            :type position_tag: Enum
+
+        """
+        self.time = gmtime()
+        self.position = position_point
+        self.pointTag = position_tag
+        self.previousFreeSpace = parent_point
+
+
+class StateMachine(object):
+    """
+    Class for the state machine
+
+    """
+
+    def __init__(self):
+        """
+        Creates a state machine
+
+        :return: 'StateMachine' in the initial state
+        :rtype: StateMachine
+
+        """
+        self.__state = 0

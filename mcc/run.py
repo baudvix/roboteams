@@ -1,29 +1,27 @@
 import pygame
 from pygame.constants import QUIT
-from model.map import MapModel
-from simulator.simulator import Simulator
-from view.viewModule import View
+from mcc.mvc.controller import Controller
+from mcc.mvc.view import View
 
 def main():
     """
         main run method
 
     """
-    ## Simulate Environment
-    sim = Simulator()
-    sim.generateList()
 
     # Create Map
-    map = MapModel()
+    controller = Controller()
 
+    """
     # Fill Map with simulated content
     for p in sim.nxtList:
-        for x in range(5):
-            for y in range(5):
+        for x in range(15):
+            for y in range(10):
                 map.increase_point(p.x_coord-2+x, p.y_coord-2+y)
+    """
+
 
     clock = pygame.time.Clock()
-    view = View(map)
 
     #Main Loop
     while 1:
@@ -36,14 +34,14 @@ def main():
             if event.type == QUIT:
                 return
 
-        p = sim.goPoint()
-        for x in range(5):
-            for y in range(5):
-                map.increase_point(p.x_coord-2+x, p.y_coord-2+y)
+        p = controller.sim.goPoint()
+        for x in range(15):
+            for y in range(10):
+                controller.map.increase_point(p.x_coord-2+x, p.y_coord-2+y)
 
 
-        view.log( p.x_coord.__str__()+" "+p.y_coord.__str__() )
-        view.update(events)
+        controller.view.log( p.x_coord.__str__()+" "+p.y_coord.__str__() )
+        controller.view.update(events)
 
 
 
