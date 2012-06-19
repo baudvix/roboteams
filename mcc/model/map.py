@@ -1,9 +1,3 @@
-"""
-Module for the map model
-
-"""
-
-from mcc import utils
 
 class MapModel(object):
     """
@@ -30,7 +24,7 @@ class MapModel(object):
 
         :return: first map section in the map model
         :rtype: MapSection
-        
+
         """
         return self.__first_map_section
 
@@ -41,7 +35,7 @@ class MapModel(object):
         :param map_section: map section to replace the current
         :type map_section: MapSection
         :raises TypeError: If the type of the arguments is not MapSection
-        
+
         """
         if type(map_section) != type(MapSection()):
             raise TypeError("Type \"MapSection\" excepted,\
@@ -57,7 +51,7 @@ class MapModel(object):
 
         :return: position of the target in the map model
         :rtype: Point
-        
+
         """
         return self.__target_position
 
@@ -68,11 +62,11 @@ class MapModel(object):
         :param target_position: point to replace the current target position
         :type target_position: Point
         :raises TypeError: If the type of the arguments is not Point
-        
+
         """
         if type(target_position) != type(utils.Point(0, 0, 0)):
             raise TypeError("Type \"Point\" excepted, but",
-                            type(target_position), " given.")
+                type(target_position), " given.")
 
         self.__target_position = target_position
 
@@ -90,11 +84,11 @@ class MapModel(object):
         :type offset_y: int
         :raises TypeError: If the type of the arguments is not integer
         :raises ValueError: If the offset is (0,0) or already occupied
-        
+
         """
         if (type(offset_x) != type(1)) or (type(offset_y) != type(1)):
             raise TypeError("Type \"int\" excepted, but", type(offset_x),
-                            ", ", type(offset_y), " given.")
+                ", ", type(offset_y), " given.")
         if offset_x == 0 and offset_y == 0:
             raise ValueError("Can't add MapSection at position (0,0).")
 
@@ -143,7 +137,7 @@ class MapModel(object):
         """
         if type(x_coord) != type(1) or type(y_coord) != type(1):
             raise TypeError("Type \"int\" excepted, but", type(x_coord), ", ",
-                            type(y_coord), " given.")
+                type(y_coord), " given.")
 
         offset_x = x_coord / MapSection.get_grid_width()
         offset_y = y_coord / MapSection.get_grid_height()
@@ -235,7 +229,7 @@ class MapSection(object):
         :return: 'MapSection' right -, left-, top- and bottom-grid
                  which are initially all None
         :rtype: MapSection
-        
+
         """
         self.__right_grid = None
         self.__left_grid = None
@@ -253,26 +247,26 @@ class MapSection(object):
     def get_right_grid(self):
         """
         Getter method for right_grid
-    
+
         :return: the grid which is concatenated at the right of this grid
         :rtype: MapSection
-        
-        """ 
+
+        """
         return self.__right_grid
 
     def set_right_grid(self, right_grid):
         """
         Setter method for right_grid
 
-        :param right_grid: grid to replace the reference to the current 
-                           right grid 
+        :param right_grid: grid to replace the reference to the current
+                           right grid
         :type right_grid: MapSection
         :raises TypeError: If the type of the arguments is not MapSection
-        
+
         """
         if type(right_grid) != type(MapSection()):
             raise TypeError("Type \"MapSection\" excepted, but",
-                            type(right_grid), " given.")
+                type(right_grid), " given.")
 
         self.__right_grid = right_grid
 
@@ -281,10 +275,10 @@ class MapSection(object):
     def get_left_grid(self):
         """
         Getter method for left_grid
-    
+
         :return: the grid which is concatenated at the left of this grid
         :rtype: MapSection
-        
+
         """
         return self.__left_grid
 
@@ -292,15 +286,15 @@ class MapSection(object):
         """
         Setter method for left_grid
 
-        :param left_grid: grid to replace the reference to the current 
-                           left grid 
+        :param left_grid: grid to replace the reference to the current
+                           left grid
         :type left_grid: MapSection
         :raises TypeError: If the type of the arguments is not MapSection
-        
+
         """
         if type(left_grid) != type(MapSection()):
             raise TypeError("Type \"MapSection\" excepted, but",
-                            type(left_grid), " given.")
+                type(left_grid), " given.")
 
         self.__left_grid = left_grid
 
@@ -309,10 +303,10 @@ class MapSection(object):
     def get_top_grid(self):
         """
         Getter method for top_grid
-    
+
         :return: the grid which is concatenated at the top of this grid
         :rtype: MapSection
-        
+
         """
         return self.__top_grid
 
@@ -320,15 +314,15 @@ class MapSection(object):
         """
         Setter method for top_grid
 
-        :param top_grid: grid to replace the reference to the current 
-                           top grid 
+        :param top_grid: grid to replace the reference to the current
+                           top grid
         :type top_grid: MapSection
         :raises TypeError: If the type of the arguments is not MapSection
-        
+
         """
         if type(top_grid) != type(MapSection()):
             raise TypeError("Type \"MapSection\" excepted, but",
-                            type(top_grid), " given.")
+                type(top_grid), " given.")
 
         self.__top_grid = top_grid
 
@@ -337,10 +331,10 @@ class MapSection(object):
     def get_bottom_grid(self):
         """
         Getter method for bottom_grid
-    
+
         :return: the grid which is concatenated at the bottom of this grid
         :rtype: MapSection
-        
+
         """
         return self.__bottom_grid
 
@@ -348,15 +342,15 @@ class MapSection(object):
         """
         Setter method for bottom_grid
 
-        :param bottom_grid: grid to replace the reference to the current 
-                           bottom grid 
+        :param bottom_grid: grid to replace the reference to the current
+                           bottom grid
         :type bottom_grid: MapSection
         :raises TypeError: If the type of the arguments is not MapSection
-        
+
         """
         if type(bottom_grid) != type(MapSection()):
             raise TypeError("Type \"MapSection\" excepted, but",
-                            type(bottom_grid), " given.")
+                type(bottom_grid), " given.")
 
         self.__bottom_grid = bottom_grid
 
@@ -397,7 +391,7 @@ class MapSection(object):
         """
         if type(x_coord) != type(1) or type(y_coord) != type(1):
             raise TypeError("Type \"int\" excepted, but", type(x_coord),
-                            ", ", type(y_coord), " given.")
+                ", ", type(y_coord), " given.")
 
         return self.__grid[x_coord][y_coord]
 
@@ -410,11 +404,11 @@ class MapSection(object):
         :type points: [[int, int]]
         :raises TypeError: If the type of the arguments is not a list of
                            integer tuple
-        
+
         """
         if type(points) != type([]):
             raise TypeError("Type \"list\" excepted, but", type(points),
-                            " given.")
+                " given.")
 
         for i in range (0, len(points)):
             if len(points[i]) != 2:
@@ -422,3 +416,4 @@ class MapSection(object):
 
         for i in range (0, len(points)):
             self.__grid[points[i][0]][points[i][1]] += 1
+

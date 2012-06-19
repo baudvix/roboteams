@@ -63,6 +63,7 @@ class RobotNXT(RobotBase):
         RobotBase.__init__(self, handle)
         self.color = color
 
+
 class NXTModel(object):
     """
         Model of an NXT
@@ -74,7 +75,7 @@ class NXTModel(object):
         self.typ = None
         self.last_calibration = None
         self.position = position_point
-        self.free_space = FreeSpace(position_point)
+        self.free_space = None
         self.trace = None
 
     def updatePosition(self, point, tag):
@@ -86,11 +87,6 @@ class NXTModel(object):
             :type tag: Enum
         """
         self.free_space = FreeSpace(point, tag, self.free_space)
-
-    def updateTrace(self,point):
-
-        self.trace = self.trace.addNewPoint(point)
-
 
 class Trace(object):
     """
