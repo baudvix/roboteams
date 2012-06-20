@@ -118,7 +118,7 @@ class Explorer():
                     
                 elif typ == 'r':
                     self.timelist_access(typ, id)
-                    self.send_message(typ='a', id=self.message_id, message='ack')
+                    self.send_message(typ='a', id=id, message='ack')
 
                 elif typ == 'a':
                     self.timelist_access(typ, id)
