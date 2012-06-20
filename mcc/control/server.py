@@ -7,10 +7,13 @@ from mcc.model import robot
 
 
 class MCCProtocol(amp.AMP):
+    def __init__(self):
+        amp.AMP.__init__(self)
+        self.factory = None
 
     def register(self, robot_type, color=None):
         print 'NEW robot: type=%d color=%d' % (robot_type, color)
-        if robot_type == NXT_TYPE:
+        if robot_type == robot.NXT_TYPE:
             self.factory.robots.append(robot.RobotNXT(self.factory.last_handle, self, color))
         else:
             self.factory.robots.append(robot.RobotNAO(self.factory.last_handle, self))
@@ -24,7 +27,7 @@ class MCCProtocol(amp.AMP):
                 robo.active = True
                 print '#%d activated' % handle
                 return {'ACK': 'got activate'}
-        raise command.CommandHandleError('No robot with handle=' + handle)
+        raise command.CommandHandleError('No robot with handle')
     command.Activate.responder(activate)
 
     def nxt_calibrated(self, handle, nxt_handle, x, y, yaw):
@@ -50,7 +53,10 @@ class MCCProtocol(amp.AMP):
     command.ArrivedPoint.responder(arrived_point)
 
     def connectionLost(self, reason):
-        print 'Connection Lost to Client ', reason
+        for robo in self.factory.robots:
+            if robo.connection == self:
+                robo.active = False
+                print 'Connection Lost to robo %d ' % robo.handle
 
 class MCCFactory(Factory):
 
@@ -59,13 +65,13 @@ class MCCFactory(Factory):
     def __init__(self, reactor, instance, deferred):
         self.last_handle = 0
         self.robots = []
+        #TODO start a thread for heavy calculation
+        #TODO start a thread for view
 
 
 class MCCServer(object):
 
     def __init__(self):
-        #TODO start a thread for heavy calculation
-        #TODO start a thread for view
         self.protocol = None
         self.host = 'localhost'
         self.port = 5000

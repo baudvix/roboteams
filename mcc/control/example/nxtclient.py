@@ -63,7 +63,7 @@ class NXTClient():
         self.color = color
         self.handle = None
         self.active = False
-        self.robot_type = 1
+        self.robot_type = 0
         self.connect()
         loop = task.LoopingCall(self.run)
         loop.start(1.0)

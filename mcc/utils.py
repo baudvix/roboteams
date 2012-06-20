@@ -120,14 +120,12 @@ class Point(object):
 
 
 class Color():
-
-    def __init__(self):
-        self.color_map = {'red': 0, 'blue': 1, 'green': 2, 'yellow': 3, 'black': 4}
-
-    def to_number(self, color):
-        return self.color_map[color]
-
-    def to_string(self, color):
-        for key, value in self.color_map.items():
-            if value == color:
-                return key
+    """
+    Holds the static color definitions
+    """
+    COLOR_NONE = -1
+    COLOR_RED = 0
+    COLOR_GREEN = 1
+    COLOR_BLUE = 2
+    COLOR_YELLOW = 3
+    COLOR_BLACK = 4

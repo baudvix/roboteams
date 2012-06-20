@@ -1,6 +1,9 @@
 from time import gmtime
 import Queue
 
+NXT_TYPE = 0
+NAO_TYPE = 1
+
 class EmptyError(Exception):
     pass
 
@@ -9,25 +12,9 @@ class RobotBase():
     def __init__(self, handle, connection):
         self.__in_queue = Queue.Queue()
         self.__out_queue = Queue.Queue()
-        self.__active = False
-        self.__handle = handle
-        self.__connection = connection
-
-    def is_active(self):
-        return self.__active
-
-    def set_active(self, active):
-        self.__active = active
-
-    active = property(is_active, set_active)
-
-    def get_handle(self):
-        return self.__handle
-
-    def set_handle(self, handle):
-        self.__handle = handle
-
-    handle = property(get_handle, set_handle)
+        self.active = False
+        self.handle = handle
+        self.connection = connection
 
     def put_out(self, *args, **kw):
         self.__out_queue.put((args, kw), True)
@@ -51,7 +38,7 @@ class RobotBase():
 class RobotNXT(RobotBase):
 
     def __init__(self, handle, connection, color):
-        RobotBase.__init__(self, connection, handle)
+        RobotBase.__init__(self, handle, connection)
         self.color = color
 
 
