@@ -1,49 +1,100 @@
+"""
+robot provides a model of the robots and their functionality
+"""
 from time import gmtime
+from mcc import utils
 import Queue
 
 NXT_TYPE = 0
 NAO_TYPE = 1
 
+#TODO make this module thread safe
+
 class EmptyError(Exception):
+    """
+    This error is raised if the queue is empty
+    """
     pass
 
 class RobotBase():
-
+    """
+    the base class for NXT and NAO robots
+    """
     def __init__(self, handle, connection):
+        """
+        initialise the queues and sets the handle and the connection
+        """
         self.__in_queue = Queue.Queue()
         self.__out_queue = Queue.Queue()
         self.active = False
         self.handle = handle
         self.connection = connection
+        self.point = None
+
+    def get_point(self):
+        """
+        getter of point (property)
+        """
+        return self.point
+
+    def set_point(self, point):
+        """
+        setter of point (property)
+        """
+        if type(point) is type(utils.Point):
+            self.point = point
+        else:
+            raise TypeError("Use utils.Point")
+
+    point = property(get_point, set_point)
 
     def put_out(self, *args, **kw):
+        """
+        add a command to the out_queue (thread safe)
+        """
         self.__out_queue.put((args, kw), True)
 
     def get_out(self):
+        """
+        pop a command from the out_queue (thread safe)
+        """
         if self.__out_queue.empty():
             raise EmptyError("Out-Queue is empty")
         else:
             return self.__out_queue.get(True)
 
+    #TODO check for delete. if command is received, action should be called immediately
     def put_in(self, *args, **kw):
-        self.__out_queue.put((args, kw), True)
+        """
+        add a command to the in_queue (thread safe)
+        """
+        self.__in_queue.put((args, kw), True)
 
     def get_in(self):
+        """
+        pop a command from the in_queue (thread safe)
+        """
         if self.__in_queue.empty():
             raise EmptyError("In-Queue is empty")
         else:
-            return self.__out_queue.get(True)
+            return self.__in_queue.get(True)
 
 
 class RobotNXT(RobotBase):
-
+    """
+    implements the RobotBase and some NXT specific functions
+    i.e. the color
+    """
+    #TODO add Freespace and trace from NXTModel
     def __init__(self, handle, connection, color):
         RobotBase.__init__(self, handle, connection)
         self.color = color
 
 
 class RobotNAO(RobotBase):
-
+    """
+    implements the RobotBase and some NAO specific functions
+    """
     def __init__(self, handle, connection):
         RobotBase.__init__(self, connection, handle)
 
@@ -75,7 +126,7 @@ class Trace(object):
     """
         The precessed NXT information as a Que
     """
-
+    #TODO rewrite with Queue
     def __init__(self, position_point):
         """
             Constructor of the Trace Class
@@ -101,7 +152,7 @@ class FreeSpace(object):
     """
         Model of the unprocessed data
     """
-
+    #TODO rewrite with Queue
     def __init__(self, position_point, position_tag, parent_point):
         """
             Constructor of the FreeSpace class

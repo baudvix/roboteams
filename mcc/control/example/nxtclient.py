@@ -8,26 +8,26 @@ class RobotProtocol(amp.AMP):
 
     def update_state(self, state):
         print 'Updating state to %d' % state
-        return {'ACK': 'got state'}
+        return {'ack': 'got state'}
     command.UpdateState.responder(update_state)
 
-    def update_position(self, x, y, yaw):
-        print 'Updating position (%d, %d, %d)' % (x, y, yaw)
-        return {'ACK': 'got position'}
+    def update_position(self, x_axis, y_axis, yaw):
+        print 'Updating position (%d, %d, %d)' % (x_axis, y_axis, yaw)
+        return {'ack': 'got position'}
     command.UpdatePosition.responder(update_position)
 
     def send_map(self, map):
         print 'Updating map '
         pprint.pprint(map)
-        return {'ACK': 'got map'}
+        return {'ack': 'got map'}
     command.SendMap.responder(send_map)
 
 
 class NXTProtocol(RobotProtocol):
 
-    def go_to_point(self,x ,y ):
-        print 'Going to Point (%d, %d)' % (x, y)
-        return {'ACK': 'got point'}
+    def go_to_point(self,x_axis ,y_axis):
+        print 'Going to Point (%d, %d)' % (x_axis, y_axis)
+        return {'ack': 'got point'}
     command.GoToPoint.responder(go_to_point)
 
 
@@ -35,18 +35,18 @@ class NAOProtocol(RobotProtocol):
 
     def nxt_missing(self, nxt_handle, color):
         print 'Searching for NXT #%d, color=%d' % (nxt_handle, color)
-        return {'ACK': 'searching'}
+        return {'ack': 'searching'}
     command.NXTMissing.responder(nxt_missing)
 
     def perform_calibration(self, nxt_handle, color):
         print 'Performing calibration on NXT #%d, color=%d' % (nxt_handle, color)
-        return {'ACK': 'try calibration'}
+        return {'ack': 'try calibration'}
     command.PerformCalibration.responder(perform_calibration)
 
     def send_path(self, path):
         print 'Follow path'
         pprint.pprint(path)
-        return {'ACK': 'follow path'}
+        return {'ack': 'follow path'}
     command.SendPath.responder(send_path)
 
 class RobotFactory(_InstanceFactory):
@@ -96,7 +96,7 @@ class NXTClient():
         deffered.addCallback(self.activated)
         deffered.addErrback(self.failure)
 
-    def activated(self, ACK):
+    def activated(self, ack):
         print 'active'
         self.active = True
 

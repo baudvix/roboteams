@@ -4,26 +4,26 @@
 import pygame
 import random
 
-from ocempgui.widgets import *
+from ocempgui.widgets import Label, Renderer, Button, Constants, ScrolledWindow
 
 
 class View:
     found = False
     label = Label('')
 
-    def __init__(self, map):
+    def __init__(self, main_map):
 
-        self.map = map
+        self.map = main_map
 
         pygame.init()
         self.screen = screen = pygame.display.set_mode((1024, 760), pygame.DOUBLEBUF)
         pygame.display.set_caption('MCC - Mission Control Center')
 
         #Create the background
-        graphTile = pygame.image.load('mcc/view/assets/background.jpg').convert()
-        graphRect = graphTile.get_rect()
+        graph_tile = pygame.image.load('mcc/view/assets/background.jpg').convert()
+        graph_rect = graph_tile.get_rect()
         background = pygame.Surface(screen.get_size())
-        background.blit(graphTile, graphRect)
+        background.blit(graph_tile, graph_rect)
 
 
         #Display The Background
@@ -35,11 +35,11 @@ class View:
         self.re.screen = screen
 
         btn = Button("Click")
-        btn.topleft = (10,10)
+        btn.topleft = (10, 10)
         btn.connect_signal(Constants.SIG_CLICKED, self.success, btn)
 
-        console = ScrolledWindow(1004,100)
-        console.topleft = (10,650)
+        console = ScrolledWindow(1004, 100)
+        console.topleft = (10, 650)
         console.child = self.label
         self.label.multiline = True
 
@@ -48,7 +48,7 @@ class View:
         self.re.add_widget(console)
 
 
-        self.mapSurface = pygame.Surface((604, 604))
+        self.map_surface = pygame.Surface((604, 604))
 
     def success(self,b):
         self.found = True
@@ -58,7 +58,7 @@ class View:
         self.label.text = text+'\n'+self.label.text
 
     def getPoint(self):
-        r = random.randint(0,10)
+        r = random.randint(0, 10)
         if r <= 5:
             return 0
         elif r<8:
@@ -103,8 +103,8 @@ class View:
         self.re.update()
 
         # Update MAP
-        self.drawMap(self.mapSurface)
-        self.screen.blit(self.mapSurface,(412,8))
+        self.drawMap(self.map_surface)
+        self.screen.blit(self.map_surface,(412, 8))
 
         #Flip the Screen
         pygame.display.flip()

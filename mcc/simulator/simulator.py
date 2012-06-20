@@ -1,4 +1,4 @@
-from math import *
+from math import cos, sin
 import random
 import math
 from mcc.utils import Point
@@ -6,36 +6,36 @@ from mcc.utils import Point
 class Simulator(object):
 
     def __init__(self):
-        self.nxtList = []
-        self.pointX = 50
-        self.pointY = 50
+        self.nxt_list = []
+        self.point_x = 50
+        self.point_y = 50
         self.yaw = 0
 
 
-    def generateList(self):
+    def generate_list(self):
 
         #point = Point(0,0,0)
-        self.pointX = 50
-        self.pointY = 50
+        self.point_x = 50
+        self.point_y = 50
         self.yaw = 0
 
         self.direction = 0
 
         #generate List
-        for i in range(100):
+        for _ in range(100):
             # adding Point to List
 
             # compute new Point
-            point = self.goPoint()
-            self.nxtList.append(point)
+            point = self.go_point()
+            self.nxt_list.append(point)
 
-    def goPoint(self):
+    def go_point(self):
 
         while True:
             #TODO use direction
             # change Direction?
             if not random.randint(0, 9):
-                r = random.randint(0,2)
+                r = random.randint(0, 2)
                 if not r:
                     self.direction = -1
                 elif r == 1:
@@ -45,19 +45,19 @@ class Simulator(object):
 
             # Compute new Position
 
-            dh = random.normalvariate(0,1)*2.25*4
-            dr = random.normalvariate(0,1)*2.25*math.pi
+            dh = random.normalvariate(0, 1)*2.25*4
+            dr = random.normalvariate(0, 1)*2.25*math.pi
 
             dx = sin(dr)*dh
             dy = -cos(dr)*dh
 
             print "dh: ", dh, "\ndr: ", dr, "\ndx: ", dx, "\ndy: ", dy
 
-            self.pointX += dx
-            self.pointY += dy
+            self.point_x += dx
+            self.point_y += dy
             self.yaw = dr
-            if not (self.pointX < 0 or self.pointY < 0):
+            if not (self.point_x < 0 or self.point_y < 0):
                 break
 
-        point = Point(self.pointX.__int__(), self.pointY.__int__(), self.yaw)
+        point = Point(self.point_x.__int__(), self.point_y.__int__(), self.yaw)
         return point

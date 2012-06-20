@@ -33,7 +33,7 @@ def main():
             if event.type == QUIT:
                 return
 
-        p = controller.sim.goPoint()
+        p = controller.sim.go_point()
         for x in range(15):
             for y in range(10):
                 controller.map.increase_point(p.x_coord-2+x, p.y_coord-2+y)

@@ -158,16 +158,16 @@ class MapModel(object):
         tmp_map_section = self.__first_map_section
 
         if offset_x > 0:
-            for i in range(0, offset_x):
+            for _ in range(0, offset_x):
                 tmp_map_section = tmp_map_section.right_grid
         elif offset_x < 0:
-            for i in range(0, offset_x, -1):
+            for _ in range(0, offset_x, -1):
                 tmp_map_section = tmp_map_section.left_grid
         if offset_y > 0:
-            for i in range(0, offset_y):
+            for _ in range(0, offset_y):
                 tmp_map_section = tmp_map_section.top_grid
         elif offset_y < 0:
-            for i in range(0, offset_y, -1):
+            for _ in range(0, offset_y, -1):
                 tmp_map_section = tmp_map_section.bottom_grid
 
         return tmp_map_section.get_point_value(x_abs, y_abs)
@@ -203,16 +203,16 @@ class MapModel(object):
         tmp_map_section = self.__first_map_section
 
         if offset_x > 0:
-            for i in range(0, offset_x):
+            for _ in range(0, offset_x):
                 tmp_map_section = tmp_map_section.right_grid
         elif offset_x < 0:
-            for i in range(0, offset_x, -1):
+            for _ in range(0, offset_x, -1):
                 tmp_map_section = tmp_map_section.left_grid
         if offset_y > 0:
-            for i in range(0, offset_y):
+            for _ in range(0, offset_y):
                 tmp_map_section = tmp_map_section.top_grid
         elif offset_y < 0:
-            for i in range(0, offset_y, -1):
+            for _ in range(0, offset_y, -1):
                 tmp_map_section = tmp_map_section.bottom_grid
 
         tmp_map_section.update_grid([[x_abs, y_abs]])
