@@ -8,6 +8,8 @@ from nxt.brick import Brick, FileFinder
 from nxt.locator import find_one_brick
 from nxt.locator import Method
 
+TIMEOFFSET = 3.0 #zeit bis zum nochmaligen Senden
+
 class pseudoBrick():
     def __init__(self):
         self.liste = [(11, 'r;6;bla')]
@@ -84,9 +86,9 @@ class Explorer():
                     self.timelist.remove(tupel)
         elif choose == 't':         
             for tupel in self.timelist:
-                if tupel[0] <= time.time():
+                if tupel[0]+TIMEOFFSET <= time.time():
                     self.timelist.remove(tupel)
-                    self.send_message(tupel[1]+';'+str(tupel[2])+';'+tupel[3])
+                    self.send_message(message=tupel[3], typ=tupel[1], id=tupel[2])
         dbg_print("timelist: "+str(self.timelist),3)
         self.lock.release() 
         dbg_print("timelist_access unlock",3)
@@ -105,7 +107,6 @@ class Explorer():
                 local_box, message = self.recv_message()
                 dbg_print((local_box, message),3)
                 try: 
-                    dbg_print("dispatcher timelist: "+str(self.timelist),3)
                     typ, t_id, payload = str(message).split(';')
                     id = int(t_id)
                 except:
@@ -130,7 +131,7 @@ class Explorer():
             
     def timer(self):
         while(True):
-            time.sleep(3)
+            time.sleep(3.0)
             self.timelist_access('t', 0)    
     
 
@@ -142,6 +143,6 @@ if __name__ == '__main__':
     else: 
         dbg_print("no robo",1)
         sys.exit()
-    robo.send_message(message='Hans')
-    robo.send_message(message='Klaus')
+    for i in range(4):
+        robo.send_message(message='Hans'+str(i))
     print("fertig")
