@@ -3,8 +3,8 @@
 #define INBOX 5
 #define OUTBOX 1
 
-string typ,id;
-int pos;
+string typ;
+int id;
 
 sub BTCheck(int conn) // läuft :)
 {
@@ -12,41 +12,39 @@ sub BTCheck(int conn) // läuft :)
  {
   TextOut(5,LCD_LINE2,"Error");
   Wait(1000);
-  Stop(true);
+  //Stop(true);
  }
 }
 
 sub splitMsg(string msg) //klappt noch nicht ganz wie geplant, nachbesserung nötig
 {
-
- string tmp;
- pos = Pos(msg,";");
  typ = SubStr(msg,0,1);
- id = SubStr(msg,pos,1);
+ id = StrToNum(SubStr(msg,2,1));
 }
 
 sub checkInbox() // todo
 {
  string in;
-
+ int lcd = 8;
  while(true)
  {
+  if(lcd<0){lcd = 8; TextOut(0,0,"",DRAW_OPT_CLEAR_WHOLE_SCREEN);}
   ReceiveRemoteString(INBOX, true, in);
   if(StrLen (in) != 0)
   {
-   TextOut(10,LCD_LINE3,in);
+   TextOut(0,lcd--*8,in);
    splitMsg(in);
    if(typ == "m")
    {
-    string tmp,tmp2;
-    tmp = NumToStr(pos);
-    tmp2 = StrCat("r;",tmp,";response");
-    SendResponseString(OUTBOX,tmp2);
+    string tmp;
+    tmp = StrCat("r;", NumToStr(id),";response");
+    TextOut(0,lcd--*8,tmp);
+    SendResponseString(OUTBOX,tmp);
    }
   }
   else
   {
-   TextOut(10,LCD_LINE3,"nothing");
+   TextOut(0,lcd--*8,"leer");
   }
   Wait(1000);
  }

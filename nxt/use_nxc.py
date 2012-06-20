@@ -25,18 +25,19 @@ class pseudoBrick():
 
 class Explorer():
     def __init__(self, mac, outbox=5, inbox=1):
-        self.brick = pseudoBrick()#find_one_brick(host=mac, method=Method(usb=False, bluetooth=True))
+        if DEBUGLEVEL < 7:
+            self.brick = find_one_brick(host=mac, method=Method(usb=False, bluetooth=True))
+        else:
+            self.brick = pseudoBrick()
         self.message_id = 0
         self.remote_message_id = 0
         self.outbox = outbox
         self.inbox = 10 + inbox
         self.timelist = []
-        self.lock = threading.Lock()
-        self.com_state = 0 #FIXME:0 fuer test =1
-        #com_state:
-        #    0: warte - nichts gesendet, nichts empfangen
-        #    1: m gesendet, r noch nicht empfangen
-        #    2: m empfangen, r gesendet, warte auf a
+        self.lock = threading.Lock()     
+        self.start_app("bt_test.rxe")
+        dispatcher = Thread(target=self.dispatch, args=())
+        dispatcher.start()
         
     def __del__(self):
         pass
@@ -61,18 +62,15 @@ class Explorer():
     def start_app(self, app):
         self.brick.start_program(app)
         
-    def send_message(self, message):
-        robo.brick.message_write(self.outbox, message)
-        typ, t_id, payload = str(message).split(';')
-        id = int(t_id)
+    def send_message(self, message = '', typ = 'm', id = 99):
         if typ == 'm':
-            self.com_state = 1
-        elif typ == 'r':
-            self.com_state = 2
-        elif typ == 'a':
-            self.com_state = 0
-        dbg_print('timelist.append: '+str((time.time(), typ, id, payload)),3)
-        self.timelist.append((time.time(), typ, id, payload))
+            self.message_id += 1
+            self.message_id %= 10
+            id = self.message_id
+        robo.brick.message_write(self.outbox, typ+";"+str(id)+";"+message)
+        if typ != 'a':
+            dbg_print('timelist.append: '+str((time.time(), typ, id, message)),3)
+            self.timelist.append((time.time(), typ, id, message))
 
     def recv_message(self):
         return robo.brick.message_read(self.inbox, self.inbox, True)
@@ -113,29 +111,19 @@ class Explorer():
                 except:
                     dbg_print("message-parsing-error: falsches Format")
                     
-                if self.com_state == 0: #warten auf m
-                    if typ == 'm':
-                        self.remote_message_id = id
-                        # irgendetwas mit payload machen
-                        self.send_message('r;'+str(self.remote_message_id)+';;')
-                    else:
-                        dbg_print("com_state - Fehler im Zustandsautomaten")
-                elif self.com_state == 1: #m gesendet, warte r, sende a
-                    if typ == 'r' and id == self.message_id:
-                        self.timelist_access(typ, id)
-                        self.send_message('a;'+str(self.message_id)+';;')
-                        self.message_id += 1
-                        self.message_id %= 10
-                    else:
-                        dbg_print("com_state - Fehler im Zustandsautomaten")
-                elif self.com_state == 2: #m empfangen, r gesendet, warte auf a
-                    if typ == 'a' and id == self.remote_message_id:
-                        self.timelist_access(typ, id)
-                        self.com_state = 0
-                    else:
-                        dbg_print("com_state - Fehler im Zustandsautomaten")
+                if typ == 'm':
+                    self.remote_message_id = id
+                    # irgendetwas mit payload machen
+                    self.send_message(typ='r', id=self.remote_message_id, message='resp')
+                    
+                elif typ == 'r':
+                    self.timelist_access(typ, id)
+                    self.send_message(typ='a', id=self.message_id, message='ack')
+
+                elif typ == 'a':
+                    self.timelist_access(typ, id)
                 else:
-                    dbg_print("com_state - Fehler im Zustandsautomaten")
+                    dbg_print('Falscher Nachrichtentyp')
             except:
                 pass
             count += 1
@@ -154,11 +142,6 @@ if __name__ == '__main__':
     else: 
         dbg_print("no robo",1)
         sys.exit()
-    robo.start_app("bt_test.rxe")
-    dispatcher1 = Thread(target=robo.dispatch, args=())
-    dispatcher1.start()
-        
-    robo.message_id = 6
-    robo.send_message('m;'+str(robo.message_id)+';HansWurst')
-    dispatcher1.join()
+    robo.send_message(message='Hans')
+    robo.send_message(message='Klaus')
     print("fertig")
