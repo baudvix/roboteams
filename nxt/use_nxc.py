@@ -1,7 +1,6 @@
 import sys
 import time
 import threading
-import mutex
 from nxt_debug import dbg_print, DEBUGLEVEL
 from threading import Thread
 import nxt.direct
@@ -32,8 +31,8 @@ class Explorer():
         self.outbox = outbox
         self.inbox = 10 + inbox
         self.timelist = []
-        self.mutex = mutex.mutex()
-        self.com_state = 1 #FIXME:0 fuer test =1
+        self.lock = threading.Lock()
+        self.com_state = 0 #FIXME:0 fuer test =1
         #com_state:
         #    0: warte - nichts gesendet, nichts empfangen
         #    1: m gesendet, r noch nicht empfangen
@@ -66,29 +65,35 @@ class Explorer():
         robo.brick.message_write(self.outbox, message)
         typ, t_id, payload = str(message).split(';')
         id = int(t_id)
+        if typ == 'm':
+            self.com_state = 1
+        elif typ == 'r':
+            self.com_state = 2
+        elif typ == 'a':
+            self.com_state = 0
         dbg_print('timelist.append: '+str((time.time(), typ, id, payload)),3)
         self.timelist.append((time.time(), typ, id, payload))
 
     def recv_message(self):
         return robo.brick.message_read(self.inbox, self.inbox, True)
 
-    def dispatch(self):
-        def r(self):
-            dbg_print("r lock",3)
+    def timelist_access(self, choose, id):
+        self.lock.acquire()
+        dbg_print("timelist_access lock",3)
+        if choose == 'r' or choose == 'a':
             for tupel in self.timelist:
-                if tupel[2] == self.message_id:
+                if tupel[2] == id:
                     self.timelist.remove(tupel)
-            self.com_state = 0
-            self.send_message('a;'+str(self.message_id)+';;')
-            dbg_print("r unlock",3) 
-            
-        def a(self):
-            dbg_print("a lock",3)
+        elif choose == 't':         
             for tupel in self.timelist:
-                if tupel[2] == self.remote_message_id:
-                    self.timelist.remove(tupel)   
-            dbg_print("a unlock",3) 
-        
+                if tupel[0] <= time.time():
+                    self.timelist.remove(tupel)
+                    self.send_message(tupel[1]+';'+str(tupel[2])+';'+tupel[3])
+        dbg_print("timelist: "+str(self.timelist),3)
+        self.lock.release() 
+        dbg_print("timelist_access unlock",3)
+
+    def dispatch(self):       
         dbg_print("run dispatch",2)
         dbg_print("run timer",2)
         t = Thread(target=self.timer, args=())
@@ -113,23 +118,20 @@ class Explorer():
                         self.remote_message_id = id
                         # irgendetwas mit payload machen
                         self.send_message('r;'+str(self.remote_message_id)+';;')
-                        
                     else:
                         dbg_print("com_state - Fehler im Zustandsautomaten")
                 elif self.com_state == 1: #m gesendet, warte r, sende a
                     if typ == 'r' and id == self.message_id:
-                        self.mutex.lock(r, self)
-                        self.mutex.unlock()
-                        
+                        self.timelist_access(typ, id)
+                        self.send_message('a;'+str(self.message_id)+';;')
                         self.message_id += 1
                         self.message_id %= 10
                     else:
                         dbg_print("com_state - Fehler im Zustandsautomaten")
                 elif self.com_state == 2: #m empfangen, r gesendet, warte auf a
                     if typ == 'a' and id == self.remote_message_id:
-                        
-                        self.mutex.lock(a, self)
-                        self.mutex.unlock()
+                        self.timelist_access(typ, id)
+                        self.com_state = 0
                     else:
                         dbg_print("com_state - Fehler im Zustandsautomaten")
                 else:
@@ -139,20 +141,9 @@ class Explorer():
             count += 1
             
     def timer(self):
-        def t(self):
-            dbg_print("timer lock",3)
-            dbg_print("timer timelist: "+str(self.timelist),3)
-            for tupel in self.timelist:
-                if tupel[0] <= time.time():
-                    self.timelist.remove(tupel)
-                    dbg_print("timelist: "+str(self.timelist),3)
-                    self.send_message(tupel[1]+';'+str(tupel[2])+';'+tupel[3])
-            dbg_print("timer unlock",3)  
-
         while(True):
             time.sleep(3)
-            self.mutex.lock(t,self)          
-            self.mutex.unlock()    
+            self.timelist_access('t', 0)    
     
 
 if __name__ == '__main__':
