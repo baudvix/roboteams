@@ -1,13 +1,14 @@
 """
 Module for utilities
-
 """
+
+import Queue
 
 class Point(object):
     """
     Class for special points in the map
     (e. g. target position or position of a NAO)
-
+    
     """
 
     def __init__(self, x_coord, y_coord, yaw=0):

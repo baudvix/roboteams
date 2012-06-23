@@ -4,4 +4,5 @@
 #Ignores pycharm ?
 .idea
 
-.pyc
+*.pyc
+*.pyo
