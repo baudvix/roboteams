@@ -6,11 +6,13 @@ Those commands are based on amp the twisted Asynchronous Message Protocol.
 
 from twisted.protocols.amp import Command, Integer, String, AmpList, Float
 
+
 class CommandTypeError(Exception):
     """
     Exception for an unknown robot type.
     """
     pass
+
 
 class CommandHandleError(Exception):
     """
@@ -20,6 +22,7 @@ class CommandHandleError(Exception):
     """
     pass
 
+
 class CommandNXTHandleError(Exception):
     """
     Exception for a unknown handle of an NXT
@@ -27,9 +30,17 @@ class CommandNXTHandleError(Exception):
     """
     pass
 
+
 class CommandActiveError(Exception):
     """
     Exception for any robot who isn't activated, but has a correct handle.
+    """
+    pass
+
+
+class CommandColorError(Exception):
+    """
+    Exception for a unknown color send by the NXT
     """
     pass
 
@@ -45,6 +56,7 @@ class Register(Command):
                  ('color', Integer())]
     response = [('handle', Integer())]
     error = [(CommandTypeError, 'COMMAND_TYPE_ERROR')]
+
 
 class Activate(Command):
     """

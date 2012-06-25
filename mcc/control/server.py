@@ -8,7 +8,7 @@ from twisted.internet.protocol import Factory
 
 from mcc.control import command
 from mcc.model import robot
-from mcc import utils
+from mcc.utils import Color, Point
 
 
 class MCCProtocol(amp.AMP):
@@ -17,7 +17,6 @@ class MCCProtocol(amp.AMP):
     """
     def __init__(self):
         amp.AMP.__init__(self)
-        #fixes for unresolved attribute
         self.factory = None
 
     def register(self, robot_type, color=None):
@@ -27,6 +26,8 @@ class MCCProtocol(amp.AMP):
         """
         print 'NEW robot: type=%d color=%d' % (robot_type, color)
         if robot_type == robot.NXT_TYPE:
+            if not Color.isColor(color):
+                raise command.CommandColorError('Unknown color. See utils.py@Color')
             self.factory.robots.append(robot.RobotNXT(self.factory.last_handle,
                                                       self, color))
         else:
@@ -123,7 +124,7 @@ class MCCProtocol(amp.AMP):
                 print 'Connection Lost to robo %d ' % robo.handle
 
     def update_position(self, robo, x_axis, y_axis, yaw, to_nxt=False):
-        robo.point = utils.Point(x_axis, y_axis, yaw)
+        robo.point = Point(x_axis, y_axis, yaw)
         if not to_nxt:
             return
         deffered = robo.connection.protocol.callRemote(command.UpdatePosition,

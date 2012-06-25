@@ -1,8 +1,9 @@
 import pprint
 from twisted.internet import reactor, defer, task
-from twisted.internet.protocol import Factory, _InstanceFactory
+from twisted.internet.protocol import _InstanceFactory
 from twisted.protocols import amp
 from mcc.control import command
+
 
 class RobotProtocol(amp.AMP):
 
@@ -24,8 +25,7 @@ class RobotProtocol(amp.AMP):
 
 
 class NXTProtocol(RobotProtocol):
-
-    def go_to_point(self,x_axis ,y_axis):
+    def go_to_point(self, x_axis, y_axis):
         print 'Going to Point (%d, %d)' % (x_axis, y_axis)
         return {'ack': 'got point'}
     command.GoToPoint.responder(go_to_point)
@@ -48,6 +48,7 @@ class NAOProtocol(RobotProtocol):
         pprint.pprint(path)
         return {'ack': 'follow path'}
     command.SendPath.responder(send_path)
+
 
 class RobotFactory(_InstanceFactory):
     def __init__(self, reactor, instance, deferred):
@@ -77,7 +78,7 @@ class NXTClient():
         if self.protocol is not None:
             self.protocol.transport.loseConnection()
         factory = RobotFactory(reactor, RobotProtocol(), deferred)
-        connector = reactor.connectTCP(self.host, self.port, factory)
+        reactor.connectTCP(self.host, self.port, factory)
         deferred.addCallback(self.connected)
         deferred.addErrback(self.failure)
         return deferred

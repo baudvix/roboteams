@@ -10,6 +10,8 @@ POINT_DODGE_LEFT = 2
 POINT_DODGE_CENTER = 3
 POINT_DODGE_RIGHT = 4
 
+#TODO: Make this modules Threadsafe
+
 
 class MapModel(object):
     """

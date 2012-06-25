@@ -3,6 +3,7 @@ robot provides a model of the robots and their functionality
 """
 from mcc.model import map
 from time import gmtime
+import threading as _threading
 import Queue
 
 NXT_TYPE = 0

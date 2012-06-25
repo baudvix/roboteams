@@ -127,3 +127,9 @@ class Color():
     COLOR_BLUE = 2
     COLOR_YELLOW = 3
     COLOR_BLACK = 4
+
+    def is_color(self, color):
+        if Color.COLOR_NONE <= color and color <= Color.COLOR_BLACK:
+            return True
+        else:
+            return False
