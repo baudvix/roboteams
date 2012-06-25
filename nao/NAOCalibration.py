@@ -10,9 +10,7 @@ import motion_poseInit
 from naoqi import ALBroker
 from naoqi import ALModule
 
-# listen to anyone # find a free port and use it # parent broker IP # parent broker port
-myBroker = ALBroker("myBroker", "0.0.0.0", 0, IP, PORT)
-
+############################################################
 #Definitions for Marker, IP, PORT, NXT's ..
 #set IP and PORt of the NAO in the config file
 naoCameraHeight = 50
@@ -35,8 +33,8 @@ except Exception, e:
     exit(1)
 period = 1500
 landMarkProxy.subscribe("Test_LandMark", period, 0.0 )
-
 memValue = "LandmarkDetected"
+
 # Create a proxy to ALMemory
 try:
     memoryProxy = ALProxy("ALMemory", IP, PORT)
@@ -44,42 +42,54 @@ except Exception, e:
     print "Error when creating memory proxy:"
     print str(e)
     exit(1)
+
+# Create a proxy to Motion
+try:
+    motionProxy = config.loadProxy("ALMotion")
+except Exception, e:
+    print "Error when creating motion proxy:"
+    print str(e)
+    exit(1)
+
+
+# listen to anyone # find a free port and use it # parent broker IP # parent broker port
+myBroker = ALBroker("myBroker", "0.0.0.0", 0, IP, PORT)
+
 ##############################################################
 
 
-def detectMarkerAndCalcDist(IP, PORT, numberOfRepitions):
-    #allDetectedMarker = [ Marker1, Marker2, Marker3, Marker4, Marker5, Marker6]
+def detectMarkerAndCalcDist(IP, PORT, numberOfMeasurements):
+    # allDetectedMarker = [ Marker1, Marker2, Marker3, Marker4, Marker5, Marker6]
     allDetectedMarker = [[[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []]]
-    #MarkerX = [alphaArray, betaArray, heightArray, idArray, [distancesToMarker] (-> calculated at last)]
-    #distancesToMarker = [c, a, b] with c as the direct distance, a as the y-distance, b as the x-distance
+    # MarkerX = [alphaArray, betaArray, heightArray, idArray, [distancesToMarker] (-> calculated at last)]
+    # distancesToMarker = [c, a, b] with c as the direct distance, a as the y-distance, b as the x-distance
 
-    #numberOfRepitions = 1
-    for i in range(0, numberOfRepitions):
+    # repeat the hole measurement numberOfMeasurements times
+    for i in range(0, numberOfMeasurements):
         time.sleep(0.1)
+
+        # this is the array of information about the markers (time, ids, wights, angles or nothing at all!)
         val = memoryProxy.getData(memValue)
 
-        #print val
-        print "--------------------------------------------------------"
-
+        # set the number of recognized markers on nxt's
         if(len(val)>=2):
             numberOfMarker = len(val[1])
         else:
             numberOfMarker = 0
 
-        # Check whether we got a valid output.
+        # Check whether we found some markers
         if(numberOfMarker >= 1):
-        #if(val and isinstance(val, list) >=2 and numberOfMarker >= 1):
-            # first Field = TimeStamp.
+            # the first field contains the time - not in use yet
             timeStamp = val[0]
 
             # There can be up to 6 markers
             for j in range(0, numberOfMarker):
                 try:
-                    # First Field = Data field
+                    # First Field = Data field with the angles and sizes
                     markerDataField = val[1][j][0]
                     allDetectedMarker[j][0].append(markerDataField[1])    #insert the alphaValue
                     allDetectedMarker[j][1].append(markerDataField[2])    #insert the betaValue
-                    allDetectedMarker[j][2].append(markerDataField[3])    #insert the sizeXValue (=sizeYValue) for the heigt
+                    allDetectedMarker[j][2].append(markerDataField[3])    #insert the sizeXValue (=sizeYValue) for the height
 
                     # Second Field = Extra info (ie, mark ID)
                     markerID = val[1][j][1][0]
@@ -90,12 +100,15 @@ def detectMarkerAndCalcDist(IP, PORT, numberOfRepitions):
                     print val
                     print "Error msg %s" % (str(e))
         else:
+            # this should not happen because before method starts nao enshures that the head centres the right marker
             print "No landmark detected"
 
-    #calculate the distances for all 6 markers
+    # calculate the distances for all possible 6 markers
     for i in range(0,6):
-        #only calculate if there is one marker
+
+        # only calculate if there is one marker
         if(allDetectedMarker[i][0] != []):
+
             print allDetectedMarker[i][0]
             allDetectedMarker[i][0] = calculateAVG(allDetectedMarker[i][0]) #avgAlphaArray
             allDetectedMarker[i][1] = calculateAVG(allDetectedMarker[i][1]) #avgBetaArray
@@ -107,33 +120,41 @@ def detectMarkerAndCalcDist(IP, PORT, numberOfRepitions):
 
     return allDetectedMarker
 
-##NOT READY - DO NOT USE
-def findNXT(nxtNUMBER):
+# this method makes the NAO look for a certain nxt (has certain color and marker numbers)
+def findNXT(NXTNumber):
+    # set the initial head position for NAO
     motion_poseInit.setMotion(0, 0)
+
+    # this are the current intervals in degree in which the NAO looks for the nxt
     pitchIntervals = [10, 20, 0]
     yawIntervals = [0, -30, 30, -60, 60]
-    numberOfIntervalsPitch = len(pitchIntervals)
-    numberOfIntervalsYaw = len(yawIntervals)
 
-    for g in range(0, numberOfIntervalsPitch):
-        #measure for each interval
-        print 'g' +str(g)
-        for h in range(0, numberOfIntervalsYaw):
-            print 'h' +str(h)
+    # in every pitch motion interval is a yaw motion of the NXT
+    for g in range(0, len(pitchIntervals)):
+
+        # move
+        for h in range(0, len(yawIntervals)):
+            # set the head position to the current yaw and pitch interval
             motion_poseInit.setMotion(yawIntervals[h], pitchIntervals[g])
+
             allDetectedMarker = [[[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []]]
-            #make 5 measurements before we are sure that there is (no) marker detected
+
+            #make 5 measurements to be sure that there is / is no marker detected
             for i in range(0, 5):
+                # sleep time is necessary otherwise the NAO has no chance to realize marker because of head movement
                 time.sleep(0.5)
                 val = memoryProxy.getData(memValue)
 
+                # same like in detectMarkerAndCalcDist
                 if(len(val)>=2):
                     numberOfMarker = len(val[1])
                 else:
                     numberOfMarker = 0
 
+                # Check whether we found some markers
                 if(numberOfMarker >= 1):
-                    #check the markerID for the right nxt
+
+                    # check the markerID for the right nxt - TODO: change id into color recogition
                     for j in range(0, numberOfMarker):
                         try:
                             # First Field = Data field
@@ -150,26 +171,33 @@ def findNXT(nxtNUMBER):
                             print val
                             print "Error msg %s" % (str(e))
 
-            #if there is min one detected marker..
+            # if could find minimal one marker
             if(allDetectedMarker[0][0] != []):
-                #calculate the averages for all detected markers
+
+                # calculate the averages for all detected markers
                 for i in range(0,6):
-                    #only calculate if there is one marker
+
+                    # only calculate if there is one marker
                     if(allDetectedMarker[i][0] != []):
+
                         avgID = mostFrequent(allDetectedMarker[i][3]) #avgID
+
                         #center the head of the nao to the nxt marker if the right Marker was found
-                        if(avgID in nxts[nxtNUMBER][i]):
+                        if(avgID in nxts[NXTNumber][i]):
+
                             avgAlpha = calculateAVG(allDetectedMarker[i][0]) #avgAlphaArray
                             avgBeta = calculateAVG(allDetectedMarker[i][1]) #avgBetaArray
+
                             motion_poseInit.setMotion(toDEG(getHead()[0]+avgAlpha), toDEG(getHead()[1]+avgBeta))
-                            #transmitt HeadPosition to verify the color for nxt
+
                             tts = ALProxy("ALTextToSpeech")
-                            tts.say('Marker' + str(avgID) + 'from NXT ' + str(nxtNUMBER) + ' found')
-                            tts.say('The position of the NXT is ' + nxts[nxtNUMBER][1][nxts[0][0].index(avgID)])
+                            tts.say('Marker' + str(avgID) + 'from NXT ' + str(NXTNumber) + ' found')
+                            tts.say('The position of the NXT is ' + nxts[NXTNumber][1][nxts[0][0].index(avgID)])
+
                             return True
 
     tts = ALProxy("ALTextToSpeech")
-    tts.say('NXT not found!')
+    tts.say('NXT ' + str(NXTNumber) + ' not found!')
     return False
 
 #to get the current head position of the nao
@@ -179,7 +207,7 @@ def getHead():
     HeadPitchAngle = memoryProxy.getData("Device/SubDeviceList/HeadPitch/Position/Actuator/Value")
     return HeadYawAngle, HeadPitchAngle
 
-#not needed any more!!
+# not needed but running fragment:
 def moveHead():
     alphaDEG = toDEG(getHead()[0])
     betaDEG  = toDEG(getHead()[1])
@@ -198,6 +226,7 @@ def moveHead():
 
     #right
     elif(alphaDEG < 0):
+
         if(alphaDEG >= -90):
             motion_poseInit.setMotion(alphaDEG-30, betaDEG)
             return False
@@ -223,17 +252,11 @@ def calculateDirectDistance(marker): #xy
 def calculateYDistance(marker): #y
     alpha = marker[0]
     yawHeadPos = getHead()[0]
-    print "y"
-    print math.sin(math.pi/2-alpha+yawHeadPos)
-    print math.pi/2-alpha+yawHeadPos
     return abs(math.sin(math.pi/2-alpha+yawHeadPos)*calculateDirectDistance(marker))
 
 def calculateXDistance(marker): #x
     alpha = marker[0]
     yawHeadPos = getHead()[0]
-    print "x"
-    print math.cos(math.pi/2-alpha+yawHeadPos)
-    print math.pi/2-alpha+yawHeadPos
     return abs(math.cos(math.pi/2-alpha+yawHeadPos)*calculateDirectDistance(marker))
 
 def toRAD(number):
@@ -242,20 +265,23 @@ def toRAD(number):
 def toDEG(number):
     return number*180/math.pi
 
-def main():
-    proxy = config.loadProxy("ALMotion")
-    config.StiffnessOn(proxy)
-    config.PoseInit(proxy)
+def performCalibration(NXTNumber, color):
+
+    config.StiffnessOn(motionProxy)
+    config.PoseInit(motionProxy)
 
     found = findNXT(0)
     tts = ALProxy("ALTextToSpeech")
+
     if(found):
         tts.say('Start to calculate distance')
         allMarker = detectMarkerAndCalcDist(IP, PORT, 10)
         print allMarker
+        directDistance = int(allMarker[0][4][0])
+
         if(len(allMarker)>0):
-            tts.say('The nxt is '+ str(int(allMarker[0][4][0])) + 'centemeter away from me!')
+            tts.say('The nxt is '+ str(directDistance) + 'centimeter away from me!')
+        else:
+            tts.say('Error! Could not calculate distance. Make sure that the nxt didn\'t move')
 
     myBroker.shutdown()
-
-main()
