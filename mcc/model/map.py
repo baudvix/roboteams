@@ -4,6 +4,13 @@ map holds a model of the map, where the data of the NXT is finally stored
 
 from mcc import utils
 
+POINT_FREE = 0
+POINT_TARGET = 1
+POINT_DODGE_LEFT = 2
+POINT_DODGE_CENTER = 3
+POINT_DODGE_RIGHT = 4
+
+
 class MapModel(object):
     """
     Class for the MapModel. Contains the reference to the first map section
@@ -172,8 +179,6 @@ class MapModel(object):
 
         return tmp_map_section.get_point_value(x_abs, y_abs)
 
-
-
     def increase_point(self, x_coord, y_coord):
         """
         Increases the value of a given point and creates a map section, if
@@ -222,7 +227,7 @@ class MapSection(object):
     """
     Class for the MapSection. Contains the references to the bordering grids
     and the grid which is defined by 'grid_height' and 'grid_width'
-
+    Grid holds [free, dodge] count
     """
     __grid_height = 100
     __grid_width = 100
@@ -247,7 +252,7 @@ class MapSection(object):
         for i in range(0, MapSection.__grid_height):
             self.__grid.append([])
             for _ in range(0, MapSection.__grid_width):
-                self.__grid[i].append(0)
+                self.__grid[i].append([0, 0])
 
     def get_right_grid(self):
         """
@@ -400,13 +405,12 @@ class MapSection(object):
 
         return self.__grid[x_coord][y_coord]
 
-
     def update_grid(self, points):
         """
         Updates the grid by increasing the values of the given points
 
         :param points: points that shall be updated
-        :type points: [[int, int]]
+        :type points: [[int, int, type] - type 0 = free, 1 = dodge
         :raises TypeError: If the type of the arguments is not a list of
                            integer tuple
 
@@ -415,10 +419,9 @@ class MapSection(object):
             raise TypeError("Type \"list\" excepted, but", type(points),
                 " given.")
 
-        for i in range (0, len(points)):
-            if len(points[i]) != 2:
+        for i in range(0, len(points)):
+            if len(points[i]) != 3:
                 raise TypeError("Wrong format!")
 
-        for i in range (0, len(points)):
-            self.__grid[points[i][0]][points[i][1]] += 1
-
+        for i in range(0, len(points)):
+            self.__grid[points[i][0]][points[i][1]][points[i][2]] += 1

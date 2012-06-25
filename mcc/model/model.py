@@ -6,6 +6,7 @@ from mcc.view.view import View
 from state import StateMachine
 from map import MapModel
 
+
 class Model(object):
     """
     Class for the model. Contains the references to the MapModel,the NAOModels,

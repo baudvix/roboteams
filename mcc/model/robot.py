@@ -1,20 +1,22 @@
 """
 robot provides a model of the robots and their functionality
 """
+from mcc.model import map
 from time import gmtime
-from mcc import utils
 import Queue
 
 NXT_TYPE = 0
 NAO_TYPE = 1
 
-#TODO make this module thread safe
+#TODO: make this module thread safe
+
 
 class EmptyError(Exception):
     """
     This error is raised if the queue is empty
     """
     pass
+
 
 class RobotBase():
     """
@@ -29,24 +31,7 @@ class RobotBase():
         self.active = False
         self.handle = handle
         self.connection = connection
-        self.point = None
-
-    def get_point(self):
-        """
-        getter of point (property)
-        """
-        return self.point
-
-    def set_point(self, point):
-        """
-        setter of point (property)
-        """
-        if type(point) is type(utils.Point):
-            self.point = point
-        else:
-            raise TypeError("Use utils.Point")
-
-    point = property(get_point, set_point)
+        self.position = None
 
     def put_out(self, *args, **kw):
         """
@@ -63,7 +48,7 @@ class RobotBase():
         else:
             return self.__out_queue.get(True)
 
-    #TODO check for delete. if command is received, action should be called immediately
+    #TODO: check for delete. if command is received, action should be called immediately
     def put_in(self, *args, **kw):
         """
         add a command to the in_queue (thread safe)
@@ -85,10 +70,47 @@ class RobotNXT(RobotBase):
     implements the RobotBase and some NXT specific functions
     i.e. the color
     """
-    #TODO add Freespace and trace from NXTModel
     def __init__(self, handle, connection, color):
+        """
+        Constructor for a new NXT
+        """
         RobotBase.__init__(self, handle, connection)
         self.color = color
+        self._trace = []
+        self._data = []
+        self.last_calibration = ''
+
+    def put_data(self, position, data_type):
+        """
+        adds new data received by the NXT
+        """
+        self._data.append(DataNXT(position, data_type, DataNXT.DATA_NXT_NEW))
+        if data_type == map.POINT_FREE or data_type == map.POINT_TARGET:
+            self._trace.append(TraceNXT(position))
+
+    def fget_data(self):
+        """
+        The data property getter.
+        Use put_data to add a new TraceNXT and DataNXT element
+        """
+        return self._trace
+
+    def fset_data(self, value):
+        """The data property setter."""
+        self._trace = value
+    data = property(fget_data, fset_data)
+
+    def fget_trace(self):
+        """
+        The trace property getter.
+        Use put_data to add a new TraceNXT and DataNXT element
+        """
+        return self._trace
+
+    def fset_trace(self, value):
+        """The trace property setter."""
+        self._trace = value
+    trace = property(fget_trace, fset_trace)
 
 
 class RobotNAO(RobotBase):
@@ -96,74 +118,93 @@ class RobotNAO(RobotBase):
     implements the RobotBase and some NAO specific functions
     """
     def __init__(self, handle, connection):
+        """
+        Constructor for a new NAO
+        """
         RobotBase.__init__(self, connection, handle)
 
-class NXTModel(object):
-    """
-        Model of an NXT
-    """
-    def __init__(self, position_point):
-        """
-            Constructor of the NXTModel
-        """
-        self.typ = None
-        self.last_calibration = None
-        self.position = position_point
-        self.free_space = None
-        self.trace = None
 
-    def updatePosition(self, point, tag):
-        """
-            updatePosition adds a position of the NXT to the FreeSpace Stack
-            :param point: Point of the NXT
-            :type point: Point
-            :param tag: Found Point tag of the Point
-            :type tag: Enum
-        """
-        self.free_space = FreeSpace(point, tag, self.free_space)
-
-class Trace(object):
+class TraceNXT(object):
     """
         The precessed NXT information as a Que
     """
-    #TODO rewrite with Queue
-    def __init__(self, position_point):
-        """
-            Constructor of the Trace Class
-            :param positionPoint: Point of the NXT
-            :type positionPoint: Point
-        """
-        self.position = position_point
-        self.next = None
-        Trace.last = self
 
-    def addNewPoint(self, position_point):
+    def __init__(self, position):
         """
-            adds a new Point to the Que
-            :param positionPoint: point which is added to the Que
-            :type x_coord: Point
+        Constructor for a new Trace element
         """
-        new_trace = Trace(position_point)
-        self.next = new_trace
-        return  new_trace
+        self._position = position
+        self._time = gmtime()
+
+    def fget_time(self):
+        """The time property getter."""
+        return self._time
+
+    def fset_time(self, value):
+        """The time property setter."""
+        self._time = value
+    time = property(fget_time, fset_time)
+
+    def fget_position(self):
+        """The position property getter."""
+        return self._position
+
+    def fset_position(self, value):
+        """The position property setter."""
+        self._position = value
+    position = property(fget_position, fset_position)
 
 
-class FreeSpace(object):
+class DataNXT(object):
     """
         Model of the unprocessed data
     """
-    #TODO rewrite with Queue
-    def __init__(self, position_point, position_tag, parent_point):
+
+    DATA_NXT_NEW = 0
+    DATA_NXT_CURRENT = 1
+    DATA_NXT_CALIBRATED = 2
+
+    def __init__(self, position_point, position_tag, status):
         """
-            Constructor of the FreeSpace class
-            :param position_point: position of the Point
-            :type position_point: Point
-            :param position_tag: tag of the Point
-            :type position_tag: Enum
-            :param x_coord: link to the parrent FreeSpace in the Que
-            :type x_coord: FreeSpace
+        Constructor for a new data element
         """
-        self.time = gmtime()
-        self.position = position_point
-        self.pointTag = position_tag
-        self.previousFreeSpace = parent_point
+        self._time = gmtime()
+        self._position = position_point
+        self._type = position_tag
+        self._status = status
+
+    def fget_time(self):
+        """The time property getter."""
+        return self._time
+
+    def fset_time(self, value):
+        """The time property setter."""
+        self._time = value
+    time = property(fget_time, fset_time)
+
+    def fget_position(self):
+        """The position property getter."""
+        return self._position
+
+    def fset_position(self, value):
+        """The position property setter."""
+        self._position = value
+    position = property(fget_position, fset_position)
+
+    def fget_type(self):
+        """The type property getter."""
+        return self._type
+
+    def fset_type(self, value):
+        """The type property setter."""
+        self._type = value
+    type = property(fget_type, fset_type)
+
+    def fget_status(self):
+        """The status property getter."""
+        return self._status
+
+    def fset_status(self, value):
+        """The status property setter."""
+        self._status = value
+    status = property(fget_status, fset_status)

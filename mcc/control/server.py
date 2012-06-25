@@ -10,13 +10,14 @@ from mcc.control import command
 from mcc.model import robot
 from mcc import utils
 
+
 class MCCProtocol(amp.AMP):
     """
     MCCProtocol defines the reaction on incoming data and requests
     """
     def __init__(self):
         amp.AMP.__init__(self)
-        #fix for unresolved attribute
+        #fixes for unresolved attribute
         self.factory = None
 
     def register(self, robot_type, color=None):
@@ -64,7 +65,7 @@ class MCCProtocol(amp.AMP):
         for robo in self.factory.robots:
             if robo.handle == nxt_handle:
                 self.update_position(robo, x_axis, y_axis, yaw, True)
-                #TODO call thread with error calculation
+                #TODO: call thread with error calculation
                 print '#%d NXT calibrated #%d (%d, %d, %d)' % (handle,
                                                                nxt_handle,
                                                                x_axis, y_axis,
@@ -86,7 +87,7 @@ class MCCProtocol(amp.AMP):
             raise command.CommandHandleError("No robot with handle")
         for robo in self.factory.robots:
             if robo.handle == nxt_handle:
-                print '#%d Roboter spotted NXT #%d' % ( handle, nxt_handle)
+                print '#%d Roboter spotted NXT #%d' % (handle, nxt_handle)
                 self.go_to_position(robo, robo.x_axis, robo.y_axis)
                 #TODO add calibrate NXT
                 return {'ack': 'got spotted'}
@@ -97,7 +98,7 @@ class MCCProtocol(amp.AMP):
         """
         saves incoming data from the NXT
         """
-        #TODO save data in nxt (freespace, update position)
+        #TODO: save data in nxt (freespace, update position)
         print '#%d Send data %d: (%d, %d, %d)' % (handle, point_tag, x_axis,
                                                   y_axis, yaw)
         return{'ack': 'got data'}
@@ -107,7 +108,7 @@ class MCCProtocol(amp.AMP):
         """
         recognize and fire action
         """
-        #TODO calculate new go_to_position
+        #TODO: calculate new go_to_position
         print '#%d Arrived at (%d. %d)' % (handle, x_axis, y_axis)
         return {'ack': 'got arrival'}
     command.ArrivedPoint.responder(arrived_point)
@@ -150,8 +151,8 @@ class MCCFactory(Factory):
     def __init__(self):
         self.last_handle = 0
         self.robots = []
-        #TODO start a thread for heavy calculation
-        #TODO start a thread for view
+        #TODO: start a thread for heavy calculation
+        #TODO: start a thread for view
 
 
 class MCCServer(object):
@@ -200,6 +201,7 @@ class MCCServer(object):
         run is called in every loop of the reactor. so if you want to do
         something regularly you put it in here
         """
+
 
 def main():
     """

@@ -2,13 +2,11 @@
 Module for utilities
 """
 
-import Queue
 
 class Point(object):
     """
     Class for special points in the map
     (e. g. target position or position of a NAO)
-    
     """
 
     def __init__(self, x_coord, y_coord, yaw=0):
@@ -36,7 +34,6 @@ class Point(object):
             raise TypeError("Type \"integer / float\" excepted, but",
                             type(x_coord), " ", type(y_coord), " ",
                             type(y_coord), "given.")
-
 
     def get_x_coord(self):
         """
