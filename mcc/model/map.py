@@ -442,7 +442,7 @@ class MapSection(object):
         or marking / deleting a dodge
 
         :param points: points that shall be updated
-        :type points: [[int, int]]
+        :type points: list
         :param option: 0: Point values; 1: Dodge values
         :type option: int
         :raises TypeError: If the type of the arguments is not a list of
@@ -454,7 +454,7 @@ class MapSection(object):
                             ", ", type(option), " given.")
 
         for i in range(0, len(points)):
-            if len(points[i]) != 3:
+            if len(points[i]) != 2:
                 raise TypeError("Wrong format!")
 
         if not option:
