@@ -182,20 +182,23 @@ class MapModel(object):
 
         return tmp_map_section.get_point_value(x_abs, y_abs)
 
-    def increase_point(self, x_coord, y_coord):
+    def set_point(self, x_coord, y_coord, option = 0):
         """
-        Increases the value of a given point and creates a map section, if
-        necessary
+        Increases the value of a given point or sets a dodge point
+        and creates a map section, if necessary
 
         :param x_coord: the x-coordinate of which the value shall be increased
         :type x_coord: int
         :param y_coord: the y-coordinate of which the value shall be increased
         :type y_coord: int
+        :param option: 0: free point, 1: dodge point
+        :type option: int
 
         """
-        if type(x_coord) != type(1) or type(y_coord) != type(1):
+        if type(x_coord) != type(1) or type(y_coord) != type(1) or \
+           type(option) != type(1):
             raise TypeError("Type \"int\" excepted, but", type(x_coord), ", ",
-                type(y_coord), " given.")
+                  type(y_coord), ", ", type(option), " given.")
 
         offset_x = x_coord / MapSection.get_grid_width()
         offset_y = y_coord / MapSection.get_grid_height()
@@ -223,7 +226,10 @@ class MapModel(object):
             for _ in range(0, offset_y, -1):
                 tmp_map_section = tmp_map_section.bottom_grid
 
-        tmp_map_section.update_grid([[x_abs, y_abs]])
+        if option == 0:
+            tmp_map_section.update_grid([[x_abs, y_abs]])
+        elif option == 1 and tmp_map_section.get_point_value(x_abs, y_abs, 1) != 1:
+            tmp_map_section.update_grid([[x_abs, y_abs]], 1)
 
     def increase_points(self, points):
         """
@@ -240,7 +246,7 @@ class MapModel(object):
 
         while not points.__sizeof__():
             p = points.pop()
-            self.increase_point(p[0], p[1])
+            self.set_point(p[0], p[1])
 
 
 class MapSection(object):
@@ -410,7 +416,7 @@ class MapSection(object):
 
     get_grid_width = staticmethod(get_grid_width)
 
-    def get_point_value(self, x_coord, y_coord, option=0):
+    def get_point_value(self, x_coord, y_coord, option = 0):
         """
         :param x_coord: x_coord where the value shall be retrieved of
         :type x_coord: int
@@ -430,7 +436,7 @@ class MapSection(object):
         else:
             return self.__grid[x_coord][y_coord][1]
 
-    def update_grid(self, points, option=0):
+    def update_grid(self, points, option = 0):
         """
         Updates the grid by increasing the values of the given points
         or marking / deleting a dodge
