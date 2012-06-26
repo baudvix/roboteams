@@ -1,10 +1,7 @@
+#!/usr/bin/env python
 """
-Module for the model
 
 """
-from mcc.view.view import View
-from state import StateMachine
-from map import MapModel
 
 
 class Model(object):
@@ -16,21 +13,21 @@ class Model(object):
 
     def __init__(self):
         """
-        Creates a model
-
-        :return: 'Model' with an initial map model ('map_model'), a view
-                 ('view') and a state machine ('state_machine')
-        :rtype: Model
 
         """
-        self.__map_model = MapModel()
-        self.__nao_model = [None]
-        self.__nxt_model = [None]
-        self.__view = View(self.__map_model)
-        self.__state_machine = StateMachine()
+        self.map = []
+        self.robots_nao = []
+        self.robots_nxt = []
+        self.state_machine = []
 
-    def register_nao(self):
-        pass
+    def register_nao(self, robot_nao):
+        self.register_nao.append((robot_nao.handle, robot_nao))
 
-    def register_nxt(self):
-        pass
+    def register_nxt(self, robot_nxt):
+        self.robots_nxt.append((robot_nxt.color, robot_nxt))
+
+    def register_map(self, name, new_map):
+        self.map.append((name, new_map))
+
+    def register_state(self, state_machine):
+        self.state_machine = state_machine

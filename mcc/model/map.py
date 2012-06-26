@@ -182,7 +182,7 @@ class MapModel(object):
 
         return tmp_map_section.get_point_value(x_abs, y_abs)
 
-    def set_point(self, x_coord, y_coord, option = 0):
+    def set_point(self, x_coord, y_coord, option=0):
         """
         Increases the value of a given point or sets a dodge point
         and creates a map section, if necessary
@@ -416,7 +416,7 @@ class MapSection(object):
 
     get_grid_width = staticmethod(get_grid_width)
 
-    def get_point_value(self, x_coord, y_coord, option = 0):
+    def get_point_value(self, x_coord, y_coord, option=0):
         """
         :param x_coord: x_coord where the value shall be retrieved of
         :type x_coord: int
@@ -436,7 +436,7 @@ class MapSection(object):
         else:
             return self.__grid[x_coord][y_coord][1]
 
-    def update_grid(self, points, option = 0):
+    def update_grid(self, points, option=0):
         """
         Updates the grid by increasing the values of the given points
         or marking / deleting a dodge

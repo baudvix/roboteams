@@ -10,8 +10,6 @@ import Queue
 NXT_TYPE = 0
 NAO_TYPE = 1
 
-#TODO: make this module thread safe
-
 
 class EmptyError(Exception):
     """
