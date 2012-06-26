@@ -4,14 +4,13 @@ map holds a model of the map, where the data of the NXT is finally stored
 """
 
 from mcc import utils
+import threading
 
 POINT_FREE = 0
 POINT_TARGET = 1
 POINT_DODGE_LEFT = 2
 POINT_DODGE_CENTER = 3
 POINT_DODGE_RIGHT = 4
-
-#TODO: Make this modules Threadsafe
 
 
 class MapModel(object):
@@ -32,6 +31,7 @@ class MapModel(object):
         """
         self.__first_map_section = MapSection()
         self.__target_position = None
+        self._lock = threading.Lock()
 
     def get_first_map_section(self):
         """
@@ -41,7 +41,8 @@ class MapModel(object):
         :rtype: MapSection
 
         """
-        return self.__first_map_section
+        with self._lock:
+            return self.__first_map_section
 
     def set_first_map_section(self, map_section):
         """
@@ -55,8 +56,8 @@ class MapModel(object):
         if type(map_section) != type(MapSection()):
             raise TypeError("Type \"MapSection\" excepted,\
                              but",  type(map_section), " given.")
-
-        self.__first_map_section = map_section
+        with self._lock:
+            self.__first_map_section = map_section
 
     first_map_section = property(get_first_map_section, set_first_map_section)
 
@@ -68,7 +69,8 @@ class MapModel(object):
         :rtype: Point
 
         """
-        return self.__target_position
+        with self._lock:
+            return self.__target_position
 
     def set_target_position(self, target_position):
         """
@@ -82,12 +84,12 @@ class MapModel(object):
         if type(target_position) != type(utils.Point(0, 0, 0)):
             raise TypeError("Type \"Point\" excepted, but",
                 type(target_position), " given.")
-
-        self.__target_position = target_position
+        with self._lock:
+            self.__target_position = target_position
 
     target_position = property(get_target_position, set_target_position)
 
-    def add_map_section(self, offset_x, offset_y):
+    def _add_map_section(self, offset_x, offset_y):
         """
         Adds a map section at the position stated with the offset.
         If there are free spaces (no grids) in the way to the position,
@@ -161,7 +163,8 @@ class MapModel(object):
 
         # make sure that the grid exists; pass if it already does
         try:
-            self.add_map_section(offset_x, offset_y)
+            with self._lock:
+                self._add_map_section(offset_x, offset_y)
         except ValueError:
             pass
 
@@ -180,7 +183,8 @@ class MapModel(object):
             for _ in range(0, offset_y, -1):
                 tmp_map_section = tmp_map_section.bottom_grid
 
-        return tmp_map_section.get_point_value(x_abs, y_abs)
+        with self._lock:
+            return tmp_map_section.get_point_value(x_abs, y_abs)
 
     def set_point(self, x_coord, y_coord, option=0):
         """
@@ -207,7 +211,8 @@ class MapModel(object):
 
         # make sure that the grid exists; pass if it already does
         try:
-            self.add_map_section(offset_x, offset_y)
+            with self._lock:
+                self._add_map_section(offset_x, offset_y)
         except ValueError:
             pass
 
@@ -225,11 +230,11 @@ class MapModel(object):
         elif offset_y < 0:
             for _ in range(0, offset_y, -1):
                 tmp_map_section = tmp_map_section.bottom_grid
-
-        if option == 0:
-            tmp_map_section.update_grid([[x_abs, y_abs]])
-        elif option == 1 and tmp_map_section.get_point_value(x_abs, y_abs, 1) != 1:
-            tmp_map_section.update_grid([[x_abs, y_abs]], 1)
+        with self._lock:
+            if option == 0:
+                tmp_map_section.update_grid([[x_abs, y_abs]])
+            elif option == 1 and tmp_map_section.get_point_value(x_abs, y_abs, 1) != 1:
+                tmp_map_section.update_grid([[x_abs, y_abs]], 1)
 
     def increase_points(self, points):
         """
@@ -246,7 +251,8 @@ class MapModel(object):
 
         while not points.__sizeof__():
             p = points.pop()
-            self.set_point(p[0], p[1])
+            with self._lock:
+                self.set_point(p[0], p[1])
 
 
 class MapSection(object):
