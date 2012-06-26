@@ -30,7 +30,7 @@ def main():
         events = pygame.event.get()
 
         for event in events:
-            if event.type == QUIT:
+            if event.type == pygame.QUIT:
                 return
 
         p = controller.sim.go_point()

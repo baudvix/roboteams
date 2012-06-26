@@ -217,6 +217,22 @@ class MapModel(object):
 
         tmp_map_section.update_grid([[x_abs, y_abs]])
 
+    def increase_points(self, points):
+        """
+        Increases the values of the given points and creates a map section, if
+        necessary
+
+        :param points: a list of points of which the value shall be increased
+        :type points: list
+
+        """
+        if type(points) != type([]):
+            raise TypeError("Type \"list\" excepted, but", type(points), ", ",
+                            " given.")
+
+        while not points.__sizeof__():
+            p = points.pop()
+            self.increase_point(p[0], p[1])
 
 class MapSection(object):
     """
@@ -247,7 +263,7 @@ class MapSection(object):
         for i in range(0, MapSection.__grid_height):
             self.__grid.append([])
             for _ in range(0, MapSection.__grid_width):
-                self.__grid[i].append(0)
+                self.__grid[i].append([0, 0])
 
     def get_right_grid(self):
         """
@@ -385,40 +401,54 @@ class MapSection(object):
 
     get_grid_width = staticmethod(get_grid_width)
 
-    def get_point_value(self, x_coord, y_coord):
+    def get_point_value(self, x_coord, y_coord, option = 0):
         """
         :param x_coord: x_coord where the value shall be retrieved of
         :type x_coord: int
         :param y_coord: y_coord where the value shall be retrieved of
         :type y_coord: int
-        :raises TypeError: If the type of the arguments is not a Point
+        :param option: 0: Point value; 1: Dodge value
+        :type option: int
+        :raises TypeError: If the type of the arguments is not int
 
         """
-        if type(x_coord) != type(1) or type(y_coord) != type(1):
+        if type(x_coord) != type(1) or type(y_coord) != type(1) or type(option) != type(1):
             raise TypeError("Type \"int\" excepted, but", type(x_coord),
-                ", ", type(y_coord), " given.")
+                ", ", type(y_coord), ", ", type(option), " given.")
 
-        return self.__grid[x_coord][y_coord]
+        if option == 0:
+            return self.__grid[x_coord][y_coord][0]
+        else:
+            return self.__grid[x_coord][y_coord][1]
 
 
-    def update_grid(self, points):
+    def update_grid(self, points, option = 0):
         """
         Updates the grid by increasing the values of the given points
+        or marking / deleting a dodge
 
         :param points: points that shall be updated
         :type points: [[int, int]]
+        :param option: 0: Point values; 1: Dodge values
+        :type option: int
         :raises TypeError: If the type of the arguments is not a list of
-                           integer tuple
+                           integer tuple and an int
 
         """
         if type(points) != type([]):
-            raise TypeError("Type \"list\" excepted, but", type(points),
-                " given.")
+            raise TypeError("Type \"list\", \"int\" excepted, but", type(points),
+                            ", ", type(option), " given.")
 
         for i in range (0, len(points)):
             if len(points[i]) != 2:
                 raise TypeError("Wrong format!")
 
-        for i in range (0, len(points)):
-            self.__grid[points[i][0]][points[i][1]] += 1
-
+        if not option:
+            for i in range (0, len(points)):
+                self.__grid[points[i][0]][points[i][1]][0] += 1
+        else:
+            for i in range (0, len(points)):
+                if not self.__grid[points[i][0]][points[i][1]][1]:
+                    self.__grid[points[i][0]][points[i][1]][1] = 1
+                else:
+                    self.__grid[points[i][0]][points[i][1]][1] = 0
