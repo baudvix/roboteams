@@ -3,7 +3,7 @@
 robot provides a model of the robots and their functionality
 """
 from mcc.model import map
-from time import gmtime
+from datetime import datetime
 import threading
 import Queue
 
@@ -65,16 +65,23 @@ class RobotNXT(RobotBase):
         self.color = color
         self._trace = []
         self._data = []
-        self.last_calibration = ''
+        self.last_calibration = None
 
-    def put(self, position, data_type):
+    def put(self, position, data_type, time=None):
         """
         adds new data received by the NXT
         """
         with self._lock:
-            self._data.append(DataNXT(position, data_type, DataNXT.DATA_NXT_NEW))
-            if data_type == map.POINT_FREE or data_type == map.POINT_TARGET:
-                self._trace.append(TraceNXT(position))
+            if time is None:
+                self._data.append(DataNXT(position, data_type,
+                    DataNXT.DATA_NXT_NEW))
+                if data_type == map.POINT_FREE or data_type == map.POINT_TARGET:
+                    self._trace.append(TraceNXT(position))
+            else:
+                self._data.append(DataNXT(position, data_type,
+                    DataNXT.DATA_NXT_NEW, time))
+                if data_type == map.POINT_FREE or data_type == map.POINT_TARGET:
+                    self._trace.append(TraceNXT(position, time))
 
     #PROPERTY --- data
     def fget_data(self):
@@ -106,6 +113,16 @@ class RobotNXT(RobotBase):
             self._trace = value
     trace = property(fget_trace, fset_trace)
 
+    #PROPERTY --- last_calibration
+    def fget_last_calibration(self):
+        """The last_calibration property getter"""
+        return self._last_calibration
+
+    def fset_last_calibration(self, time):
+        """The last_calibration property setter"""
+        self._last_calibration = time
+    last_calibration = property(fget_last_calibration, fset_last_calibration)
+
 
 class RobotNAO(RobotBase):
     """
@@ -123,12 +140,15 @@ class TraceNXT(object):
         The precessed NXT information as a Que
     """
 
-    def __init__(self, position):
+    def __init__(self, position, time=None):
         """
         Constructor for a new Trace element
         """
+        if time is None:
+            self._time = datetime.now()
+        else:
+            self._time = time
         self._position = position
-        self._time = gmtime()
 
     #PROPERTY --- time
     def fget_time(self):
@@ -160,11 +180,14 @@ class DataNXT(object):
     DATA_NXT_CURRENT = 1
     DATA_NXT_CALIBRATED = 2
 
-    def __init__(self, point_position, point_type, status):
+    def __init__(self, point_position, point_type, status, time=None):
         """
         Constructor for a new data element
         """
-        self._time = gmtime()
+        if time is None:
+            self._time = datetime.now()
+        else:
+            self._time = time
         self._position = point_position
         self._point_type = point_type
         self._status = status
