@@ -1,14 +1,6 @@
 __author__ = 'Lorenz'
 
-import config
-from config import IP
-from config import PORT
-import time
-import motion_poseInit
-import math
-from naoqi import ALProxy
-
-import Queue
+import NAOCalibration
 
 class queue():
     def __init__(self):
@@ -34,24 +26,18 @@ class queue():
             return self.arr[len(self.arr)-1]
         return -1
 
+    def len(self):
+        return len(self.arr)
+
 def main():
     q = queue()
-    q.enqueue(1)
-    q.enqueue(2)
-    q.enqueue(3)
-    print q.dequeue()
-    print q.dequeue()
-    print q.dequeue()
-    print q.dequeue()
-    print q.first()
+    # enqueue some NXTNumbers
+    q.enqueue([0,"blue"])
+    q.enqueue([2,"green"])
+    q.enqueue([1,"red"])
 
-    p = Queue()
-    print p
+    for i in range(0, q.len()):
+        element = q.dequeue()
+        NAOCalibration.performCalibration(element[0], element[1])
 
 main()
-
-
-
-
-
-
