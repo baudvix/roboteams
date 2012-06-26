@@ -100,9 +100,13 @@ class MCCProtocol(amp.AMP):
         saves incoming data from the NXT
         """
         #TODO: save data in nxt (freespace, update position)
-        print '#%d Send data %d: (%d, %d, %d)' % (handle, point_tag, x_axis,
-                                                  y_axis, yaw)
-        return{'ack': 'got data'}
+        for robo in self.factory.robots:
+            if robo.handle == handle:
+                robo.put(Point(x_axis, y_axis, yaw), point_tag)
+                print '#%d Send data %d: (%d, %d, %d)' % (handle, point_tag,
+                                                          x_axis, y_axis, yaw)
+                return{'ack': 'got data'}
+        raise command.CommandHandleError("No NXT robot with handle")
     command.SendData.responder(send_data)
 
     def arrived_point(self, handle, x_axis, y_axis):
