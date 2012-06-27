@@ -1,63 +1,83 @@
-from math import *
+from math import cos, sin
 import random
 import math
 from mcc.utils import Point
+from mcc.control.example import nxtclient
+from mcc.control import command
+
 
 class Simulator(object):
 
     def __init__(self):
-        self.nxtList = []
-        self.pointX = 50
-        self.pointY = 50
+        self.nxt_list = []
+        self.point_x = 50
+        self.point_y = 50
+        self.dx = 0
+        self.dy = 0
         self.yaw = 0
 
-
-    def generateList(self):
+    def generate_list(self):
 
         #point = Point(0,0,0)
-        self.pointX = 50
-        self.pointY = 50
+        self.point_x = 0
+        self.point_y = 0
         self.yaw = 0
 
         self.direction = 0
 
         #generate List
-        for i in range(100):
+        for _ in range(200):
             # adding Point to List
 
             # compute new Point
-            point = self.goPoint()
-            self.nxtList.append(point)
+            point = self.go_point()
+            self.nxt_list.append(point)
 
-    def goPoint(self):
+    def go_point(self):
 
+        """
+
+        """
         while True:
-            #TODO use direction
             # change Direction?
             if not random.randint(0, 9):
-                r = random.randint(0,2)
-                if not r:
-                    self.direction = -1
-                elif r == 1:
-                    self.direction = 1
-                else:
-                    self.direction = 0
+                self.direction = 0
+            else:
+                self.direction = 1
 
             # Compute new Position
+            dh = random.normalvariate(0, 1) * 2.25 * 4
+            dr = random.normalvariate(0, 1) * 2.25 * math.pi
 
-            dh = random.normalvariate(0,1)*2.25*4
-            dr = random.normalvariate(0,1)*2.25*math.pi
+            if self.direction == 1 and self.dx != 0 and self.dy != 0:
+                pass
+            else:
+                self.dx = sin(dr) * dh
+                self.dy = -cos(dr) * dh
 
-            dx = sin(dr)*dh
-            dy = -cos(dr)*dh
-
-            print "dh: ", dh, "\ndr: ", dr, "\ndx: ", dx, "\ndy: ", dy
-
-            self.pointX += dx
-            self.pointY += dy
-            self.yaw = dr
-            if not (self.pointX < 0 or self.pointY < 0):
+            self.point_x += self.dx
+            self.point_y += self.dy
+            if not (self.point_x < 0 or self.point_y < 0 or self.point_x > 190 or self.point_y > 190):
+                self.yaw = dr
                 break
+            else:
+                self.point_x -= self.dx
+                self.point_y -= self.dy
 
-        point = Point(self.pointX.__int__(), self.pointY.__int__(), self.yaw)
+        point = Point(self.point_x.__int__(), self.point_y.__int__(), self.yaw)
         return point
+
+
+class SimulatorNXT(nxtclient.NXTClient):
+
+    def __init__(self):
+        nxtclient.NXTClient.__init__(self, 1)
+        self._sim = Simulator()
+
+    def run(self):
+        p = self._sim.go_point()
+        point_tag = random.randint(0, 4)
+        deffered = self.protocol.callRemote(command.SendData, handle=self.handle, point_tag=point_tag,
+            x_axis=p.x_coord, y_axis=p.y_coord, yaw=p.yaw)
+        deffered.addCallback(self.success)
+        deffered.addErrback(self.failure)

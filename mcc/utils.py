@@ -1,13 +1,12 @@
 """
 Module for utilities
-
 """
+
 
 class Point(object):
     """
     Class for special points in the map
     (e. g. target position or position of a NAO)
-
     """
 
     def __init__(self, x_coord, y_coord, yaw=0):
@@ -27,7 +26,6 @@ class Point(object):
         """
         if (type(x_coord) == type(1)) and (type(y_coord) == type(1)) \
             and (type(yaw) == type(1.0) or type(yaw) == type(1)):
-            print "created"
             self.__x_coord = x_coord
             self.__y_coord = y_coord
             self.__yaw = yaw
@@ -35,7 +33,6 @@ class Point(object):
             raise TypeError("Type \"integer / float\" excepted, but",
                             type(x_coord), " ", type(y_coord), " ",
                             type(y_coord), "given.")
-
 
     def get_x_coord(self):
         """
@@ -129,3 +126,10 @@ class Color():
     COLOR_BLUE = 2
     COLOR_YELLOW = 3
     COLOR_BLACK = 4
+
+    @staticmethod
+    def is_color(color):
+        if Color.COLOR_NONE <= color and color <= Color.COLOR_BLACK:
+            return True
+        else:
+            return False

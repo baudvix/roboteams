@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 command holds all necessary commands for the communication between MCC, NAO
 and NXT.
@@ -6,11 +7,13 @@ Those commands are based on amp the twisted Asynchronous Message Protocol.
 
 from twisted.protocols.amp import Command, Integer, String, AmpList, Float
 
+
 class CommandTypeError(Exception):
     """
     Exception for an unknown robot type.
     """
     pass
+
 
 class CommandHandleError(Exception):
     """
@@ -20,6 +23,15 @@ class CommandHandleError(Exception):
     """
     pass
 
+
+class CommandNXTHandleError(Exception):
+    """
+    Exception for a unknown handle of an NXT
+    The NXT which the NAO spotted/ calibrated isn't activated or registered
+    """
+    pass
+
+
 class CommandActiveError(Exception):
     """
     Exception for any robot who isn't activated, but has a correct handle.
@@ -27,27 +39,36 @@ class CommandActiveError(Exception):
     pass
 
 
+class CommandColorError(Exception):
+    """
+    Exception for a unknown color send by the NXT
+    """
+    pass
+
+
 #Commands from NXT or NAO to MCC
 class Register(Command):
     """
-    The roboter registers at the MCC with his type.
+    The robot registers at the MCC with his type.
     NXT give their color with the request NAO send a -1.
     If the robot type doesn't exist an CommandTypeError is send back.
     """
     arguments = [('robot_type', Integer()),
                  ('color', Integer())]
     response = [('handle', Integer())]
-    error = [(CommandTypeError, 'COMMAND_TYPE_ERROR')]
+    error = [(CommandTypeError, 'COMMAND_TYPE_ERROR'),
+             (CommandColorError, 'COMMAND_COLOR_ERROR')]
+
 
 class Activate(Command):
     """
-    The roboter activates itself at the MCC.
+    The robot activates itself at the MCC.
     This is required at the beginning that the MCC knows it can send messages
     to the robot and if the connection was lost.
     If the handle doesn't exists an CommandHandleError is send back
     """
     arguments = [('handle', Integer())]
-    response = [('ACK', String())]
+    response = [('ack', String())]
     error = [(CommandHandleError, 'COMMAND_HANDLE_ERROR')]
 
 
@@ -60,10 +81,10 @@ class NXTCalibrated(Command):
     """
     arguments = [('handle', Integer()),
                  ('nxt_handle', Integer()),
-                 ('x', Integer()),
-                 ('y', Integer()),
+                 ('x_axis', Integer()),
+                 ('y_axis', Integer()),
                  ('yaw', Integer())]
-    response = [('ACK', String())]
+    response = [('ack', String())]
     error = [(CommandHandleError, 'COMMAND_HANDLE_ERROR'),
              (CommandActiveError, 'COMMAND_ACTIVE_ERROR')]
 
@@ -76,7 +97,7 @@ class NXTSpotted(Command):
     """
     arguments = [('handle', Integer()),
                  ('nxt_handle', Integer())]
-    response = [('ACK', String())]
+    response = [('ack', String())]
     error = [(CommandHandleError, 'COMMAND_HANDLE_ERROR'),
              (CommandActiveError, 'COMMAND_ACTIVE_ERROR')]
 
@@ -89,11 +110,11 @@ class SendData(Command):
     If the robot isn't activated an CommandActiveError is send back
     """
     arguments = [('handle', Integer()),
-                 ('pointTag', Integer()),
-                 ('x', Integer()),
-                 ('y', Integer()),
+                 ('point_tag', Integer()),
+                 ('x_axis', Integer()),
+                 ('y_axis', Integer()),
                  ('yaw', Float())]
-    response = [('ACK', String())]
+    response = [('ack', String())]
     error = [(CommandHandleError, 'COMMAND_HANDLE_ERROR'),
              (CommandActiveError, 'COMMAND_ACTIVE_ERROR')]
 
@@ -105,9 +126,9 @@ class ArrivedPoint(Command):
     If the robot isn't activated an CommandActiveError is send back
     """
     arguments = [('handle', Integer()),
-                 ('x', Integer()),
-                 ('y', Integer())]
-    response = [('ACK', String())]
+                 ('x_axis', Integer()),
+                 ('y_axis', Integer())]
+    response = [('ack', String())]
     error = [(CommandHandleError, 'COMMAND_HANDLE_ERROR'),
              (CommandActiveError, 'COMMAND_ACTIVE_ERROR')]
 
@@ -118,17 +139,17 @@ class UpdateState(Command):
     The MCC notifies the robot about the current mission state
     """
     arguments = [('state', Integer())]
-    response = [('ACK', String())]
+    response = [('ack', String())]
 
 
 class UpdatePosition(Command):
     """
     The MCC notifies the robot about his current position
     """
-    arguments = [('x', Integer()),
-                 ('y', Integer()),
+    arguments = [('x_axis', Integer()),
+                 ('y_axis', Integer()),
                  ('yaw', Integer())]
-    response = [('ACK', String())]
+    response = [('ack', String())]
 
 
 class SendMap(Command):
@@ -137,7 +158,7 @@ class SendMap(Command):
     """
     arguments = [('map', AmpList([('value', Integer()),
                                   ('type', Integer())]))]
-    response = [('ACK', String())]
+    response = [('ack', String())]
 
 
 #Commands from MCC to NAO
@@ -147,7 +168,7 @@ class NXTMissing(Command):
     """
     arguments = [('nxt_handle', Integer()),
                  ('color', Integer())]
-    response = [('ACK', String())]
+    response = [('ack', String())]
 
 
 class PerformCalibration(Command):
@@ -156,16 +177,16 @@ class PerformCalibration(Command):
     """
     arguments = [('nxt_handle', Integer()),
                  ('color', Integer())]
-    response = [('ACK', String())]
+    response = [('ack', String())]
 
 
 class SendPath(Command):
     """
     The MCC sends to the NAO the path to the target
     """
-    arguments = [('path', AmpList([('x', Integer()),
-                                   ('y', Integer())]))]
-    response = [('ACK'), String()]
+    arguments = [('path', AmpList([('x_axis', Integer()),
+                                   ('y_axis', Integer())]))]
+    response = [('ack'), String()]
 
 
 #Commands from MCC to NXT
@@ -173,6 +194,6 @@ class GoToPoint(Command):
     """
     The MCC sends to the NXT a point to go to
     """
-    arguments = [('x', Integer()),
-                 ('y', Integer())]
-    response = [('ACK', String())]
+    arguments = [('x_axis', Integer()),
+                 ('y_axis', Integer())]
+    response = [('ack', String())]
