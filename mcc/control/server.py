@@ -7,8 +7,10 @@ from twisted.internet import reactor, task
 from twisted.internet.protocol import Factory
 
 from mcc.control import command
-from mcc.model import robot
+from mcc.model import robot, map
 from mcc.utils import Color, Point
+
+from mcc.view import view
 
 
 class MCCProtocol(amp.AMP):
@@ -26,7 +28,7 @@ class MCCProtocol(amp.AMP):
         """
         print 'NEW robot: type=%d color=%d' % (robot_type, color)
         if robot_type == robot.NXT_TYPE:
-            if not Color.isColor(color):
+            if not Color.is_color(color):
                 raise command.CommandColorError('Unknown color. See utils.py@Color')
             self.factory.robots.append(robot.RobotNXT(self.factory.last_handle,
                                                       self, color))
@@ -156,8 +158,13 @@ class MCCFactory(Factory):
     def __init__(self):
         self.last_handle = 0
         self.robots = []
+        self.maps = []
+        self.maps.append(map.MapModel('Calibrated_Map'))
         #TODO: start a thread for heavy calculation
         #TODO: start a thread for view
+        self._viewThread = view.View(self.maps[0])
+        self._viewThread.daemon = True
+        self._viewThread.start()
 
 
 class MCCServer(object):

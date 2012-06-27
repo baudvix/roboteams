@@ -1,4 +1,6 @@
 import pprint
+import random
+import math
 from twisted.internet import reactor, defer, task
 from twisted.internet.protocol import _InstanceFactory
 from twisted.protocols import amp
@@ -71,7 +73,16 @@ class NXTClient():
         reactor.run()
 
     def run(self):
-        print 'TODO'
+        if self.active:
+            point_type = random.randint(0, 4)
+            x_axis = random.randint(0, 200)
+            y_axis = random.randint(0, 200)
+            yaw = random.random() * 2 * math.pi
+            deffered = self.protocol.callRemote(command.SendData, handle=self.handle, point_tag=point_type, x_axis=x_axis, y_axis=y_axis, yaw=yaw)
+            deffered.addCallback(self.success)
+            deffered.addErrback(self.failure)
+        else:
+            print 'not active'
 
     def connect(self):
         deferred = defer.Deferred()
@@ -101,8 +112,11 @@ class NXTClient():
         print 'active'
         self.active = True
 
+    def success(self, ack):
+        print 'Success: %s:%s::%s' % (self.host, self.port, ack)
+
     def failure(self, error):
-        print 'Error: %s:%s\n%s' % (self.host, self.port, error)
+        print 'Error: %s:%s::%s' % (self.host, self.port, error)
 
 if __name__ == '__main__':
     nxt_client = NXTClient(1)

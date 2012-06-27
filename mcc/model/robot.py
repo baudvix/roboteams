@@ -65,6 +65,7 @@ class RobotNXT(RobotBase):
         self.color = color
         self._trace = []
         self._data = []
+        self.map_overlay = map.MapModel('NXT #' + str(self.handle) + ' overlay')
         self.last_calibration = None
 
     def put(self, position, data_type, time=None):
@@ -122,6 +123,18 @@ class RobotNXT(RobotBase):
         """The last_calibration property setter"""
         self._last_calibration = time
     last_calibration = property(fget_last_calibration, fset_last_calibration)
+
+    #PROPERTY --- map_overlay
+    def fget_map_overlay(self):
+        """The map_overlay property getter"""
+        with self._lock:
+            return self._map_overlay
+
+    def fset_map_overlay(self, value):
+        """The map_overlay property setter"""
+        with self._lock:
+            self._map_overlay = value
+    map_overlay = property(fget_map_overlay, fset_map_overlay)
 
 
 class RobotNAO(RobotBase):

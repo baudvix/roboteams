@@ -20,7 +20,7 @@ class MapModel(object):
 
     """
 
-    def __init__(self):
+    def __init__(self, name):
         """
         Creates a map model
 
@@ -31,6 +31,7 @@ class MapModel(object):
         """
         self.__first_map_section = MapSection()
         self.__target_position = None
+        self.name = name
         self._lock = threading.Lock()
 
     def get_first_map_section(self):
