@@ -40,7 +40,7 @@ class NAOProtocol(RobotProtocol):
 
     def perform_calibration(self, nxt_handle, color):
         print 'Performing calibration on NXT #%d, color=%d' % (nxt_handle, color)
-        return {'ACK': 'try calibration'}
+        return {'ack': 'try calibration'}
     command.PerformCalibration.responder(perform_calibration)
 
     def send_path(self, path):
@@ -48,7 +48,6 @@ class NAOProtocol(RobotProtocol):
         pprint.pprint(path)
         return {'ACK': 'follow path'}
     command.SendPath.responder(send_path)
-    
 
 class RobotFactory(_InstanceFactory):
     def __init__(self, reactor, instance, deferred):
@@ -59,19 +58,17 @@ class NAOClient():
 
     def __init__(self, color):
         self.protocol = None
-        self.mcc_host = '194.95.174.172'
-        self.mcc_port = 5000
-        self.listen_port = 6000
+        self.host = '194.95.174.172'
+        self.port = 5000
         self.color = -1
         self.handle = None
         self.active = False
         self.robot_type = 1 #0:NXT, 1:NAO
-        self.factory = None
-        self.loop = task.LoopingCall(self.run)
         self.connect()
-
+        self.loop = task.LoopingCall(self.run)
+        self.loop.start(1.0)
         reactor.run()
-        
+
     def run(self):
         print 'TODO'
 
@@ -79,8 +76,8 @@ class NAOClient():
         deferred = defer.Deferred()
         if self.protocol is not None:
             self.protocol.transport.loseConnection()
-        self.factory = RobotFactory(reactor, NAOProtocol(), deferred)
-        connector = reactor.connectTCP(self.mcc_host, self.mcc_port, self.factory)
+        factory = RobotFactory(reactor, NAOProtocol(), deferred)
+        connector = reactor.connectTCP(self.host, self.port, factory)
         deferred.addCallback(self.connected)
         deferred.addErrback(self.failure)
         return deferred
@@ -101,17 +98,17 @@ class NAOClient():
 
     def activated(self, ACK):
         print 'active'
+        deffered = self.protocol.callRemote(command.NXTSpotted, handle=self.handle, nxt_handle=0)
+        deffered.addCallback(self.nxt_spotted)
+        deffered.addErrback(self.failure)
         self.active = True
-        self.listen()
-        self.loop.start(1.0)
+        
+    def nxt_spotted(self, ACK):
+        print 'NXT spotted'
 
     def failure(self, error):
-        print 'Error: %s:%s\n%s' % (self.mcc_host, self.mcc_port, error)
+        print 'Error: %s:%s\n%s' % (self.host, self.port, error)
         self.loop.stop()
-    
-    def listen(self):
-        listener = reactor.listenTCP(self.listen_port, self.factory)
-        
 
 if __name__ == '__main__':
     nxt_client = NAOClient(1)

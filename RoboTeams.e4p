@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-4.6.dtd">
 <!-- eric4 project file for project RoboTeams -->
-<!-- Saved: 2012-06-25, 12:16:16 -->
+<!-- Saved: 2012-06-27, 18:40:51 -->
 <!-- Copyright (C) 2012 ,  -->
 <Project version="4.6">
   <Language>en</Language>
@@ -15,16 +15,13 @@
     <Source>nxt/nxt_python_explorer.py</Source>
     <Source>nxt/use_nxc.py</Source>
     <Source>nxt/nxt_debug.py</Source>
-    <Source>mcc/control/test.py</Source>
     <Source>mcc/control/command.py</Source>
     <Source>mcc/control/example/nxtclient.py</Source>
     <Source>mcc/control/example/__init__.py</Source>
-    <Source>mcc/control/controller.py</Source>
     <Source>mcc/control/server.py</Source>
     <Source>mcc/control/__init__.py</Source>
     <Source>mcc/exception.py</Source>
     <Source>mcc/model/state.py</Source>
-    <Source>mcc/model/model.py</Source>
     <Source>mcc/model/robot.py</Source>
     <Source>mcc/model/__init__.py</Source>
     <Source>mcc/model/map.py</Source>
@@ -40,6 +37,7 @@
     <Source>nao/motion_poseInit.py</Source>
     <Source>nao/testfile.py</Source>
     <Source>__init__.py</Source>
+    <Source>mcc/control/example/naoclient.py</Source>
   </Sources>
   <Forms>
   </Forms>

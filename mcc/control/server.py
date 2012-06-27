@@ -49,7 +49,10 @@ class MCCProtocol(amp.AMP):
             if robo.handle == handle:
                 robo.active = True
                 print '#%d activated' % handle
-                self.update_position(robo, 0, 0, 0, True)
+                update = False
+                if type(robo).__name__ == robot.NXT_TYPE:
+                    update = True
+                self.update_position(robo, 0, 0, 0, update)
                 return {'ack': 'got activate'}
         raise command.CommandHandleError('No robot with handle')
     command.Activate.responder(activate)
@@ -79,27 +82,30 @@ class MCCProtocol(amp.AMP):
     command.NXTCalibrated.responder(nxt_calibrated)
 
     def nxt_spotted(self, handle, nxt_handle):
+        print 'test'
         """
         stops the NXT at his current position
         """
         robo_handle = False
+        nao_robo = None
         for robo in self.factory.robots:
             if robo.handle == handle:
                 robo_handle = True
+                nao_robo = robo
                 break
         if not robo_handle:
             raise command.CommandHandleError("No robot with handle")
-        for robo in self.factory.robots:
-            if robo.handle == nxt_handle:
+        for nxt_robo in self.factory.robots:
+            if nxt_robo.handle == nxt_handle:
                 print '#%d Roboter spotted NXT #%d' % (handle, nxt_handle)
-                self.go_to_position(robo, robo.x_axis, robo.y_axis)
-                self.calibrate_nxt(robo)
+                #self.go_to_position(robo, robo.x_axis, robo.y_axis)
+                self.calibrate_nxt(nao_robo, nxt_robo)
                 return {'ack': 'got spotted'}
         raise command.CommandNXTHandleError("No NXT robot with handle")
     command.NXTSpotted.responder(nxt_spotted)
 
-    def calibrate_nxt(self, robo):
-        deffered = robo.connection.callRemote(command.PerformCalibration, robo.handle, robo.color)
+    def calibrate_nxt(self, nao_robo,  nxt_robo):
+        deffered = nao_robo.connection.callRemote(command.PerformCalibration, nxt_handle = nxt_robo.handle, color = nxt_robo.color)
         deffered.addErrback(self.default_failure)
 
     def send_data(self, handle, point_tag, x_axis, y_axis, yaw):

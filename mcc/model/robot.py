@@ -146,7 +146,7 @@ class RobotNAO(RobotBase):
         """
         Constructor for a new NAO
         """
-        RobotBase.__init__(self, connection, handle)
+        RobotBase.__init__(self, handle, connection)
 
 
 class TraceNXT(object):
