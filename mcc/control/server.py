@@ -13,6 +13,8 @@ from mcc.utils import Color, Point
 
 from mcc.view import view
 
+from mcc.control.example.calibration import LogicCalibration
+
 
 class MCCProtocol(amp.AMP):
     """
@@ -34,8 +36,7 @@ class MCCProtocol(amp.AMP):
             self.factory.robots.append(robot.RobotNXT(self.factory.last_handle,
                                                       self, color))
         else:
-            self.factory.robots.append(robot.RobotNAO(self.factory.last_handle,
-                                                      self))
+            self.factory.robots.append(robot.RobotNAO(self.factory.last_handle, self))
         self.factory.last_handle += 1
         return {'handle': (self.factory.last_handle - 1)}
     command.Register.responder(register)
@@ -46,6 +47,7 @@ class MCCProtocol(amp.AMP):
         error if the handle doesn't exist. Else it will activate the robot in
         the pool of robots
         """
+        print "got activate %d " % handle
         for robo in self.factory.robots:
             if robo.handle == handle:
                 robo.active = True
@@ -132,7 +134,7 @@ class MCCProtocol(amp.AMP):
                 print 'Connection Lost to robo %d ' % robo.handle
 
     def update_position(self, robo, x_axis, y_axis, yaw, to_nxt=False):
-        robo.point = Point(x_axis, y_axis, yaw)
+        robo.position = Point(x_axis, y_axis, yaw)
         if not to_nxt:
             return
         deffered = robo.connection.callRemote(command.UpdatePosition,
@@ -184,10 +186,12 @@ class MCCServer(object):
         5000
         """
         self.protocol = None
+        self.factory = None
         self.host = 'localhost'
         self.port = 5000
         self.robots = None
         self.listen()
+        self.example_logic = LogicCalibration()
         loop = task.LoopingCall(self.run)
         loop.start(0.5)
         print 'MCC is started and listens on %d' % self.port
@@ -199,8 +203,8 @@ class MCCServer(object):
         """
         if self.protocol is not None:
             self.protocol.transport.loseConnection()
-        factory = MCCFactory()
-        reactor.listenTCP(self.port, factory)
+        self.factory = MCCFactory()
+        reactor.listenTCP(self.port, self.factory)
 
     def listening(self):
         """
@@ -218,6 +222,7 @@ class MCCServer(object):
         run is called in every loop of the reactor. so if you want to do
         something regularly you put it in here
         """
+        self.example_logic.run(self.factory.robots)
 
 
 def main():
