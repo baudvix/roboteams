@@ -105,14 +105,36 @@ class UpdateNXTData(object):
 
         inner_points = [[x_coord, y_coord]]
         for point in inner_points:
-            pass
+            if not (self.contains([point[0] + 1, point[1]], result) or
+                    self.contains([point[0] + 1, point[1]], inner_points)):
+                inner_points.append([point[0] + 1, point[1]])
+            if not (self.contains([point[0], point[1] + 1], result) or
+                    self.contains([point[0], point[1] + 1], inner_points)):
+                inner_points.append([point[0], point[1] + 1])
+            if not (self.contains([point[0] - 1, point[1]], result) or
+                    self.contains([point[0] - 1, point[1]], inner_points)):
+                inner_points.append([point[0] - 1, point[1]])
+            if not (self.contains([point[0], point[1] - 1], result) or
+                    self.contains([point[0], point[1] - 1], inner_points)):
+                inner_points.append([point[0], point[1] - 1])
 
-        print corners
-        print inner_points
+        result.extend(inner_points)
+        return result
 
 
+    def contains(self, element, list):
+        """
+
+        """
+
+        for elem in list:
+            if element == elem:
+                return True
+
+        return False
 
 test = UpdateNXTData()
+
 test.insert_position_data(0, 0, math.pi/4, None)
 
 
