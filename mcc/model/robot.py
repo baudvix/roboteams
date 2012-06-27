@@ -1,4 +1,4 @@
-#!/usr/bin/env  python
+#!/usr/bin/env python
 """
 robot provides a model of the robots and their functionality
 """

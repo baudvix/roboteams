@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 command holds all necessary commands for the communication between MCC, NAO
 and NXT.

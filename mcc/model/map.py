@@ -1,4 +1,4 @@
-#!/usr/bin/env  python
+#!/usr/bin/env python
 """
 map holds a model of the map, where the data of the NXT is finally stored
 """

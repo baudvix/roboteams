@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 server provides the communication between the mcc and the robots
 """
