@@ -50,6 +50,7 @@ class MCCProtocol(amp.AMP):
             if robo.handle == handle:
                 robo.active = True
                 print '#%d activated' % handle
+                self.update_position(robo, 0, 0, 0, True)
                 return {'ack': 'got activate'}
         raise command.CommandHandleError('No robot with handle')
     command.Activate.responder(activate)
@@ -134,19 +135,22 @@ class MCCProtocol(amp.AMP):
         robo.point = Point(x_axis, y_axis, yaw)
         if not to_nxt:
             return
-        deffered = robo.connection.protocol.callRemote(command.UpdatePosition,
+        deffered = robo.connection.callRemote(command.UpdatePosition,
                                                         x_axis=x_axis,
                                                         y_axis=y_axis, yaw=yaw)
         deffered.addErrback(self.default_failure)
 
     def go_to_position(self, robo, x_axis, y_axis):
-        deffered = robo.connection.protocol.callRemote(command.GoToPoint,
+        deffered = robo.connection.callRemote(command.GoToPoint,
                                                         x_axis=x_axis,
                                                         y_axis=y_axis)
         deffered.addErrback(self.default_failure)
 
     def default_failure(self, error):
         print 'Error occurred', error
+
+    def print_out(self, ack):
+        print 'Success: %s' % ack
 
 
 class MCCFactory(Factory):
