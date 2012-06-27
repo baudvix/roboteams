@@ -42,11 +42,10 @@ class pseudoBrick():
 class Explorer():
     def __init__(self, mac, outbox=5, inbox=1):
         #if DEBUGLEVEL < 7:
-        self.brick = find_one_brick(host=mac, method=Method(usb=False, bluetooth=True))
+        self.brick = find_one_brick(host=mac, method=Method(usb=True, bluetooth=True))
         #else:
         #    self.brick = pseudoBrick()
         self.message_id = 0
-        self.remote_message_id = 0
         self.outbox = outbox
         self.inbox = 10 + inbox
         self.timelist = []
@@ -159,6 +158,10 @@ if __name__ == '__main__':
     else: 
         dbg_print("no robo",1)
         sys.exit()
-    robo.send_message(message='3')
+    time.sleep(2.0);    
+    robo.send_message(message='s')
+    robo.send_message(message='d')
+    robo.send_message(message='a')
+    robo.send_message(message='w')
     
     dbg_print("__main__ fertig",7)
