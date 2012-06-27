@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Project SYSTEM "Project-4.6.dtd">
+<!-- eric4 project file for project RoboTeams -->
+<!-- Saved: 2012-06-25, 12:16:16 -->
+<!-- Copyright (C) 2012 ,  -->
+<Project version="4.6">
+  <Language>en</Language>
+  <ProgLanguage mixed="0">Python</ProgLanguage>
+  <ProjectType>Console</ProjectType>
+  <Description></Description>
+  <Version></Version>
+  <Author></Author>
+  <Email></Email>
+  <Sources>
+    <Source>nxt/nxt_python_explorer.py</Source>
+    <Source>nxt/use_nxc.py</Source>
+    <Source>nxt/nxt_debug.py</Source>
+    <Source>mcc/control/test.py</Source>
+    <Source>mcc/control/command.py</Source>
+    <Source>mcc/control/example/nxtclient.py</Source>
+    <Source>mcc/control/example/__init__.py</Source>
+    <Source>mcc/control/controller.py</Source>
+    <Source>mcc/control/server.py</Source>
+    <Source>mcc/control/__init__.py</Source>
+    <Source>mcc/exception.py</Source>
+    <Source>mcc/model/state.py</Source>
+    <Source>mcc/model/model.py</Source>
+    <Source>mcc/model/robot.py</Source>
+    <Source>mcc/model/__init__.py</Source>
+    <Source>mcc/model/map.py</Source>
+    <Source>mcc/utils.py</Source>
+    <Source>mcc/run.py</Source>
+    <Source>mcc/__init__.py</Source>
+    <Source>mcc/view/view.py</Source>
+    <Source>mcc/view/__init__.py</Source>
+    <Source>mcc/simulator/__init__.py</Source>
+    <Source>mcc/simulator/simulator.py</Source>
+    <Source>nao/NAOCalibration.py</Source>
+    <Source>nao/config.py</Source>
+    <Source>nao/motion_poseInit.py</Source>
+    <Source>nao/testfile.py</Source>
+    <Source>__init__.py</Source>
+  </Sources>
+  <Forms>
+  </Forms>
+  <Translations>
+  </Translations>
+  <Resources>
+  </Resources>
+  <Interfaces>
+  </Interfaces>
+  <Others>
+  </Others>
+  <Vcs>
+    <VcsType>None</VcsType>
+  </Vcs>
+  <FiletypeAssociations>
+    <FiletypeAssociation pattern="*.pyw" type="SOURCES" />
+    <FiletypeAssociation pattern="*.idl" type="INTERFACES" />
+    <FiletypeAssociation pattern="*.py" type="SOURCES" />
+    <FiletypeAssociation pattern="*.ptl" type="SOURCES" />
+  </FiletypeAssociations>
+</Project>

@@ -4,6 +4,8 @@ import Queue
 NXT_TYPE = 0
 NAO_TYPE = 1
 
+NAO_COLOR = -1
+
 class EmptyError(Exception):
     pass
 
@@ -45,7 +47,7 @@ class RobotNXT(RobotBase):
 class RobotNAO(RobotBase):
 
     def __init__(self, handle, connection):
-        RobotBase.__init__(self, connection, handle)
+        RobotBase.__init__(self, handle,  connection)
 
 class NXTModel(object):
     """

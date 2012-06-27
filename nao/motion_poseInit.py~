@@ -3,7 +3,7 @@
 ''' PoseInit: Small example to make Nao go to an initial position. '''
 
 import config
-from naoqi import motion
+import motion
 
 
 def setMotion(HeadYawAngle, HeadPitchAngle):

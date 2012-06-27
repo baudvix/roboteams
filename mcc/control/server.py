@@ -11,8 +11,10 @@ class MCCProtocol(amp.AMP):
         amp.AMP.__init__(self)
         self.factory = None
 
-    def register(self, robot_type, color=None):
-        print 'NEW robot: type=%d color=%d' % (robot_type, color)
+    def register(self, robot_type, color):
+        if color == robot.NAO_COLOR:
+            color = None
+        print 'NEW robot: type=%d color=%s' % (robot_type, color)
         if robot_type == robot.NXT_TYPE:
             self.factory.robots.append(robot.RobotNXT(self.factory.last_handle, self, color))
         else:
