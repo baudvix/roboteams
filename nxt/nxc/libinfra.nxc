@@ -1,0 +1,49 @@
+#include "libinfra.h"
+
+void BTCheck(int conn)
+{
+ if(!BluetoothStatus(conn)==NO_ERR)
+ {
+  TextOut(5,LCD_LINE2,"Error");
+  Wait(1000);
+  Stop(true);
+ }
+}
+
+message splitMsg(string in)
+{
+ message tmp;
+ int m_len = StrLen(in)-4;
+ tmp.typ = SubStr(in,0,1);
+ tmp.id = StrToNum(SubStr(in,2,1));
+ tmp.msg = RightStr(in, m_len);
+ return tmp;
+}
+
+void lcd_print(string msg){
+  if(lcd<0){lcd = 7; TextOut(0,0,"",DRAW_OPT_CLEAR_WHOLE_SCREEN);}
+  TextOut(0,lcd--*8,msg);
+}
+
+string dequeue(){
+ if(msg_count <= 0){ return "\0";}
+ string tmp;
+ Acquire(queue_mutex);
+  --msg_count;
+  tmp = queue[aus_index++%10];
+ Release(queue_mutex);
+ return tmp;
+}
+
+bool enqueue(string elem){
+ if(msg_count >= 10){return false;}
+ Acquire(queue_mutex);
+  ++msg_count;
+  queue[ein_index++%10]=elem;
+ Release(queue_mutex);
+ return true;
+}
+
+bool is_empty(){
+ return msg_count <= 0;
+}

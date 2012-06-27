@@ -1,0 +1,36 @@
+#include "libmov.h"
+
+int vor(int strecke){
+//todo umdrehungen in cm umrechnen
+ Off(OUT_AB);
+ if(strecke == 0){
+  while(weiter){
+   SetOutput(OUT_AB,Power, MOTOR_POWER,TachoLimit, 3600,RegMode, OUT_REGMODE_SYNC,RunState, OUT_RUNSTATE_RUNNING,OutputMode, 7,UpdateFlags, 7); 
+   while((MotorRunState(OUT_B) == OUT_RUNSTATE_RUNNING) && (SENSOR_1 < 1) && (SENSOR_2 < 1) && (SENSOR_3 < 1) && weiter != 0);
+   if(!((SENSOR_1 < 1) && (SENSOR_2 < 1) && (SENSOR_3 < 1))){weiter = 0;}
+  }
+ }else{
+   SetOutput(OUT_AB,Power, MOTOR_POWER,TachoLimit, strecke,RegMode, OUT_REGMODE_SYNC,RunState, OUT_RUNSTATE_RUNNING,OutputMode, 7,UpdateFlags, 7); 
+   while((MotorRunState(OUT_B) == OUT_RUNSTATE_RUNNING) && (SENSOR_1 < 1) && (SENSOR_2 < 1) && (SENSOR_3 < 1) && weiter != 0);
+ }
+ Off(OUT_AB);
+ return MotorTachoCount(OUT_A);
+}
+
+void drehen(char richtung, int winkel){
+ Off(OUT_AB);
+ int lr; //links oder rechts
+ switch(richtung){
+ case 'l': lr = 100; break;
+ case 'r': lr = -100; break;
+ default: lr = 100;
+ }
+ RotateMotorEx(OUT_AB, MOTOR_POWER, 2*winkel+TEPPICH_ABWEICHUNG, lr, true/*=sync*/, true/*=bremsen*/);
+ Off(OUT_AB);
+}
+
+void zurueck(int umdrehungen){
+ RotateMotorEx(OUT_AB, MOTOR_POWER, -360*umdrehungen, 0, true/*=sync*/, true/*=bremsen*/);
+ Off(OUT_AB);
+}
+

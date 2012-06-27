@@ -9,35 +9,49 @@ from nxt.locator import find_one_brick
 from nxt.locator import Method
 
 TIMEOFFSET = 3.0 #zeit bis zum nochmaligen Senden
+MAC1 = "00:16:53:10:49:4D" 
+MAC2 = "00:16:53:10:48:E7"
+MAC3 = "00:16:53:10:48:F3"
 
 class pseudoBrick():
     def __init__(self):
-        self.liste = [(11, 'r;6;bla')]
+        self.liste = []
     
     def start_program(self, app):
         pass
     
     def message_write(self, outbox, message):
-        dbg_print("message write: "+message,2)
-        time.sleep(1.0/10)
+        dbg_print("pseudoBrick.message_write(): "+message,7)
+        time.sleep(0.1)
+        typ, id, msg = message.split(';')
+        if typ == 'm':
+            self.liste.append('r;'+str(id)+';resp')
+        elif typ == 'r':
+            self.liste.append('a;'+str(id)+';ack')
+        elif typ == 'a':
+            pass
+        else:
+            dbg_print("pseudoBrick.message_write() - parse-error")
 
     def message_read(self, inbox1, inbox2, leeren):
-        time.sleep(5)
-        return self.liste.pop()
+        msg = self.liste.pop()
+        dbg_print("pseudoBrick.message_read() - "+str(msg),7)
+        time.sleep(2)
+        return (11, msg)
 
 class Explorer():
     def __init__(self, mac, outbox=5, inbox=1):
-        if DEBUGLEVEL < 7:
-            self.brick = find_one_brick(host=mac, method=Method(usb=False, bluetooth=True))
-        else:
-            self.brick = pseudoBrick()
+        #if DEBUGLEVEL < 7:
+        self.brick = find_one_brick(host=mac, method=Method(usb=False, bluetooth=True))
+        #else:
+        #    self.brick = pseudoBrick()
         self.message_id = 0
         self.remote_message_id = 0
         self.outbox = outbox
         self.inbox = 10 + inbox
         self.timelist = []
         self.lock = threading.Lock()     
-        self.start_app("bt_test.rxe")
+        self.start_app("explorer.rxe")
         dispatcher = Thread(target=self.dispatch, args=())
         dispatcher.start()
         
@@ -65,7 +79,7 @@ class Explorer():
         self.brick.start_program(app)
         
     def send_message(self, message = '', typ = 'm', id = 99):
-        if typ == 'm':
+        if typ == 'm' and id == 99:
             self.message_id += 1
             self.message_id %= 10
             id = self.message_id
@@ -75,7 +89,9 @@ class Explorer():
             self.timelist.append((time.time(), typ, id, message))
 
     def recv_message(self):
-        return robo.brick.message_read(self.inbox, self.inbox, True)
+        t = robo.brick.message_read(self.inbox, self.inbox, True)
+        dbg_print(t,6)
+        return t 
 
     def timelist_access(self, choose, id):
         self.lock.acquire()
@@ -101,11 +117,11 @@ class Explorer():
         dbg_print("BT-Empfang",1)
         count = 0
         while(True):
-            if count%100 == 0:
-                dbg_print("DispatcherSchleife Durchlauf: "+str(count),3)
+            if count%100000 == 0:
+                dbg_print("dispatch() - #"+str(count),3)
             try:
                 local_box, message = self.recv_message()
-                dbg_print((local_box, message),3)
+                dbg_print("message: "+str(message),9)
                 try: 
                     typ, t_id, payload = str(message).split(';')
                     id = int(t_id)
@@ -137,12 +153,12 @@ class Explorer():
 
 if __name__ == '__main__':
     dbg_print('suche robo',1)
-    robo = Explorer(mac="00:16:53:10:48:F3")
+    robo = Explorer(mac=MAC1)
     if robo != None: 
         dbg_print("robo gefunden",1)
     else: 
         dbg_print("no robo",1)
         sys.exit()
-    for i in range(4):
-        robo.send_message(message='Hans'+str(i))
-    print("fertig")
+    robo.send_message(message='3')
+    
+    dbg_print("__main__ fertig",7)

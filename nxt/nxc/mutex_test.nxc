@@ -1,0 +1,25 @@
+#include "libinfra.nxc"
+
+mutex motorMutex;
+  task t1()
+  {
+     while (true) {
+       Acquire(motorMutex);
+       lcd_print("t1");
+       Release(motorMutex);
+       Wait(2500);
+     }
+  }
+  task t2()
+  {
+     while (true) {
+       Acquire(motorMutex);
+       lcd_print("t2");
+       Release(motorMutex);
+       Wait(2000);
+     }
+  }
+  task main()
+  {
+    Precedes(t1, t2);
+  }
