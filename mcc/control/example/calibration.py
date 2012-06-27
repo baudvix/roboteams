@@ -9,15 +9,16 @@ class LogicCalibration():
     tell the nao to locate the nxt
     onCalibration updating position and inform nxt
     """
-    def __init__(self):
+    def __init__(self, robots):
         self.called_calibration = False
+        self.robots = robots
 
-    def run(self, robots):
+    def run(self):
         if self.called_calibration:
             return
         has_nxt = False
         has_nao = False
-        for robo in robots:
+        for robo in self.robots:
             if has_nxt and has_nao:
                 break
             if robo.robot_type == robot.NXT_TYPE:
@@ -28,10 +29,10 @@ class LogicCalibration():
                 has_nao = True
 
         if has_nxt and has_nao:
-            for robo in robots:
+            for robo in self.robots:
                 if robo.robot_type == robot.NAO_TYPE:
                     nxt_robo = None
-                    for robo2 in robots:
+                    for robo2 in self.robots:
                         if robo2.robot_type == robot.NXT_TYPE:
                             nxt_robo = robo2
                     defferd = robo.connection.callRemote(command.PerformCalibration,

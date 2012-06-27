@@ -96,10 +96,14 @@ class MCCProtocol(amp.AMP):
             if robo.handle == nxt_handle:
                 print '#%d Roboter spotted NXT #%d' % (handle, nxt_handle)
                 self.go_to_position(robo, robo.x_axis, robo.y_axis)
-                #TODO add calibrate NXT
+                self.calibrate_nxt(robo)
                 return {'ack': 'got spotted'}
         raise command.CommandNXTHandleError("No NXT robot with handle")
     command.NXTSpotted.responder(nxt_spotted)
+
+    def calibrate_nxt(self, robo):
+        deffered = robo.connection.callRemote(command.PerformCalibration, robo.handle, robo.color)
+        deffered.addErrback(self.default_failure)
 
     def send_data(self, handle, point_tag, x_axis, y_axis, yaw):
         """
@@ -191,7 +195,7 @@ class MCCServer(object):
         self.port = 5000
         self.robots = None
         self.listen()
-        self.example_logic = LogicCalibration()
+        self.example_logic = LogicCalibration(self.factory.robots)
         loop = task.LoopingCall(self.run)
         loop.start(0.5)
         print 'MCC is started and listens on %d' % self.port
@@ -222,7 +226,7 @@ class MCCServer(object):
         run is called in every loop of the reactor. so if you want to do
         something regularly you put it in here
         """
-        self.example_logic.run(self.factory.robots)
+        self.example_logic.run()
 
 
 def main():
