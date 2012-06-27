@@ -94,10 +94,14 @@ class MCCProtocol(amp.AMP):
             if robo.handle == nxt_handle:
                 print '#%d Roboter spotted NXT #%d' % (handle, nxt_handle)
                 self.go_to_position(robo, robo.x_axis, robo.y_axis)
-                #TODO add calibrate NXT
+                self.calibrate_nxt(robo)
                 return {'ack': 'got spotted'}
         raise command.CommandNXTHandleError("No NXT robot with handle")
     command.NXTSpotted.responder(nxt_spotted)
+
+    def calibrate_nxt(self, robo):
+        deffered = robo.connection.callRemote(command.PerformCalibration, robo.handle, robo.color)
+        deffered.addErrback(self.default_failure)
 
     def send_data(self, handle, point_tag, x_axis, y_axis, yaw):
         """
