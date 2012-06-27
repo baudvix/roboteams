@@ -55,7 +55,8 @@ class Register(Command):
     arguments = [('robot_type', Integer()),
                  ('color', Integer())]
     response = [('handle', Integer())]
-    error = [(CommandTypeError, 'COMMAND_TYPE_ERROR')]
+    error = [(CommandTypeError, 'COMMAND_TYPE_ERROR'),
+             (CommandColorError, 'COMMAND_COLOR_ERROR')]
 
 
 class Activate(Command):
@@ -108,7 +109,7 @@ class SendData(Command):
     If the robot isn't activated an CommandActiveError is send back
     """
     arguments = [('handle', Integer()),
-                 ('pointTag', Integer()),
+                 ('point_tag', Integer()),
                  ('x_axis', Integer()),
                  ('y_axis', Integer()),
                  ('yaw', Float())]

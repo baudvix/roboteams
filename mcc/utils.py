@@ -26,7 +26,6 @@ class Point(object):
         """
         if (type(x_coord) == type(1)) and (type(y_coord) == type(1)) \
             and (type(yaw) == type(1.0) or type(yaw) == type(1)):
-            print "created"
             self.__x_coord = x_coord
             self.__y_coord = y_coord
             self.__yaw = yaw
@@ -128,7 +127,8 @@ class Color():
     COLOR_YELLOW = 3
     COLOR_BLACK = 4
 
-    def is_color(self, color):
+    @staticmethod
+    def is_color(color):
         if Color.COLOR_NONE <= color and color <= Color.COLOR_BLACK:
             return True
         else:
