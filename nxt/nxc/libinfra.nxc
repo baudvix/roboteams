@@ -13,12 +13,13 @@ void BTCheck(int conn)
 message splitMsg(string in)
 {
  message tmp;
- ArrayInit(tmp.msg.param,0,10);
- 
+ int in_len = strlen(in);
  tmp.typ = SubStr(in,0,1);
  tmp.id = StrToNum(SubStr(in,2,1));
- tmp.msg.funktion = StrIndex(in,4);
- //TODO param auslesen
+ int f_p_trenner = Pos(",",in);
+ tmp.msg.funktion = StrToNum(SubStr(in,4,f_p_trenner-4));
+ tmp.msg.param = StrToNum(SubStr(in,f_p_trenner+1,in_len-f_p_trenner+1));
+ 
  return tmp;
 }
 
@@ -27,57 +28,28 @@ void lcd_print(string msg){
   TextOut(0,lcd--*8,msg);
 }
 
-void queueInit(payload &queue[]){
-	int i;
-	init0.funktion = '0';
-	init1.funktion = '0';
-	init2.funktion = '0';
-	init3.funktion = '0';
-	init4.funktion = '0';
-	init5.funktion = '0';
-	init6.funktion = '0';
-	init7.funktion = '0';
-	init8.funktion = '0';
-	init9.funktion = '0';
-	for(i=0;i<10;++i){init0.param[i]=0;}
-	for(i=0;i<10;++i){init1.param[i]=0;}
-	for(i=0;i<10;++i){init2.param[i]=0;}
-	for(i=0;i<10;++i){init3.param[i]=0;}
-	for(i=0;i<10;++i){init4.param[i]=0;}
-	for(i=0;i<10;++i){init5.param[i]=0;}
-	for(i=0;i<10;++i){init6.param[i]=0;}
-	for(i=0;i<10;++i){init7.param[i]=0;}
-	for(i=0;i<10;++i){init8.param[i]=0;}
-	for(i=0;i<10;++i){init9.param[i]=0;}
-	queue[0]=init0;
-	queue[1]=init1;
-	queue[2]=init2;
-	queue[3]=init3;
-	queue[4]=init4;
-	queue[5]=init5;
-	queue[6]=init6;
-	queue[7]=init7;
-	queue[8]=init8;
-	queue[9]=init9;
+void queueInit(int &queue1[], int &queue2[]){
+	ArrayInit(queue1,0,10);
+  ArrayInit(queue2,0,10);
 }
 
-payload dequeue(payload &queue[]){
+payload dequeue(int &queue1[], int &queue2[]){
  payload tmp;
  Acquire(queue_mutex);
   --msg_count;
-  tmp = queue[aus_index];
+  tmp.funktion = queue1[aus_index];
+  tmp.param = queue2[aus_index];
   aus_index++;
   aus_index %= 10;
  Release(queue_mutex);
  return tmp;
 }
 
-void enqueue(payload &queue[], payload elem){
+void enqueue(int &queue1[], int &queue2[], payload elem){
  Acquire(queue_mutex);
   ++msg_count;
-  queue[ein_index].funktion = elem.funktion;
-  int i;
-  for(i=0;i<10;++i){queue[ein_index].param[i]=elem.param[i];}
+  queue1[ein_index] = elem.funktion;
+  queue2[ein_index] = elem.param;
   ein_index++;
   ein_index %= 10;
  Release(queue_mutex);

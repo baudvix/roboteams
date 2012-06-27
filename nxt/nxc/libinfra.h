@@ -6,8 +6,8 @@
  static int lcd = 7;
 //fuer splitMsg()
 struct payload{
- char funktion;
- int param[10];
+ int funktion;
+ int param;
 };
 
 struct message{
@@ -18,17 +18,8 @@ struct message{
 
 
 //fuer queue
- payload queue[];
- payload init0;
- payload init1;
- payload init2;
- payload init3;
- payload init4;
- payload init5;
- payload init6;
- payload init7;
- payload init8;
- payload init9;
+ int queue1[10];
+ int queue2[10];
 
  int ein_index = 0;
  int aus_index = 0;
@@ -39,8 +30,8 @@ struct message{
  message splitMsg(string in);
  void lcd_print(string msg);
  
- void queueInit(payload &queue[]);
+ void queueInit(int &queue1[], int &queue2[]);
  bool is_empty(void);
- payload dequeue(payload &queue[]);
- void enqueue(payload &queue[], payload elem);
+ payload dequeue(int &queue1[], int &queue2[]);
+ void enqueue(int &queue1[], int &queue2[], payload elem);
 #endif

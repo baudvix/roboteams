@@ -5,7 +5,7 @@
 #include "libinfra.nxc" //noetig da kein linking
 
 mutex print_mutex;
-#define DEBUG 2
+#define DEBUG 0
 
 task sen_event(){
  #if DEBUG == 1
@@ -24,23 +24,24 @@ task movement(){
  payload dequeued;
  while(true){
   if(!is_empty()){
-   dequeued = dequeue(queue);
-   if(dequeued.funktion == '0'){
+   dequeued = dequeue(queue1, queue2);
+   if(dequeued.funktion == 0){
     Acquire(print_mutex);
      lcd_print("ERROR dequeue()");
     Release(print_mutex);
    }
    Acquire(print_mutex);
-      lcd_print(StrCat("dequeue=",CharToStr(dequeued.funktion)));//,NumToStr(dequeued.param[0]),NumToStr(dequeued.param[1]),NumToStr(dequeued.param[2]),NumToStr(dequeued.param[3]),NumToStr(dequeued.param[4]),NumToStr(dequeued.param[5]),NumToStr(dequeued.param[6]),NumToStr(dequeued.param[7]),NumToStr(dequeued.param[8]),NumToStr(dequeued.param[9])));
+      lcd_print(StrCat("dequeue=",NumToStr(dequeued.funktion)));
+			lcd_print(StrCat(" param=",NumToStr(dequeued.param)));
    Release(print_mutex);
-   if(dequeued.funktion == 'w'){weiter = 1; vor(0); break;}
-   else if(dequeued.funktion == 's'){zurueck(1); break;}
-   else if(dequeued.funktion == 'a'){drehen('l',90); break;}
-   else if(dequeued.funktion == 'd'){drehen('r',90); break;}
+   if(dequeued.funktion == 1){weiter = 1; vor(0);}
+   else if(dequeued.funktion == 2){zurueck(1);}
+   else if(dequeued.funktion == 3){drehen('l',90);}
+   else if(dequeued.funktion == 4){drehen('r',90);}
    else{
      Acquire(print_mutex);
       lcd_print("M_PARSING-ERROR: ");
-      lcd_print(StrCat("dequeue=",CharToStr(dequeued.funktion)));
+      lcd_print(StrCat("dequeue=",NumToStr(dequeued.funktion)));
      Release(print_mutex);
    }
   }else{
@@ -79,7 +80,7 @@ task dispatcher()
    m = splitMsg(in);
    #if DEBUG == 2
    Acquire(print_mutex);
-    lcd_print(StrCat("typ=",m.typ,";id=",NumToStr(m.id),";msg=",CharToStr(m.msg.funktion)));
+    lcd_print(StrCat("typ=",m.typ,";id=",NumToStr(m.id),";func=",NumToStr(m.msg.funktion)));
    Release(print_mutex);
    #endif
    if(m.typ == "m")/*strncmp(m.typ,"m",1) funktioniert nicht*/
@@ -91,7 +92,7 @@ task dispatcher()
     Release(print_mutex);
     #endif
     SendResponseString(OUTBOX,tmp);
-    //enqueue(queue,m.msg);
+    enqueue(queue1, queue2, m.msg);
    }else if(m.typ == "a"){
     //id-fertig
    }else if(m.typ == "r"){
@@ -111,9 +112,9 @@ task dispatcher()
 
 task main()
 {
- Precedes(dispatcher);
+ Precedes(dispatcher, movement);
 
- queueInit(queue); 
+ queueInit(queue1, queue2); 
  //Init Sensoren:
  SetSensorTouch(S1);
  SetSensorTouch(S2);
