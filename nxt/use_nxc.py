@@ -163,13 +163,7 @@ if __name__ == '__main__':
         sys.exit()
     time.sleep(2.0);    
     #max_int = 32768
-    robo.go_forward(0)
-    robo.send_message(message='2,19')
-    time.sleep(5.0);
-    robo.send_message(message='3,99')
-    time.sleep(10.0);
-    robo.send_message(message='4,88')
-    time.sleep(10.0);
+    #robo.go_forward(0)
     robo.send_message(message='1,3')
     
     dbg_print("__main__ fertig",7)
