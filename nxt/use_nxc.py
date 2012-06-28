@@ -41,10 +41,8 @@ class pseudoBrick():
 
 class Explorer():
     def __init__(self, mac, outbox=5, inbox=1):
-        #if DEBUGLEVEL < 7:
         self.brick = find_one_brick(host=mac, method=Method(usb=True, bluetooth=True))
-        #else:
-        #    self.brick = pseudoBrick()
+        #self.brick = pseudoBrick()
         self.message_id = 0
         self.outbox = outbox
         self.inbox = 10 + inbox
@@ -56,18 +54,21 @@ class Explorer():
         
     def __del__(self):
         pass
-        
-    def turnright(self, degrees):
+    
+    def event(self, message):
         pass
     
+    def turnright(self, degrees):
+        self.send_message(message='4,'+str(degrees))
+    
     def turnleft(self,  degrees):    
-        pass
+        self.send_message(message='3,'+str(degrees))
         
     def go_forward(self, distance):
-        pass
+        self.send_message(message='1,'+str(distance))
         
     def go_back(self, distance):
-        pass
+        self.send_message(message='2,'+str(distance))
     
     def find_programs(self):
         ff = FileFinder(robo.brick, "*.rxe")
@@ -126,11 +127,13 @@ class Explorer():
                     id = int(t_id)
                 except:
                     dbg_print("message-parsing-error: falsches Format")
-                    
+                dbg_print("typ="+str(typ)+"id="+str(t_id)+"msg="+str(payload),4)   
                 if typ == 'm':
-                    self.remote_message_id = id
                     # irgendetwas mit payload machen
-                    self.send_message(typ='r', id=self.remote_message_id, message='resp')
+                    event, value = payload.split(',')
+                    if event == 's':
+                        print "%d Einheiten gefahren" % value
+                    self.send_message(typ='r', id=id, message='resp')
                     
                 elif typ == 'r':
                     self.timelist_access(typ, id)
@@ -159,9 +162,7 @@ if __name__ == '__main__':
         dbg_print("no robo",1)
         sys.exit()
     time.sleep(2.0);    
-    robo.send_message(message='2,19')
-    robo.send_message(message='3,99')
-    robo.send_message(message='4,88')
-    robo.send_message(message='1,3')
+    #max_int = 32768
+    robo.go_forward(0)
     
     dbg_print("__main__ fertig",7)
