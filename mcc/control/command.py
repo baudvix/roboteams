@@ -175,9 +175,16 @@ class PerformCalibration(Command):
     """
     The MCC requests a calibration of a given NXT
     """
-    arguments = [('nxt_handle', Integer()),
+    arguments = [('nao_handle', Integer()),
+                 ('nxt_handle', Integer()),
                  ('color', Integer())]
-    response = [('ack', String())]
+    response = [('nao_handle', Integer()),
+                ('nxt_handle', Integer()),
+                ('x_axis', Integer()),
+                ('y_axis', Integer()),
+                ('yaw', Integer())]
+    # errors = [(Exception, 'CALIBRATION_ERROR'),
+    #          (NXTNotFoundException, 'NXT_NOT_FOUND')]
 
 
 class SendPath(Command):

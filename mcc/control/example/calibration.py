@@ -15,16 +15,16 @@ class LogicCalibration():
 
     def run(self):
         if self.called_calibration:
-            return
+             return
         has_nxt = False
         has_nao = False
         for robo in self.robots:
             if has_nxt and has_nao:
                 break
-            if robo.robot_type == robot.NXT_TYPE:
+            if (robo.robot_type == robot.NXT_TYPE) and robo.active:
                 print "got nxt"
                 has_nxt = True
-            if robo.robot_type == robot.NAO_TYPE:
+            if (robo.robot_type == robot.NAO_TYPE) and robo.active:
                 print "got nao"
                 has_nao = True
 
@@ -35,15 +35,15 @@ class LogicCalibration():
                     for robo2 in self.robots:
                         if robo2.robot_type == robot.NXT_TYPE:
                             nxt_robo = robo2
-                    defferd = robo.connection.callRemote(command.PerformCalibration,
-                        nxt_handle=nxt_robo.handle, color=nxt_robo.color)
-                    print "Call for calib"
                     self.called_calibration = True
+                    defferd = robo.connection.callRemote(command.PerformCalibration, nao_handle=robo.handle, nxt_handle=nxt_robo.handle, color=nxt_robo.color)
+                    print "Call for calib"
+                    defferd.addCallback(self.print_out)
+                    defferd.addErrback(self.failure)
 
-                    def print_out(ack):
-                        print 'Success: %s' % ack
+    def print_out(self, response):
+        print 'Success: NAO %d found NXT %d on (%d,%d) with orientation %d' %(response['nao_handle'], response['nxt_handle'], response['x_axis'], response['y_axis'], response['yaw'])
+        self.called_calibration = False
 
-                    def failure(error):
-                        print 'Error: %s' % (error)
-                    defferd.addCallback(print_out)
-                    defferd.addErrback(failure)
+    def failure(self, error):
+        print 'Error: %s' % (error)

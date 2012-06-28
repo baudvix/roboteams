@@ -1,0 +1,14 @@
+#Ignores DS_Store
+.DS_Store
+
+#Ignores pycharm ?
+.idea
+
+<<<<<<< HEAD
+.pyc
+
+.eric4project
+=======
+*.pyc
+*.pyo
+>>>>>>> mcc-master

@@ -1,0 +1,8 @@
+#Ignores DS_Store
+.DS_Store
+
+#Ignores pycharm ?
+.idea
+
+*.pyc
+*.pyo

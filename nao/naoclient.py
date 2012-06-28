@@ -41,11 +41,11 @@ class NAOProtocol(RobotProtocol):
 
     def perform_calibration(self, nao_handle, nxt_handle, color):
         print 'Performing calibration on NXT #%d, color=%d' % (nxt_handle, color)
-        calibrationResult = performCalibration(color)
-        if calibrationResult[0] != -1:
-            return {'nao_handle': nao_handle,'nxt_handle': nxt_handle,'x_axis':calibrationResult[0],'y_axis':calibrationResult[1],'yaw': calibrationResult[2]}
-        else:
-            return {'handle': self.handle,'nxt_handle': nxt_handle,'x_axis': -1,'y_axis': -1,'yaw': -1}
+        try:
+            calibrationResult = performCalibration(color)
+            return {'handle': nao_handle,'nxt_handle': nxt_handle,'x_axis':calibrationResult[0],'y_axis':calibrationResult[1],'yaw': calibrationResult[2]}
+        except NXTNotFoundException, e:
+            raise e
     command.PerformCalibration.responder(perform_calibration)
 
     def send_path(self, path):
