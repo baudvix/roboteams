@@ -2,6 +2,45 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2b3f0bc5-1a81-44d6-a9a8-ba04217144cc" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/doc/uml/RoboTeams.vpp" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/doc/uml/UseCases.ods" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/doc/uml/UseCases.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/view/assets/background.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/nxt/doku/doku.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/nxt/doku/doku.tex" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/nxt/man/Appendix+2-LEGO+MINDSTORMS+NXT+Direct+commands.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/nxt/man/NXC-Tutorial_DE v2-3.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.gitignore" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/doc/req/Requirements.txt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/control/command.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/control/controller.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/control/example/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/control/example/nxtclient.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/control/test.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/exception.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/model/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/model/map.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/model/model.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/model/robot.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/model/state.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/run.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/simulator/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/simulator/simulator.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/utils.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/view/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/view/view.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/nao/motion_poseInit.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/nxt/nxt_debug.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/nxt/nxt_python_explorer.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/nxt/use_nxc.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/requirements.txt" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/docs/uml/RE.mm" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/docs/uml/RE.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/docs/uml/RE.xmind" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/docs/uml/RoboTeams.vpp" afterPath="" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/requirments.txt" afterPath="$PROJECT_DIR$/mcc/control/__init__.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mcc/control/server.py" afterPath="$PROJECT_DIR$/mcc/control/server.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nao/NAOCalibration.py" afterPath="$PROJECT_DIR$/nao/NAOCalibration.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nao/NAOController.py" afterPath="$PROJECT_DIR$/nao/NAOController.py" />
@@ -28,10 +67,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="NAOCalibration.py" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="NAOCalibration.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nao/NAOCalibration.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="62" column="18" selection-start="1965" selection-end="1965" vertical-scroll-proportion="0.46979865">
+            <state line="274" column="1" selection-start="10660" selection-end="10660" vertical-scroll-proportion="-151.15384">
               <folding>
                 <element signature="e#23#34#0" expanded="true" />
               </folding>
@@ -42,7 +81,7 @@
       <file leaf-file-name="config.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nao/config.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="11" selection-start="114" selection-end="118" vertical-scroll-proportion="0.0">
+            <state line="5" column="7" selection-start="114" selection-end="114" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -50,22 +89,16 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="testfile.py" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="testfile.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/nao/testfile.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="297" column="20" selection-start="13169" selection-end="13169" vertical-scroll-proportion="0.0">
+            <state line="145" column="44" selection-start="6289" selection-end="6289" vertical-scroll-proportion="0.56624824">
               <folding>
                 <element signature="e#23#34#0" expanded="true" />
                 <element signature="e#1715#2100#0" expanded="false" />
                 <element signature="e#2142#2404#0" expanded="false" />
                 <element signature="e#2446#2695#0" expanded="false" />
                 <element signature="e#2733#2960#0" expanded="false" />
-                <element signature="e#3002#3053#0" expanded="false" />
-                <element signature="e#10755#11043#0" expanded="false" />
-                <element signature="e#11088#11211#0" expanded="false" />
-                <element signature="e#11254#11289#0" expanded="false" />
-                <element signature="e#11969#11994#0" expanded="false" />
-                <element signature="e#12033#12058#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -109,9 +142,9 @@
         <option value="$PROJECT_DIR$/nao/vision_getandsaveimage.py" />
         <option value="$PROJECT_DIR$/nao/multi_color_two_object.py" />
         <option value="$USER_HOME$/Documents/Studium/Semesterprojekt/NAO/python_examples/Vision/Landmark detection/vision_landMarkDetection.py" />
-        <option value="$PROJECT_DIR$/nao/config.py" />
-        <option value="$PROJECT_DIR$/nao/NAOCalibration.py" />
         <option value="$PROJECT_DIR$/nao/colorDetection.py" />
+        <option value="$PROJECT_DIR$/nao/NAOCalibration.py" />
+        <option value="$PROJECT_DIR$/nao/config.py" />
         <option value="$PROJECT_DIR$/nao/testfile.py" />
       </list>
     </option>
@@ -462,11 +495,11 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.17569353" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32893" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25334322" sideWeight="0.677675" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25334322" sideWeight="0.677675" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3989432" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32232496" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32232496" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32893" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -575,9 +608,7 @@
     <entry file="file://$PROJECT_DIR$/nao/NAOController.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="42" column="34" selection-start="813" selection-end="813" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#23#44#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -597,6 +628,24 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/nao/NAOCalibration.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="274" column="1" selection-start="10660" selection-end="10660" vertical-scroll-proportion="-151.15384">
+          <folding>
+            <element signature="e#23#34#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nao/config.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="7" selection-start="114" selection-end="114" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/nao/colorDetection.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="119" column="20" selection-start="3377" selection-end="3377" vertical-scroll-proportion="0.0">
@@ -609,37 +658,13 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/nao/testfile.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="297" column="20" selection-start="13169" selection-end="13169" vertical-scroll-proportion="0.0">
+        <state line="145" column="44" selection-start="6289" selection-end="6289" vertical-scroll-proportion="0.56624824">
           <folding>
             <element signature="e#23#34#0" expanded="true" />
             <element signature="e#1715#2100#0" expanded="false" />
             <element signature="e#2142#2404#0" expanded="false" />
             <element signature="e#2446#2695#0" expanded="false" />
             <element signature="e#2733#2960#0" expanded="false" />
-            <element signature="e#3002#3053#0" expanded="false" />
-            <element signature="e#10755#11043#0" expanded="false" />
-            <element signature="e#11088#11211#0" expanded="false" />
-            <element signature="e#11254#11289#0" expanded="false" />
-            <element signature="e#11969#11994#0" expanded="false" />
-            <element signature="e#12033#12058#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/nao/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="11" selection-start="114" selection-end="118" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/nao/NAOCalibration.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="62" column="18" selection-start="1965" selection-end="1965" vertical-scroll-proportion="0.46979865">
-          <folding>
-            <element signature="e#23#34#0" expanded="true" />
           </folding>
         </state>
       </provider>

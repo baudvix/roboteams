@@ -84,7 +84,7 @@ class MCCServer(object):
 
     def listen(self):
         deffered = defer.Deferred()
-         if self.protocol is not None:
+        if self.protocol is not None:
             self.protocol.transport.loseConnection()
         factory = MCCFactory(reactor, MCCProtocol, deffered)
         connector = reactor.listenTCP(self.port, factory)
