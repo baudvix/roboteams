@@ -14,7 +14,6 @@ from mcc.utils import Color, Point
 from mcc.view import view
 
 
-
 class MCCProtocol(amp.AMP):
     """
     MCCProtocol defines the reaction on incoming data and requests
