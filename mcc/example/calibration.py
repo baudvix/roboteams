@@ -15,17 +15,15 @@ class LogicCalibration():
 
     def run(self):
         if self.called_calibration:
-             return
+            return
         has_nxt = False
         has_nao = False
         for robo in self.robots:
             if has_nxt and has_nao:
                 break
             if (robo.robot_type == robot.NXT_TYPE) and robo.active:
-                print "got nxt"
                 has_nxt = True
             if (robo.robot_type == robot.NAO_TYPE) and robo.active:
-                print "got nao"
                 has_nao = True
 
         if has_nxt and has_nao:
@@ -42,7 +40,7 @@ class LogicCalibration():
                     defferd.addErrback(self.failure)
 
     def print_out(self, response):
-        print 'Success: NAO %d found NXT %d on (%d,%d) with orientation %d' %(response['nao_handle'], response['nxt_handle'], response['x_axis'], response['y_axis'], response['yaw'])
+        print 'Success: NAO %d found NXT %d on (%d,%d) with orientation %d' % (response['nao_handle'], response['nxt_handle'], response['x_axis'], response['y_axis'], response['yaw'])
         self.called_calibration = False
 
     def failure(self, error):

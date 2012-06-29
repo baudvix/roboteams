@@ -71,13 +71,17 @@ class Simulator(object):
 class SimulatorNXT(nxtclient.NXTClient):
 
     def __init__(self):
-        nxtclient.NXTClient.__init__(self, 1)
         self._sim = Simulator()
+        nxtclient.NXTClient.__init__(self, 1)
 
     def run(self):
-        p = self._sim.go_point()
-        point_tag = random.randint(0, 4)
-        deffered = self.protocol.callRemote(command.SendData, handle=self.handle, point_tag=point_tag,
-            x_axis=p.x_coord, y_axis=p.y_coord, yaw=p.yaw)
-        deffered.addCallback(self.success)
-        deffered.addErrback(self.failure)
+        if self.active:
+            p = self._sim.go_point()
+            point_tag = random.randint(0, 4)
+            deffered = self.protocol.callRemote(command.SendData, handle=self.handle, point_tag=point_tag,
+                x_axis=p.x_coord, y_axis=p.y_coord, yaw=p.yaw)
+            deffered.addCallback(self.success)
+            deffered.addErrback(self.failure)
+
+if __name__ == '__main__':
+    SimulatorNXT()
