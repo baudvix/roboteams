@@ -187,7 +187,7 @@ class MapModel(object):
         with self._lock:
             return tmp_map_section.get_point_value(x_abs, y_abs)
 
-    def set_point(self, x_coord, y_coord, option=0):
+    def _set_point(self, x_coord, y_coord, option=0):
         """
         Increases the value of a given point or sets a dodge point
         and creates a map section, if necessary
@@ -212,8 +212,7 @@ class MapModel(object):
 
         # make sure that the grid exists; pass if it already does
         try:
-            with self._lock:
-                self._add_map_section(offset_x, offset_y)
+            self._add_map_section(offset_x, offset_y)
         except ValueError:
             pass
 
@@ -231,11 +230,10 @@ class MapModel(object):
         elif offset_y < 0:
             for _ in range(0, offset_y, -1):
                 tmp_map_section = tmp_map_section.bottom_grid
-        with self._lock:
-            if option == 0:
-                tmp_map_section.update_grid([[x_abs, y_abs]])
-            elif option == 1 and tmp_map_section.get_point_value(x_abs, y_abs, 1) != 1:
-                tmp_map_section.update_grid([[x_abs, y_abs]], 1)
+        if option == 0:
+            tmp_map_section.update_grid([[x_abs, y_abs]])
+        elif option == 1 and tmp_map_section.get_point_value(x_abs, y_abs, 1) != 1:
+            tmp_map_section.update_grid([[x_abs, y_abs]], 1)
 
     def increase_points(self, points):
         """
@@ -250,9 +248,9 @@ class MapModel(object):
             raise TypeError("Type \"list\" excepted, but", type(points), ", ",
                             " given.")
 
-        with self._lock:
-            for p in points:
-                self.set_point(p[0], p[1])
+        for p in points:
+            with self._lock:
+                self._set_point(p[0], p[1])
 
 
 class MapSection(object):

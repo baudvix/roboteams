@@ -2,7 +2,7 @@ from math import cos, sin
 import random
 import math
 from mcc.utils import Point
-from mcc.control.example import nxtclient
+from mcc.example import nxtclient
 from mcc.control import command
 
 

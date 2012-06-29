@@ -1,6 +1,5 @@
-import pygame
 import math
-from mcc.control.controller import *
+
 
 class UpdateNXTData(object):
     """
@@ -24,7 +23,6 @@ class UpdateNXTData(object):
         self.__filled_max = int(self.__nxt_width * self.__nxt_height * 3)
         self.__corner_radius = math.sqrt(math.pow(self.__nxt_height / 2, 2) + math.pow(self.__nxt_width / 2, 2))
         self.__angel = math.atan((self.__nxt_width / 2.0) / (self.__nxt_height / 2.0))
-
 
     def insert_position_data(self, x_coord, y_coord, yaw):
         """
@@ -50,8 +48,7 @@ class UpdateNXTData(object):
 
         return new_points
 
-
-    def compute_rotation(self, x_coord, y_coord, yaw, option = 0):
+    def compute_rotation(self, x_coord, y_coord, yaw, option=0):
         """
         Computes the corners of the NXT
 
@@ -98,12 +95,12 @@ class UpdateNXTData(object):
         """
 
         result = []
-        dx =  math.fabs(x1-x0)
+        dx = math.fabs(x1 - x0)
         if x0 < x1:
             sx = 1
         else:
             sx = -1
-        dy = math.fabs(y1-y0) * (-1)
+        dy = math.fabs(y1 - y0) * (-1)
         if y0 < y1:
             sy = 1
         else:
@@ -124,7 +121,6 @@ class UpdateNXTData(object):
                 y0 += sy
 
         return result
-
 
     def fill_polygon(self, corners):
         """
@@ -183,7 +179,6 @@ class UpdateNXTData(object):
         else:
             list.insert(0, element)
 
-
     def remove_duplicates(self, list):
         """
         Removes the duplicate entries in the given list
@@ -220,39 +215,3 @@ class UpdateNXTData(object):
             if element in list_1:
                 list_1.remove(element)
         return list_1
-
-
-def main():
-    """
-
-    """
-
-    test = UpdateNXTData()
-    controller = Controller()
-    clock = pygame.time.Clock()
-
-    #Main Loop
-    while True:
-        clock.tick(30)
-
-        #Event Handling
-        events = pygame.event.get()
-
-        for event in events:
-            if event.type == pygame.QUIT:
-                return
-
-        point = controller.sim.go_point()
-        print point.x_coord
-        controller.map.increase_points(test.insert_position_data(point.x_coord, point.y_coord, point.yaw))
-
-        controller.view.log(point.x_coord.__str__()+" "+point.y_coord.__str__())
-        controller.view.update(events)
-
-#this calls the 'main' function when this script is executed
-if __name__ == '__main__':
-    main()
-
-
-
-

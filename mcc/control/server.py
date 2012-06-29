@@ -5,9 +5,11 @@ server provides the communication between the mcc and the robots
 
 from twisted.protocols import amp
 from twisted.internet import reactor, task
+from twisted.internet import error as err
 from twisted.internet.protocol import Factory
 
 from mcc.control import command
+from mcc.control.map_update import UpdateNXTData
 from mcc.model import robot, map
 from mcc.utils import Color, Point
 
@@ -107,6 +109,8 @@ class MCCProtocol(amp.AMP):
         for robo in self.factory.robots:
             if robo.handle == handle:
                 robo.put(Point(x_axis, y_axis, yaw), point_tag)
+                test = self.factory.tmp_update_map.insert_position_data(x_axis, y_axis, yaw)
+                self.factory.maps[0].increase_points(test)
                 print '#%d Send data %d: (%d, %d, %d)' % (handle, point_tag,
                                                           x_axis, y_axis, yaw)
                 return{'ack': 'got data'}
@@ -147,6 +151,9 @@ class MCCProtocol(amp.AMP):
         deffered.addErrback(self.default_failure)
 
     def default_failure(self, error):
+        if type(error) == err.ConnectionDone:
+            print 'Error: Connection Done'
+            #TODO: deactivate, wait for reactivation, ...
         print 'Error occurred', error
 
     def print_out(self, ack):
@@ -164,6 +171,7 @@ class MCCFactory(Factory):
         self.last_handle = 0
         self.robots = []
         self.maps = []
+        self.tmp_update_map = UpdateNXTData()
         self.maps.append(map.MapModel('Calibrated_Map'))
         #TODO: start a thread for heavy calculation
         #TODO: start a thread for view

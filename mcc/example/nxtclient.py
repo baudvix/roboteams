@@ -1,6 +1,5 @@
 import pprint
-import random
-import math
+
 from twisted.internet import reactor, defer, task
 from twisted.internet.protocol import _InstanceFactory
 from twisted.protocols import amp
