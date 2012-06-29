@@ -250,9 +250,8 @@ class MapModel(object):
             raise TypeError("Type \"list\" excepted, but", type(points), ", ",
                             " given.")
 
-        while not points.__sizeof__():
-            p = points.pop()
-            with self._lock:
+        with self._lock:
+            for p in points:
                 self.set_point(p[0], p[1])
 
 
