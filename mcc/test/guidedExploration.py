@@ -17,9 +17,7 @@ class FindFreeSpace(object):
         self.map = map
         self.nxt = nxt
         self.boundaries = []
-        self.x_distance = 25
-        self.y_distance = 15
-        self.amount = 1000
+        self.amount = 5000
 
     def run(self):
         #TODO find boundaries from each NXT starting point
@@ -134,59 +132,37 @@ class FindFreeSpace(object):
         step_size = 1
         # 0: right, 1: up, 2: left, 3: down
         direction = 1
-        x_distance = self.x_distance
-        y_distance = self.y_distance
         found_points = 0
         target_points = []
         while True:
             if direction == 0:
                 for i in range(0, step_size):
                     x_coord += 1
-                    x_distance += 1
-                    if (math.fabs(x_distance) >= self.x_distance or
-                        math.fabs(y_distance) >= self.y_distance) and \
-                        self.map.get_point(x_coord, y_coord) == 0:
+                    if not self.map.get_point(x_coord, y_coord):
                         target_points.append([x_coord, y_coord])
                         found_points += 1
-                        x_distance = 0
-                        y_distance = 0
                 direction += 1
             elif direction == 1:
                 for i in range(0, step_size):
                     y_coord += 1
-                    y_distance += 1
-                    if (math.fabs(x_distance) >= self.x_distance or
-                        math.fabs(y_distance) >= self.y_distance) and \
-                        self.map.get_point(x_coord, y_coord) == 0:
+                    if not self.map.get_point(x_coord, y_coord):
                         target_points.append([x_coord, y_coord])
                         found_points += 1
-                        x_distance = 0
-                        y_distance = 0
                 direction += 1
                 step_size += 1
             elif direction == 2:
                 for i in range(0, step_size):
                     x_coord -= 1
-                    x_distance -= 1
-                    if (math.fabs(x_distance) >= self.x_distance or
-                        math.fabs(y_distance) >= self.y_distance) and \
-                        self.map.get_point(x_coord, y_coord) == 0:
+                    if not self.map.get_point(x_coord, y_coord):
                         target_points.append([x_coord, y_coord])
                         found_points += 1
-                        x_distance = 0
-                        y_distance = 0
                 direction += 1
             elif direction == 3:
                 for i in range(0, step_size):
                     y_coord -= 1
-                    y_distance -= 1
-                    if (math.fabs(x_distance) >= self.x_distance or
-                        math.fabs(y_distance) >= self.y_distance) and \
-                        self.map.get_point(x_coord, y_coord) == 0:
+                    if self.map.get_point(x_coord, y_coord) == 0:
                         target_points.append([x_coord, y_coord])
                         found_points += 1
-                        x_distance = 0
-                        y_distance = 0
                 direction = 0
                 step_size += 1
             if found_points >= self.amount:

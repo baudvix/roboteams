@@ -1,8 +1,6 @@
 import pygame
-from test.guidedExploration import *
+from mcc.test.guidedExploration import *
 from mcc.control.controller import Controller
-from mcc.model.robot import RobotNXT
-from mcc.utils import Point
 import random
 
 def main():
@@ -19,30 +17,30 @@ def main():
 
     for i in range(50, 100):
         for j in range(50, 80):
-            controller.map.increase_point(i, j)
+            controller.map.set_point(i, j)
 
     for i in range(10, 45):
         for j in range(10, 45):
-            controller.map.increase_point(i, j)
+            controller.map.set_point(i, j)
 
     for _ in range(0, 20):
         rand1 = random.randint(0, 170)
         rand2 = random.randint(0, 170)
         for i in range(rand1, rand1 + 30):
             for j in range(rand2, rand2 + 30):
-                controller.map.increase_point(i, j)
+                controller.map.set_point(i, j)
 
         for i in range(rand1, rand1 + 30):
             for j in range(rand2, rand2 + 30):
-                controller.map.increase_point(i, j)
+                controller.map.set_point(i, j)
 
     list = test.run()
 
     # Fill Map with simulated content
     for p in list:
-        controller.map.increase_point(p[0], p[1])
-        controller.map.increase_point(p[0], p[1])
-        controller.map.increase_point(p[0], p[1])
+        controller.map.set_point(p[0], p[1])
+        controller.map.set_point(p[0], p[1])
+        controller.map.set_point(p[0], p[1])
 
     clock = pygame.time.Clock()
 
@@ -78,19 +76,19 @@ for p in controller.sim.nxt_list:
     if last_point.x_coord < p.x_coord and last_point.y_coord < p.y_coord:
         for x in range(last_point.x_coord - 5, p.x_coord + 5):
             for y in range(last_point.y_coord - 5, p.y_coord + 5):
-                controller.map.increase_point(x, y)
+                controller.map.set_point(x, y)
     elif last_point.x_coord > p.x_coord and last_point.y_coord < p.y_coord:
         for x in range(p.x_coord + 5, last_point.x_coord - 5, -1):
             for y in range(last_point.y_coord - 5, p.y_coord + 5):
-                controller.map.increase_point(x, y)
+                controller.map.set_point(x, y)
     elif last_point.x_coord < p.x_coord and last_point.y_coord > p.y_coord:
         for x in range(last_point.x_coord - 5, p.x_coord + 5):
             for y in range(p.y_coord + 5, last_point.y_coord - 5, -1):
-                controller.map.increase_point(x, y)
+                controller.map.set_point(x, y)
     else:
         for x in range(p.x_coord + 5, last_point.x_coord - 5, -1):
             for y in range(p.y_coord + 5, last_point.y_coord - 5, -1):
-                controller.map.increase_point(x, y)
+                controller.map.set_point(x, y)
     last_point = p
 
 clock = pygame.time.Clock()
@@ -113,19 +111,19 @@ while True:
     if last_point.x_coord < p.x_coord and last_point.y_coord < p.y_coord:
         for x in range(last_point.x_coord - 5, p.x_coord + 5):
             for y in range(last_point.y_coord - 5, p.y_coord + 5):
-                controller.map.increase_point(x, y)
+                controller.map.set_point(x, y)
     elif last_point.x_coord > p.x_coord and last_point.y_coord < p.y_coord:
         for x in range(p.x_coord + 5, last_point.x_coord - 5, -1):
             for y in range(last_point.y_coord - 5, p.y_coord + 5):
-                controller.map.increase_point(x, y)
+                controller.map.set_point(x, y)
     elif last_point.x_coord < p.x_coord and last_point.y_coord > p.y_coord:
         for x in range(last_point.x_coord - 5, p.x_coord + 5):
             for y in range(p.y_coord + 5, last_point.y_coord - 5, -1):
-                controller.map.increase_point(x, y)
+                controller.map.set_point(x, y)
     else:
         for x in range(p.x_coord + 5, last_point.x_coord - 5, -1):
             for y in range(p.y_coord + 5, last_point.y_coord - 5, -1):
-                controller.map.increase_point(x, y)
+                controller.map.set_point(x, y)
     last_point = p
 
 
