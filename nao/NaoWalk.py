@@ -7,6 +7,30 @@ from naoqi import ALProxy
 
 class NaoWalk():
 
+    # INCOMPLETE AT: walkUpToBall(), include MCC-CALL and delete walkToPosition()
+
+    # Usage description:
+    # When the NaoWalk Phase started, call
+    #       hasBall()
+    #
+    # to determine if NAO has the Redball in vision.
+    # If not, call
+    #       retrieveBall()
+    #
+    # to find and turn to the ball
+    # If NAO has a ball in vision, call
+    #       walkUpToBall()
+    #
+    # NAO will walk up closely to the Redball and call the MCC to
+    # request the NXT to move to his next position
+    # After the NXT left his initial Position, call
+    #       walkToTarget()
+    #
+    # and NAO makes his few last steps.
+    #
+    # Repeat this progress until NAO has reached
+    # the target area.
+
     def __init__(self):
         self.myBroker = ALBroker("myBroker","0.0.0.0",0,"germanopen3.local",9559)
         self.motion = ALProxy("ALMotion")
@@ -64,6 +88,7 @@ class NaoWalk():
         x = ballPosi[0]/2 + 0.05
         self.motion.stiffnessInterpolation("Body", 1.0, 0.1)
         self.motion.walkInit()
+        self.__turnToBall()
         self.motion.post.walkTo(x,0,0)
         while True:
             headYawAngle = self.motion.getAngles("HeadYaw", False)
