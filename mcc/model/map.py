@@ -33,6 +33,32 @@ class MapModel(object):
         self.__target_position = None
         self.name = name
         self._lock = threading.Lock()
+        self.__max_free_count = 0
+        self.__max_dodge_count = 0
+
+    #PROPERTY --- max_free_count
+    def fget__max_free_count(self):
+        """The max_free_count property getter"""
+        with self._lock:
+            return self.__max_free_count
+
+    def fset__max_free_count(self, value):
+        """The max_free_count property setter"""
+        with self._lock:
+            self.__max_free_count = value
+    max_free_count = property(fget__max_free_count, fset__max_free_count)
+
+    #PROPERTY --- max_dodge_count
+    def fget_max_dodge_count(self):
+        """The max_dodge_count property getter"""
+        with self._lock:
+            return self.__max_dodge_count
+
+    def fset_max_dodge_count(self, value):
+        """The max_dodge_count property setter"""
+        with self._lock:
+            self.__max_dodge_count = value
+    max_dodge_count = property(fget_max_dodge_count, fset_max_dodge_count)
 
     def get_first_map_section(self):
         """
@@ -231,8 +257,14 @@ class MapModel(object):
             for _ in range(0, offset_y, -1):
                 tmp_map_section = tmp_map_section.bottom_grid
         if option == 0:
+            count = tmp_map_section.get_point_value(x_abs, y_abs)
+            if count >= self.__max_free_count:
+                self.__max_free_count = count + 1
             tmp_map_section.update_grid([[x_abs, y_abs]])
         elif option == 1 and tmp_map_section.get_point_value(x_abs, y_abs, 1) != 1:
+            count = tmp_map_section.get_point_value(x_abs, y_abs, 1)
+            if count >= self.__max_dodge_count:
+                self.__max_dodge_count = count + 1
             tmp_map_section.update_grid([[x_abs, y_abs]], 1)
 
     def increase_points(self, points):

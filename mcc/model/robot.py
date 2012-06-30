@@ -73,6 +73,34 @@ class RobotBase():
     position = property(fget_position, fset_position)
 
 
+class RobotSpec():
+    """
+        specifies the specs of the robot.
+        you have the measures, speed and rotation circles
+        etc.
+    """
+
+    def __init__(self, robot_type, width=None, length=None, speed=None, rotation_circle=None):
+        if robot_type == NXT_TYPE:
+            self.width = 9
+            self.length = 15
+            self.speed = 5
+            self.rotation_circle = 11
+        elif robot_type == NAO_TYPE:
+            self.width = 13
+            self.length = 14
+            self.speed = 3
+            self.rotation_circle = 18
+        if not width == None:
+            self.width = width
+        if not length == None:
+            self.length = length
+        if not speed == None:
+            self.speed = speed
+        if not rotation_circle == None:
+            self.rotation_circle = rotation_circle
+
+
 class RobotNXT(RobotBase):
     """
     implements the RobotBase and some NXT specific functions
