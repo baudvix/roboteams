@@ -92,7 +92,7 @@ class NaoWalk():
         self.motion.post.walkTo(x,0,0)
         while True:
             headYawAngle = self.motion.getAngles("HeadYaw", False)
-            if headYawAngle[0] >= headYawTreshold or headYawAngle <= -headYawTreshold:
+            if headYawAngle[0] >= headYawTreshold or headYawAngle[0] <= -headYawTreshold:
                 self.motion.stopWalk()
                 self.__turnToBall()
                 self.walkUpToBall()
