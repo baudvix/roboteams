@@ -111,7 +111,7 @@ class MCCProtocol(amp.AMP):
                 robo.put(Point(x_axis, y_axis, yaw), point_tag)
                 test = self.factory.tmp_update_map.insert_position_data(x_axis, y_axis, yaw)
                 self.factory.maps[0].increase_points(test)
-                print '#%d Send data %d: (%d, %d, %d)' % (handle, point_tag,
+                print '#%d Send data %d: (%d, %d, %f)' % (handle, point_tag,
                                                           x_axis, y_axis, yaw)
                 return{'ack': 'got data'}
         raise command.CommandHandleError("No NXT robot with handle")
