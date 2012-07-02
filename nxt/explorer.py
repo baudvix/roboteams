@@ -166,7 +166,5 @@ if __name__ == '__main__' and DEBUGLEVEL > 0:
         sys.exit()
     time.sleep(2.0);    
     #max_int = 32768
-    robo.go_forward(0)
-    robo.turnleft(2)
     
     dbg_print("__main__ fertig",7)

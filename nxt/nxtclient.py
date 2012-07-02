@@ -1,4 +1,5 @@
 import pprint
+import explorer
 from twisted.internet import reactor, defer, task
 from twisted.internet.protocol import Factory, _InstanceFactory
 from twisted.protocols import amp
@@ -56,7 +57,7 @@ class RobotFactory(_InstanceFactory):
 
 class NXTClient():
 
-    def __init__(self, color):
+    def __init__(self, color, mac):
         self.protocol = None
         self.host = 'localhost'
         self.port = 5000
@@ -64,6 +65,7 @@ class NXTClient():
         self.handle = None
         self.active = False
         self.robot_type = 0
+        self.expl = explorer.Explorer(explorer.MAC1)
         self.connect()
         loop = task.LoopingCall(self.run)
         loop.start(1.0)
