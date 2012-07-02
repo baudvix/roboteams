@@ -73,6 +73,7 @@ class MCCProtocol(amp.AMP):
             if robo.handle == nxt_handle:
                 self.update_position(robo, x_axis, y_axis, yaw, True)
                 #TODO: call thread with error calculation
+
                 print '#%d NXT calibrated #%d (%d, %d, %d)' % (handle,
                                                                nxt_handle,
                                                                x_axis, y_axis,
@@ -105,10 +106,10 @@ class MCCProtocol(amp.AMP):
         """
         saves incoming data from the NXT
         """
-        #TODO: save data in nxt (freespace, update position)
         for robo in self.factory.robots:
             if robo.handle == handle:
                 robo.put(Point(x_axis, y_axis, yaw), point_tag)
+                #TODO: Respect dodges in update_map
                 test = self.factory.tmp_update_map.insert_position_data(x_axis, y_axis, yaw)
                 self.factory.maps[0].increase_points(test)
                 print '#%d Send data %d: (%d, %d, %f)' % (handle, point_tag,
