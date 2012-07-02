@@ -17,11 +17,11 @@ class Interpolate(object):
         self.__points = points
         self.__adjusted_points = []
         self.__weights = []
-        self.__x_deviation = fixed_last_point[0] - points[points.__len__() - 1][0]
-        self.__y_deviation = fixed_last_point[1] - points[points.__len__() - 1][1]
+        self.__x_deviation = fixed_last_point[0] - points[len(points) - 1][0]
+        self.__y_deviation = fixed_last_point[1] - points[len(points) - 1][1]
 
         # Compute complete distance along the path
-        for i in range(0, self.__points.__len__() - 1):
+        for i in range(0, len(self.__points) - 1):
             self.__distance += self.point_distance(self.__points[i], self.__points[i + 1])
 
 
@@ -53,7 +53,7 @@ class Interpolate(object):
 
         distance = 0
 
-        for i in range(0, self.__points.__len__() - 1):
+        for i in range(0, len(self.__points) - 1):
             distance += self.point_distance(self.__points[i], self.__points[i + 1])
             self.__weights.append(distance / self.__distance)
 
@@ -63,7 +63,7 @@ class Interpolate(object):
 
         """
 
-        for i in range(0, self.__points.__len__()):
+        for i in range(0, len(self.__points)):
             x = self.__points[i][0] + (self.__x_deviation * self.__weights[i])
             y = self.__points[i][1] + (self.__y_deviation * self.__weights[i])
             self.__adjusted_points.append([int(x), int(y)])
