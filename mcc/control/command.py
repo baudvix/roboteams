@@ -46,6 +46,13 @@ class CommandColorError(Exception):
     pass
 
 
+class CommandMissionCompleteError(Exception):
+    """
+    Well done mission completed. Lose connection please
+    """
+    pass
+
+
 #Commands from NXT or NAO to MCC
 class Register(Command):
     """
@@ -86,6 +93,7 @@ class NXTCalibrated(Command):
                  ('yaw', Integer())]
     response = [('ack', String())]
     error = [(CommandHandleError, 'COMMAND_HANDLE_ERROR'),
+             (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR'),
              (CommandActiveError, 'COMMAND_ACTIVE_ERROR')]
 
 
@@ -99,7 +107,23 @@ class NXTSpotted(Command):
                  ('nxt_handle', Integer())]
     response = [('ack', String())]
     error = [(CommandHandleError, 'COMMAND_HANDLE_ERROR'),
+             (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR'),
              (CommandActiveError, 'COMMAND_ACTIVE_ERROR')]
+
+
+class NXTFollowed(Command):
+    """
+    The NAO notifies the MCC about his arrival at the point of the path,
+    where the NXT stands
+    """
+    arguments = [('handle', Integer()),
+                 ('nxt_handle', Integer()),
+                 ('x_axis', Integer()),
+                 ('y_axis', Integer())]
+    response = [('ack', String())]
+    error = [(CommandMissionCompleteError, 'COMMAND_MISSION_COMPLETE_ERROR'),
+             (CommandHandleError, 'COMMAND_HANDLE_ERROR'),
+             (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR'),]
 
 
 #Commands from NXT to MCC
@@ -194,7 +218,7 @@ class SendPath(Command):
     """
     arguments = [('path', AmpList([('x_axis', Integer()),
                                    ('y_axis', Integer())]))]
-    response = [('ack'), String()]
+    response = [('ack', String())]
 
 
 #Commands from MCC to NXT

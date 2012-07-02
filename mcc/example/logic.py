@@ -78,8 +78,8 @@ class NaoWalk(object):
                 if (robo.robot_type == robot.NAO_TYPE) and robo.active:
                     has_nao = True
                     self._robot_nao = robo
-        if has_nao and has_nxt:
-            self._connected = True
+            if has_nao and has_nxt:
+                self._connected = True
         if self._connected and not self._started:
             print "connected"
             #prepare list

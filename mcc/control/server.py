@@ -103,6 +103,14 @@ class MCCProtocol(amp.AMP):
         raise command.CommandNXTHandleError("No NXT robot with handle")
     command.NXTSpotted.responder(nxt_spotted)
 
+    def nxt_followed(self, handle, nxt_handle, x_axis, y_axis):
+        """
+        move the nxt to the next position of the path
+        """
+        print "moving nxt to next point of the path"
+        return {'ack': 'got followed'}
+    command.NXTFollowed.responder(nxt_followed)
+
     def send_data(self, handle, point_tag, x_axis, y_axis, yaw):
         """
         saves incoming data from the NXT
