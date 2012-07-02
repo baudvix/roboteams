@@ -35,6 +35,20 @@ class MapModel(object):
         self._lock = threading.Lock()
         self.__max_free_count = 0
         self.__max_dodge_count = 0
+        # self._expand [top,right,bottom,left]
+        self._expand = [0, 0, 0, 0]
+
+    #PROPERTY --- expand
+    def fget_expand(self):
+        """The expand property getter"""
+        with self._lock:
+            return self._expand
+
+    def fset_expand(self, value):
+        """The expand property setter"""
+        with self._lock:
+            self._expand = value
+    expand = property(fget_expand, fset_expand)
 
     #PROPERTY --- max_free_count
     def fget__max_free_count(self):
@@ -141,21 +155,25 @@ class MapModel(object):
         if offset_x > 0:
             for _ in range(0, offset_x):
                 if tmp_map_section.right_grid is None:
+                    self._expand[1] += 1
                     tmp_map_section.right_grid = MapSection()
                 tmp_map_section = tmp_map_section.right_grid
         elif offset_x < 0:
             for _ in range(0, offset_x, -1):
                 if tmp_map_section.left_grid is None:
+                    self._expand[3] += 1
                     tmp_map_section.left_grid = MapSection()
                 tmp_map_section = tmp_map_section.left_grid
         if offset_y > 0:
             for _ in range(0, offset_y):
                 if tmp_map_section.top_grid is None:
+                    self._expand[0] += 1
                     tmp_map_section.top_grid = MapSection()
                 tmp_map_section = tmp_map_section.top_grid
         elif offset_y < 0:
             for _ in range(0, offset_y, -1):
                 if tmp_map_section.bottom_grid is None:
+                    self._expand[2] += 1
                     tmp_map_section.bottom_grid = MapSection()
                 tmp_map_section = tmp_map_section.bottom_grid
 
