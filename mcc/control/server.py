@@ -74,7 +74,7 @@ class MCCProtocol(amp.AMP):
             if robo.handle == nxt_handle:
                 self.update_position(robo, x_axis, y_axis, yaw, True)
                 #NOTE TO SELF: use thread if this is a blocker
-                robo.data = Interpolate(robo.data)
+                robo.data = Interpolate(robo.data, [x_axis, y_axis])
                 print '#%d NXT calibrated #%d (%d, %d, %d)' % (handle,
                                                                nxt_handle,
                                                                x_axis, y_axis,
