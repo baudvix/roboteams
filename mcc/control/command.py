@@ -152,6 +152,7 @@ class UpdatePosition(Command):
     response = [('ack', String())]
 
 
+#TODO: this will never work. make a real type - module picke?
 class SendMap(Command):
     """
     The MCC sends to the robot a copy of the current map

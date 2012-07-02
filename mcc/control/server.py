@@ -11,7 +11,7 @@ from twisted.internet.protocol import Factory
 from mcc.control import command
 from mcc.control.map_update import UpdateNXTData
 from mcc.control.interpolate import Interpolate
-from mcc.model import robot, map
+from mcc.model import robot, map, state
 from mcc.utils import Color, Point
 
 from mcc.view import view
@@ -169,14 +169,18 @@ class MCCFactory(Factory):
     """
     protocol = MCCProtocol
 
-    def __init__(self):
+    def __init__(self, start_state):
         self.last_handle = 0
+        self.state_machine = state.StateMachine(start_state)
         self.robots = []
         self.maps = []
         self.tmp_update_map = UpdateNXTData()
         self.maps.append(map.MapModel('Calibrated_Map'))
         #TODO: start a thread for heavy calculation
         #TODO: start a thread for view
+        self.initGUI()
+
+    def initGUI(self):
         self._viewThread = view.View(self.maps[0])
         self._viewThread.daemon = True
         self._viewThread.start()
