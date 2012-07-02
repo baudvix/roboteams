@@ -3,8 +3,7 @@ import time
 import threading
 from nxt_debug import dbg_print, DEBUGLEVEL
 from threading import Thread
-import nxt.direct
-from nxt.brick import Brick, FileFinder
+from nxt.brick import FileFinder
 from nxt.locator import find_one_brick
 from nxt.locator import Method
 
@@ -23,11 +22,11 @@ class pseudoBrick():
     def message_write(self, outbox, message):
         dbg_print("pseudoBrick.message_write(): "+message,7)
         time.sleep(0.1)
-        typ, id, msg = message.split(';')
+        typ, ident, _ = message.split(';')
         if typ == 'm':
-            self.liste.append('r;'+str(id)+';resp')
+            self.liste.append('r;'+str(ident)+';resp')
         elif typ == 'r':
-            self.liste.append('a;'+str(id)+';ack')
+            self.liste.append('a;'+str(ident)+';ack')
         elif typ == 'a':
             pass
         else:
@@ -78,34 +77,34 @@ class Explorer():
     def start_app(self, app):
         self.brick.start_program(app)
         
-    def send_message(self, message = '', typ = 'm', id = 99):
-        if typ == 'm' and id == 99:
+    def send_message(self, message = '', typ = 'm', ident = 99):
+        if typ == 'm' and ident == 99:
             self.message_id += 1
             self.message_id %= 10
-            id = self.message_id
-        robo.brick.message_write(self.outbox, typ+";"+str(id)+";"+message)
+            ident = self.message_id
+        robo.brick.message_write(self.outbox, typ+";"+str(ident)+";"+message)
         if typ != 'a':
-            dbg_print('timelist.append: '+str((time.time(), typ, id, message)),3)
-            self.timelist.append((time.time(), typ, id, message))
+            dbg_print('timelist.append: '+str((time.time(), typ, ident, message)),3)
+            self.timelist.append((time.time(), typ, ident, message))
 
     def recv_message(self):
         t = robo.brick.message_read(self.inbox, self.inbox, True)
         dbg_print(t,6)
         return t 
 
-    def timelist_access(self, choose, id):
-        dbg_print("timelist_access lock choose="+str(choose)+" id="+str(id),3)
+    def timelist_access(self, choose, ident):
+        dbg_print("timelist_access lock choose="+str(choose)+" ident="+str(ident),3)
         if choose == 'r' or choose == 'a':
             for tupel in self.timelist:
-                if tupel[2] == id:
+                if tupel[2] == ident:
                     self.timelist.remove(tupel)
         elif choose == 't':         
             for tupel in self.timelist:
                 if tupel[0]+TIMEOFFSET <= time.time():
                     self.timelist.remove(tupel)
-                    self.send_message(message=tupel[3], typ=tupel[1], id=tupel[2])
+                    self.send_message(message=tupel[3], typ=tupel[1], ident=tupel[2])
         dbg_print("timelist: "+str(self.timelist),3)
-        dbg_print("timelist_access unlock choose="+str(choose)+" id="+str(id),3)
+        dbg_print("timelist_access unlock choose="+str(choose)+" ident="+str(ident),3)
 
     def dispatch(self):       
         dbg_print("run dispatch",2)
@@ -118,30 +117,30 @@ class Explorer():
             if count%100000 == 0:
                 dbg_print("dispatch() - #"+str(count),3)
             try:
-                local_box, message = self.recv_message()
+                _, message = self.recv_message()
                 dbg_print("message: "+str(message),9)
                 try: 
                     typ, t_id, payload = str(message).split(';')
-                    id = int(t_id)
+                    ident = int(t_id)
                 except:
                     dbg_print("message-parsing-error: falsches Format")
-                dbg_print("typ="+str(typ)+" id="+str(t_id)+" msg="+str(payload),4)   
+                dbg_print("typ="+str(typ)+" ident="+str(t_id)+" msg="+str(payload),4)   
                 if typ == 'm':
                     # irgendetwas mit payload machen
                     event, value = payload.split(',')
                     if event == 's':
                         print "%d Einheiten gefahren" % value
-                    self.send_message(typ='r', id=id, message='resp')
+                    self.send_message(typ='r', ident=ident, message='resp')
                     
                 elif typ == 'r':
                     self.lock.acquire()
-                    self.timelist_access(typ, id)
+                    self.timelist_access(typ, ident)
                     self.lock.release()
-                    self.send_message(typ='a', id=id, message='ack')
+                    self.send_message(typ='a', ident=ident, message='ack')
 
                 elif typ == 'a':
                     self.lock.acquire()
-                    self.timelist_access(typ, id)
+                    self.timelist_access(typ, ident)
                     self.lock.release()
                 else:
                     dbg_print('Falscher Nachrichtentyp')
@@ -167,7 +166,7 @@ if __name__ == '__main__' and DEBUGLEVEL > 0:
         sys.exit()
     time.sleep(2.0);    
     #max_int = 32768
-    #robo.go_forward(0)
-    robo.send_message(message='1,3')
+    robo.go_forward(0)
+    robo.turnleft(2)
     
     dbg_print("__main__ fertig",7)

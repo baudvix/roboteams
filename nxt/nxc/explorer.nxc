@@ -52,7 +52,7 @@ task movement(){
     id += 10;
     SendResponseString(OUTBOX,streckeninfo);
     Release(blue_mutex);*/
-	 }
+   }
    else if(dequeued.funktion == 2){zurueck(1);}
    else if(dequeued.funktion == 3){drehen('l',90);}
    else if(dequeued.funktion == 4){drehen('r',90);}
