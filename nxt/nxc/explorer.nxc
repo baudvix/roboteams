@@ -37,10 +37,10 @@ task movement(){
      lcd_print("ERROR dequeue()");
     Release(print_mutex);
    }
-	 #if DEBUG == 3
+   #if DEBUG == 3
    Acquire(print_mutex);
-      lcd_print(StrCat("dequeue=",NumToStr(dequeued.funktion)));
-			lcd_print(StrCat(" param=",NumToStr(dequeued.param)));
+     lcd_print(StrCat("dequeue=",NumToStr(dequeued.funktion)));
+     lcd_print(StrCat(" param=",NumToStr(dequeued.param)));
    Release(print_mutex);
    #endif
    if(dequeued.funktion == 1){
@@ -60,7 +60,7 @@ task movement(){
      Acquire(print_mutex);
       lcd_print("M_PARSING-ERROR: ");
       lcd_print(StrCat("dequeue=",NumToStr(dequeued.funktion)));
-			lcd_print(StrCat(" param=",NumToStr(dequeued.param)));
+      lcd_print(StrCat(" param=",NumToStr(dequeued.param)));
      Release(print_mutex);
    }
   }else{

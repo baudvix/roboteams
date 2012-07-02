@@ -94,8 +94,7 @@ class Explorer():
         return t 
 
     def timelist_access(self, choose, id):
-        self.lock.acquire()
-        dbg_print("timelist_access lock",3)
+        dbg_print("timelist_access lock choose="+str(choose)+" id="+str(id),3)
         if choose == 'r' or choose == 'a':
             for tupel in self.timelist:
                 if tupel[2] == id:
@@ -106,8 +105,7 @@ class Explorer():
                     self.timelist.remove(tupel)
                     self.send_message(message=tupel[3], typ=tupel[1], id=tupel[2])
         dbg_print("timelist: "+str(self.timelist),3)
-        self.lock.release() 
-        dbg_print("timelist_access unlock",3)
+        dbg_print("timelist_access unlock choose="+str(choose)+" id="+str(id),3)
 
     def dispatch(self):       
         dbg_print("run dispatch",2)
@@ -127,7 +125,7 @@ class Explorer():
                     id = int(t_id)
                 except:
                     dbg_print("message-parsing-error: falsches Format")
-                dbg_print("typ="+str(typ)+"id="+str(t_id)+"msg="+str(payload),4)   
+                dbg_print("typ="+str(typ)+" id="+str(t_id)+" msg="+str(payload),4)   
                 if typ == 'm':
                     # irgendetwas mit payload machen
                     event, value = payload.split(',')
@@ -136,11 +134,15 @@ class Explorer():
                     self.send_message(typ='r', id=id, message='resp')
                     
                 elif typ == 'r':
+                    self.lock.acquire()
                     self.timelist_access(typ, id)
+                    self.lock.release()
                     self.send_message(typ='a', id=id, message='ack')
 
                 elif typ == 'a':
+                    self.lock.acquire()
                     self.timelist_access(typ, id)
+                    self.lock.release()
                 else:
                     dbg_print('Falscher Nachrichtentyp')
             except:
@@ -150,10 +152,12 @@ class Explorer():
     def timer(self):
         while(True):
             time.sleep(3.0)
-            self.timelist_access('t', 0)    
+            self.lock.acquire()
+            self.timelist_access('t', 0)
+            self.lock.release()    
     
 
-if __name__ == '__main__':
+if __name__ == '__main__' and DEBUGLEVEL > 0:
     dbg_print('suche robo',1)
     robo = Explorer(mac=MAC1)
     if robo != None: 
