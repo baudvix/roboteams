@@ -49,6 +49,7 @@ class Explorer():
         self.lock = threading.Lock()     
         self.start_app("explorer.rxe")
         dispatcher = Thread(target=self.dispatch, args=())
+        dispatcher.setDaemon(True)
         dispatcher.start()
         
     def __del__(self):
@@ -110,6 +111,7 @@ class Explorer():
         dbg_print("run dispatch",2)
         dbg_print("run timer",2)
         t = Thread(target=self.timer, args=())
+        t.setDaemon(True)
         t.start()
         dbg_print("BT-Empfang",1)
         count = 0
