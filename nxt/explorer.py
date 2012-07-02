@@ -49,7 +49,7 @@ class Explorer():
         self.lock = threading.Lock()     
         self.start_app("explorer.rxe")
         dispatcher = Thread(target=self.dispatch, args=())
-        dispatcher.setDaemon(True)
+        dispatcher.setDaemon(False)
         dispatcher.start()
         
     def __del__(self):
@@ -111,7 +111,7 @@ class Explorer():
         dbg_print("run dispatch",2)
         dbg_print("run timer",2)
         t = Thread(target=self.timer, args=())
-        t.setDaemon(True)
+        t.setDaemon(False)
         t.start()
         dbg_print("BT-Empfang",1)
         count = 0
@@ -160,7 +160,7 @@ class Explorer():
 
 if __name__ == '__main__' and DEBUGLEVEL > 0:
     dbg_print('suche robo',1)
-    robo = Explorer(mac=MAC1)
+    robo = Explorer(mac=MAC2)
     if robo != None: 
         dbg_print("robo gefunden",1)
     else: 
@@ -168,5 +168,5 @@ if __name__ == '__main__' and DEBUGLEVEL > 0:
         sys.exit()
     time.sleep(2.0);    
     #max_int = 32768
-    
+    robo.go_forward(0)
     dbg_print("__main__ fertig",7)
