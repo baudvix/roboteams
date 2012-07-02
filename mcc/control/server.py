@@ -10,6 +10,7 @@ from twisted.internet.protocol import Factory
 
 from mcc.control import command
 from mcc.control.map_update import UpdateNXTData
+from mcc.control.interpolate import Interpolate
 from mcc.model import robot, map
 from mcc.utils import Color, Point
 
@@ -72,8 +73,8 @@ class MCCProtocol(amp.AMP):
         for robo in self.factory.robots:
             if robo.handle == nxt_handle:
                 self.update_position(robo, x_axis, y_axis, yaw, True)
-                #TODO: call thread with error calculation
-
+                #NOTE TO SELF: use thread if this is a blocker
+                robo.data = Interpolate(robo.data)
                 print '#%d NXT calibrated #%d (%d, %d, %d)' % (handle,
                                                                nxt_handle,
                                                                x_axis, y_axis,
