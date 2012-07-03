@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: latin-1 -*-
+
 import sys
 import time
 import threading
@@ -51,6 +54,7 @@ class Explorer():
     def __init__(self, mac, identitaet, color, outbox=5, inbox=1):
         self.brick = find_one_brick(host=mac, method=Method(usb=True, bluetooth=True))
         self.color = color
+        self.ausrichtung = 0; # 0 - 359 Grad; 0 Norden, 90 Osten, 180 Süden, 270 Westen 
         self.identitaet = identitaet
         self.handle = None
         self.active = False
@@ -62,7 +66,7 @@ class Explorer():
         self.lock = threading.Lock()     
         self.start_app("explorer.rxe")
         dispatcher = threading.Thread(target=self.dispatch, args=())
-        dispatcher.setDaemon(False)
+        dispatcher.setDaemon(True)
         dispatcher.start()
         worker = threading.Thread(target=self.work, args=())
         worker.setDaemon(False)
@@ -76,9 +80,16 @@ class Explorer():
     
     def turnright(self, degrees):
         self.send_message(message='4,'+str(degrees))
+        self.ausrichtung+=degrees
+        self.ausrichtung%=360
     
     def turnleft(self,  degrees):    
         self.send_message(message='3,'+str(degrees))
+        if self.ausrichtung < degrees:
+            self.ausrichtung+=360
+        
+        self.ausrichtung-=degrees
+        self.ausrichtung%=360
         
     def go_forward(self, distance):
         self.send_message(message='1,'+str(distance))
@@ -127,7 +138,7 @@ class Explorer():
         dbg_print("run dispatch",2)
         dbg_print("run timer",2)
         t = threading.Thread(target=self.timer, args=())
-        t.setDaemon(False)
+        t.setDaemon(True)
         t.start()
         dbg_print("BT-Empfang",1)
         count = 0
@@ -176,7 +187,8 @@ class Explorer():
     def work(self):
         while(True):
             time.sleep(1.0)
-            print "worker: %s , handle: %s" % (self.identitaet, self.handle)
+            if self.handle != None:
+                print "worker: %s , handle: %s" % (self.identitaet, self.handle)
     
 class NXTClient():
 
