@@ -16,7 +16,10 @@ from nxt.brick import FileFinder
 from nxt.locator import find_one_brick, Method
 
 TIMEOFFSET = 3.0 #zeit bis zum nochmaligen Senden
-MAC = ["00:16:53:10:48:E7", "00:16:53:10:49:4D", "00:16:53:10:48:F3"]
+MAC = ["00:16:53:10:49:4D", "00:16:53:10:48:E7", "00:16:53:10:48:F3"]
+GRAD2CM = 360.0/17.59
+CM2GRAD = 17.59/360.0
+
 
 class RobotProtocol(amp.AMP):
 
@@ -54,12 +57,15 @@ class Explorer():
     def __init__(self, mac, identitaet, color, outbox=5, inbox=1):
         self.brick = find_one_brick(host=mac, method=Method(usb=True, bluetooth=True))
         self.color = color
-        self.ausrichtung = 0; # 0 - 359 Grad; 0 Norden, 90 Osten, 180 Süden, 270 Westen 
+        self.ausrichtung = 90; # 0 - 359 Grad; 0 Osten, 90 Norden, 180 Westen, 270 Sueden 
         self.identitaet = identitaet
         self.handle = None
         self.active = False
+        self.blockiert = False
+        self.abbruch = False
         self.robot_type = 0
         self.message_id = 0
+        self.position = [0,0]
         self.outbox = outbox
         self.inbox = 10 + inbox
         self.timelist = []
@@ -96,6 +102,31 @@ class Explorer():
         
     def go_back(self, distance):
         self.send_message(message='2,'+str(distance))
+    
+    def exploration_simple(self):
+        first = True
+        while(not self.abbruch):
+            if not self.blockiert:
+                self.blockiert = True
+                if not first:
+                    self.go_back(1)
+                    linksrechts = 0 #0=links || 1=rechts
+                    grad = 90 # 30 - 160
+                    if linksrechts == 0:
+                        self.turnleft(grad)
+                    else:
+                        self.turnright(grad)
+                first = False
+                self.go_forward(0)
+    
+    def exploration_circle(self): 
+        pass
+    
+    def exploration_radar(self):
+        pass
+    
+    def exploration_cancel(self):
+        self.abbruch = True
     
     def find_programs(self):
         ff = FileFinder(self.brick, "*.rxe")
@@ -157,8 +188,15 @@ class Explorer():
                 if typ == 'm':
                     # irgendetwas mit payload machen
                     event, value = payload.split(',')
-                    if event == 's':
+                    if event == 's': #nach Zeitintervall 500ms update_position (Entfernung)
                         print "%d Einheiten gefahren" % value
+                    elif event == 'h': #kollision update_position (Entfernung)
+                        self.blockiert = False
+                        print "Kollision: %d Einheiten gefahren" % value
+                    elif event == 't': #strecke ohne vorkommnisse abgefahren
+                        print "%d Einheiten gefahren" % value
+                    elif event == 'f': #ziel gefunden gleich kommt t
+                        print "Ziel gefunden"
                     self.send_message(typ='r', ident=ident, message='resp')
                     
                 elif typ == 'r':
@@ -187,8 +225,23 @@ class Explorer():
     def work(self):
         while(True):
             time.sleep(1.0)
-            if self.handle != None:
-                print "worker: %s , handle: %s" % (self.identitaet, self.handle)
+            if self.handle == None:
+                continue
+            state = 0#FIXME  
+            if not self.blockiert:
+                if state == 0:
+                    algo = 0
+                    explorationsintervall = 10.0
+                    if algo == 0:           
+                        self.exploration_simple()
+                    elif algo == 1:
+                        self.exploration_radar()
+                    elif algo == 2:
+                        self.exploration_circle()
+                    expl_abbr = threading.Timer(explorationsintervall,self.exploration_cancel())
+                    expl_abbr.start()
+                        
+                
     
 class NXTClient():
 
@@ -249,5 +302,5 @@ class NXTClient():
 
 if __name__ == '__main__' and DEBUGLEVEL > 0:
     dbg_print("__main__ start")
-    test = NXTClient(2)
+    test = NXTClient(1)
     dbg_print("__main__ fertig")
