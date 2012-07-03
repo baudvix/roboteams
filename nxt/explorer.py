@@ -40,9 +40,11 @@ class NXTProtocol(RobotProtocol):
         return {'ACK': 'got point'}
     command.GoToPoint.responder(go_to_point)
 
-class RobotFactory(_InstanceFactory):
-    def __init__(self, reactor, instance, deferred):
+class RobotFactory(_InstanceFactory):    
+    def __init__(self, reactor, instance, deferred, anzahl):
         _InstanceFactory.__init__(self, reactor, instance, deferred)
+        self.anzahl = anzahl
+        self.robots = [None]*anzahl
 
 
 class Explorer():
@@ -183,7 +185,7 @@ class NXTClient():
         self.host = 'localhost'
         self.port = 5000
         self.anzahl = anzahl
-        self.robots = [None]*anzahl
+        self.factory = None
         self.connect()
         loop = task.LoopingCall(self.run)
         loop.start(1.0)
@@ -196,9 +198,9 @@ class NXTClient():
         deferred = defer.Deferred()
         if self.protocol is not None:
             self.protocol.transport.loseConnection()
-        factory = RobotFactory(reactor, RobotProtocol(), deferred)
+        self.factory = RobotFactory(reactor, RobotProtocol(), deferred, self.anzahl)
         #connector = reactor.connectTCP(self.host, self.port, factory)
-        reactor.connectTCP(self.host, self.port, factory)
+        reactor.connectTCP(self.host, self.port, self.factory)
         deferred.addCallback(self.connected)
         deferred.addErrback(self.failure)
         #return deferred
@@ -208,21 +210,21 @@ class NXTClient():
         print 'connected to mcc'
         for bot in range(self.anzahl):
             try:
-                self.robots[bot] = Explorer(MAC[bot], bot, bot+1,5+bot,1+bot)
+                self.factory.robots[bot] = Explorer(MAC[bot], bot, bot+1,5+bot,1+bot)
             except:
                 print "Bot %s nicht gefunden" % MAC[bot]
-                self.robots[bot] = None
-            if self.robots[bot] != None:
+                self.factory.robots[bot] = None
+            if self.factory.robots[bot] != None:
                 deffered = protocol.callRemote(command.Register, 
-                                               robot_type=self.robots[bot].robot_type, 
-                                               color=self.robots[bot].color, rhandle=bot)
+                                               robot_type=self.factory.robots[bot].robot_type, 
+                                               color=self.factory.robots[bot].color, rhandle=bot)
                 deffered.addCallback(self.activate)
                 deffered.addErrback(self.failure)
 
     def activate(self, handle):
-        self.robots[handle['rhandle']].handle = handle['handle']
-        print "handle=%s" % (self.robots[handle['rhandle']].handle)
-        deffered = self.protocol.callRemote(command.Activate, handle=self.robots[handle['rhandle']].handle)
+        self.factory.robots[handle['rhandle']].handle = handle['handle']
+        print "handle=%s" % (self.factory.robots[handle['rhandle']].handle)
+        deffered = self.protocol.callRemote(command.Activate, handle=self.factory.robots[handle['rhandle']].handle)
         deffered.addCallback(self.activated)
         deffered.addErrback(self.failure)
 
@@ -235,5 +237,5 @@ class NXTClient():
 
 if __name__ == '__main__' and DEBUGLEVEL > 0:
     dbg_print("__main__ start")
-    test = NXTClient()
+    test = NXTClient(2)
     dbg_print("__main__ fertig")
