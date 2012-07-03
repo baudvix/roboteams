@@ -3,7 +3,7 @@
 
 //GLOBALS
 //fuer lcd_print()
- static int lcd = 7;
+ int lcd = 7;
 //fuer splitMsg()
 struct payload{
  int funktion;

@@ -4,20 +4,55 @@
 #include "libmov.nxc" //noetig da kein linking
 #include "libinfra.nxc" //noetig da kein linking
 
-mutex print_mutex;
-mutex blue_mutex;
-
 #define DEBUG 3
 
-task event(){
+task event()
+{
  #if DEBUG == 1
  Acquire(print_mutex);
  lcd_print("sen_event gestartet");//DEBUGINFO
  Release(print_mutex);
  #endif
+ while(true)
+ {
+  if(!found)
+  {
+   if(SensorRaw(S4) < 490)
+   {
+    found = 1;
+   }
+   Acquire(blue_mutex);
+    string fou;
+    fou=StrCat("m;",NumToStr(id++),";f,0"); // f: found
+    id %= 10;
+    id += 10;
+    SendResponseString(OUTBOX,fou);
+   Release(blue_mutex);
+   weiter=0;
+  }
+  Wait(500);
+  
+  Acquire(blue_mutex);
+  string news;
+    news=StrCat("m;",NumToStr(id++),";s,",NumToStr(MotorTachoCount(OUT_A)));  // s: save_way
+    id %= 10;
+    id += 10;
+    SendResponseString(OUTBOX,news);
+  Release(blue_mutex);
+ }
+}
+
+task reply()
+{
+ #if DEBUG == 1
+ Acquire(print_mutex);
+ lcd_print("movement gestartet");//DEBUGINFO
+ Release(print_mutex);
+ #endif
 }
  
-task movement(){
+task movement()
+{
  #if DEBUG == 1
  Acquire(print_mutex);
  lcd_print("movement gestartet");//DEBUGINFO
@@ -25,10 +60,8 @@ task movement(){
  #endif
  payload dequeued;
  string streckeninfo;
- int strecke;
- int id=10;
+ distance strecke;
  while(true){
-  strecke=0;
   streckeninfo="";
   if(!is_empty()){
    dequeued = dequeue(queue1, queue2);
@@ -43,19 +76,26 @@ task movement(){
 			lcd_print(StrCat(" param=",NumToStr(dequeued.param)));
    Release(print_mutex);
    #endif
-   if(dequeued.funktion == 1){
+   if(dequeued.funktion == 0){weiter=0;}
+   else if(dequeued.funktion == 1)
+   {
 		weiter = 1; 
-		strecke = vor(0);
-    /*Acquire(blue_mutex);
-    streckeninfo=StrCat("m;",NumToStr(id++),";s,",NumToStr(strecke));
-    id %= 10;
-    id += 10;
-    SendResponseString(OUTBOX,streckeninfo);
-    Release(blue_mutex);*/
+	  vor(dequeued.param,strecke);
+    Acquire(blue_mutex);
+     if(hit) {
+      streckeninfo=StrCat("m;",NumToStr(id++),";h,",NumToStr(strecke.k),NumToStr(strecke.rest));
+     } else {
+      streckeninfo=StrCat("m;",NumToStr(id++),";t,",NumToStr(strecke.k),NumToStr(strecke.rest));
+     }
+
+     id %= 10;
+     id += 10;
+     SendResponseString(OUTBOX,streckeninfo);
+    Release(blue_mutex);
 	 }
-   else if(dequeued.funktion == 2){zurueck(1);}
-   else if(dequeued.funktion == 3){drehen('l',90);}
-   else if(dequeued.funktion == 4){drehen('r',90);}
+   else if(dequeued.funktion == 2){zurueck(dequeued.param);}
+   else if(dequeued.funktion == 3){drehen('l',dequeued.param);}
+   else if(dequeued.funktion == 4){drehen('r',dequeued.param);}
    else{
      Acquire(print_mutex);
       lcd_print("M_PARSING-ERROR: ");
@@ -137,12 +177,13 @@ task dispatcher()
 
 task main()
 {
- Precedes(dispatcher, movement, event);
-
- queueInit(queue1, queue2); 
- //Init Sensoren:
- SetSensorTouch(S1);
+ Precedes(dispatcher, movement, event, reply);
+ queueInit(queue1, queue2);
+  //Init Sensoren:
+ SetSensorLowspeed(S1);
  SetSensorTouch(S2);
  SetSensorTouch(S3);
+ SetSensorLight(S4);
+
 
 }

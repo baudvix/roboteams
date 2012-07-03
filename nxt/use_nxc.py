@@ -155,7 +155,7 @@ class Explorer():
 
 if __name__ == '__main__':
     dbg_print('suche robo',1)
-    robo = Explorer(mac=MAC1)
+    robo = Explorer(mac=MAC2)
     if robo != None: 
         dbg_print("robo gefunden",1)
     else: 
