@@ -1,5 +1,9 @@
 #Ignores DS_Store
 .DS_Store
-
+#ign Eclipse
+.project
+.pydevproject
 #Ignores pycharm ?
 .idea
+
+*.pyc

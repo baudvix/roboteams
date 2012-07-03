@@ -106,3 +106,10 @@ Benutzeranforderungen
 		7.1 Der Durchmesser des Ziels beträgt mindestens 15 cm.
 
 		7.2 Im Umfeld von 30 cm um das Ziel befinden sich keine Hindernisse.
+
+
+#TODO: NXTWalk
+- nao folgt nxt mit red ball und unterer cam, reposition von nxt, calibrierung von nxt. goto red ball
+- <= 1 meter abstände
+- nao muss sagen er ist da und der nxt soll zum nächsten punkt laufen
+- nao muss den abstand zum roten ball vor der neu positionierung speichern und eigenständig gehen (ca. 5-10 cm)
