@@ -37,6 +37,19 @@ class MapModel(object):
         self.__max_dodge_count = 0
         # self._expand [top,right,bottom,left]
         self._expand = [0, 0, 0, 0]
+        self._need_redraw = False
+
+    #PROPERTY --- need_redraw
+    def fget_need_redraw(self):
+        """The need_redraw property getter"""
+        with self._lock:
+            return self._need_redraw
+    
+    def fset_need_redraw(self, value):
+        """The need_redraw property setter"""
+        with self._lock:
+            self._need_redraw = value
+    need_redraw = property(fget_need_redraw, fset_need_redraw)
 
     #PROPERTY --- expand
     def fget_expand(self):
@@ -156,24 +169,28 @@ class MapModel(object):
             for _ in range(0, offset_x):
                 if tmp_map_section.right_grid is None:
                     self._expand[1] += 1
+                    self._need_redraw = True
                     tmp_map_section.right_grid = MapSection()
                 tmp_map_section = tmp_map_section.right_grid
         elif offset_x < 0:
             for _ in range(0, offset_x, -1):
                 if tmp_map_section.left_grid is None:
                     self._expand[3] += 1
+                    self._need_redraw = True
                     tmp_map_section.left_grid = MapSection()
                 tmp_map_section = tmp_map_section.left_grid
         if offset_y > 0:
             for _ in range(0, offset_y):
                 if tmp_map_section.top_grid is None:
                     self._expand[0] += 1
+                    self._need_redraw = True
                     tmp_map_section.top_grid = MapSection()
                 tmp_map_section = tmp_map_section.top_grid
         elif offset_y < 0:
             for _ in range(0, offset_y, -1):
                 if tmp_map_section.bottom_grid is None:
                     self._expand[2] += 1
+                    self._need_redraw = True
                     tmp_map_section.bottom_grid = MapSection()
                 tmp_map_section = tmp_map_section.bottom_grid
 

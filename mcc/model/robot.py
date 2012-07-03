@@ -123,13 +123,11 @@ class RobotNXT(RobotBase):
         """
         with self._lock:
             if time is None:
-                self._data.append(DataNXT(position, data_type,
-                    DataNXT.DATA_NXT_NEW))
+                self._data.append(DataNXT(position, data_type))
                 if data_type == map.POINT_FREE or data_type == map.POINT_TARGET:
                     self._trace.append(TraceNXT(position))
             else:
-                self._data.append(DataNXT(position, data_type,
-                    DataNXT.DATA_NXT_NEW, time))
+                self._data.append(DataNXT(position, data_type, time))
                 if data_type == map.POINT_FREE or data_type == map.POINT_TARGET:
                     self._trace.append(TraceNXT(position, time))
 
@@ -202,6 +200,9 @@ class TraceNXT(object):
         The precessed NXT information as a Que
     """
 
+    TRACE_NXT_NEW = 0
+    TRACE_NXT_USED = 1
+
     def __init__(self, position, time=None):
         """
         Constructor for a new Trace element
@@ -211,6 +212,7 @@ class TraceNXT(object):
         else:
             self._time = time
         self._position = position
+        self._state = TraceNXT.TRACE_NXT_NEW
 
     #PROPERTY --- time
     def fget_time(self):
@@ -232,17 +234,19 @@ class TraceNXT(object):
         self._position = value
     position = property(fget_position, fset_position)
 
+    def use(self):
+        if not self._state == TraceNXT.TRACE_NXT_NEW:
+            return None
+        self._state = TraceNXT.TRACE_NXT_USED
+        return self
+
 
 class DataNXT(object):
     """
         Model of the unprocessed data
     """
 
-    DATA_NXT_NEW = 0
-    DATA_NXT_CURRENT = 1
-    DATA_NXT_CALIBRATED = 2
-
-    def __init__(self, point_position, point_type, status, time=None):
+    def __init__(self, point_position, point_type, time=None):
         """
         Constructor for a new data element
         """
@@ -252,7 +256,6 @@ class DataNXT(object):
             self._time = time
         self._position = point_position
         self._point_type = point_type
-        self._status = status
 
     #PROPERTY --- time
     def fget_time(self):
@@ -283,13 +286,3 @@ class DataNXT(object):
         """The type property setter."""
         self._point_type = value
     point_type = property(fget_type, fset_type)
-
-    #PROPERTY --- status
-    def fget_status(self):
-        """The status property getter."""
-        return self._status
-
-    def fset_status(self, value):
-        """The status property setter."""
-        self._status = value
-    status = property(fget_status, fset_status)
