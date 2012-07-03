@@ -25,7 +25,7 @@ class MCCProtocol(amp.AMP):
         amp.AMP.__init__(self)
         self.factory = None
 
-    def register(self, robot_type, color=None):
+    def register(self, robot_type, rhandle, color=None):
         """
         register defines the reaction on a new robot. the robot is added to
         the pool of robots and gets a unique handle
@@ -39,7 +39,7 @@ class MCCProtocol(amp.AMP):
         else:
             self.factory.robots.append(robot.RobotNAO(self.factory.last_handle, self))
         self.factory.last_handle += 1
-        return {'handle': (self.factory.last_handle - 1)}
+        return {'rhandle': rhandle, 'handle': (self.factory.last_handle - 1)}
     command.Register.responder(register)
 
     def activate(self, handle):
