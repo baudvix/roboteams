@@ -1,7 +1,8 @@
 from twisted.protocols import amp
 from twisted.internet import reactor, task, defer
 from twisted.internet.protocol import Factory
-
+import sys
+sys.path.append("../..")
 from mcc.control import command
 from mcc.model import robot
 
@@ -11,14 +12,14 @@ class MCCProtocol(amp.AMP):
         amp.AMP.__init__(self)
         self.factory = None
 
-    def register(self, robot_type, color=None):
+    def register(self, robot_type, rhandle, color=None):
         print 'NEW robot: type=%d color=%d' % (robot_type, color)
         if robot_type == robot.NXT_TYPE:
             self.factory.robots.append(robot.RobotNXT(self.factory.last_handle, self, color))
         else:
             self.factory.robots.append(robot.RobotNAO(self.factory.last_handle, self))
         self.factory.last_handle += 1
-        return {'handle': (self.factory.last_handle - 1)}
+        return {'rhandle': rhandle, 'handle': (self.factory.last_handle - 1)}
     command.Register.responder(register)
 
     def activate(self, handle):

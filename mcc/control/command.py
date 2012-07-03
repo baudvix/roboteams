@@ -35,8 +35,9 @@ class Register(Command):
     If the robot type doesn't exist an CommandTypeError is send back.
     """
     arguments = [('robot_type', Integer()),
-                 ('color', Integer())]
-    response = [('handle', Integer())]
+                 ('color', Integer()),
+                 ('rhandle', Integer())]
+    response = [('rhandle', Integer()) ,('handle', Integer())]
     error = [(CommandTypeError, 'COMMAND_TYPE_ERROR')]
 
 class Activate(Command):

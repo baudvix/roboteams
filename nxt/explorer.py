@@ -1,56 +1,70 @@
 import sys
 import time
 import threading
+sys.path.append('..')
+import pprint
+from twisted.internet import reactor, defer, task
+from twisted.internet.protocol import Factory, _InstanceFactory
+from twisted.protocols import amp
+from mcc.control import command
+
 from nxt_debug import dbg_print, DEBUGLEVEL
-from threading import Thread
 from nxt.brick import FileFinder
-from nxt.locator import find_one_brick
-from nxt.locator import Method
+from nxt.locator import find_one_brick, Method
 
 TIMEOFFSET = 3.0 #zeit bis zum nochmaligen Senden
-MAC1 = "00:16:53:10:49:4D" 
-MAC2 = "00:16:53:10:48:E7"
-MAC3 = "00:16:53:10:48:F3"
+MAC = ["00:16:53:10:48:E7", "00:16:53:10:49:4D", "00:16:53:10:48:F3"]
 
-class pseudoBrick():
-    def __init__(self):
-        self.liste = []
-    
-    def start_program(self, app):
-        pass
-    
-    def message_write(self, outbox, message):
-        dbg_print("pseudoBrick.message_write(): "+message,7)
-        time.sleep(0.1)
-        typ, ident, _ = message.split(';')
-        if typ == 'm':
-            self.liste.append('r;'+str(ident)+';resp')
-        elif typ == 'r':
-            self.liste.append('a;'+str(ident)+';ack')
-        elif typ == 'a':
-            pass
-        else:
-            dbg_print("pseudoBrick.message_write() - parse-error")
+class RobotProtocol(amp.AMP):
 
-    def message_read(self, inbox1, inbox2, leeren):
-        msg = self.liste.pop()
-        dbg_print("pseudoBrick.message_read() - "+str(msg),7)
-        time.sleep(2)
-        return (11, msg)
+    def update_state(self, state):
+        print 'Updating state to %d' % state
+        return {'ACK': 'got state'}
+    command.UpdateState.responder(update_state)
+
+    def update_position(self, x, y, yaw):
+        print 'Updating position (%d, %d, %d)' % (x, y, yaw)
+        return {'ACK': 'got position'}
+    command.UpdatePosition.responder(update_position)
+
+    def send_map(self, map):
+        print 'Updating map '
+        pprint.pprint(map)
+        return {'ACK': 'got map'}
+    command.SendMap.responder(send_map)
+
+class NXTProtocol(RobotProtocol):
+
+    def go_to_point(self,x ,y ):
+        print 'Going to Point (%d, %d)' % (x, y)
+        return {'ACK': 'got point'}
+    command.GoToPoint.responder(go_to_point)
+
+class RobotFactory(_InstanceFactory):
+    def __init__(self, reactor, instance, deferred):
+        _InstanceFactory.__init__(self, reactor, instance, deferred)
+
 
 class Explorer():
-    def __init__(self, mac, outbox=5, inbox=1):
+    def __init__(self, mac, identitaet, color, outbox=5, inbox=1):
         self.brick = find_one_brick(host=mac, method=Method(usb=True, bluetooth=True))
-        #self.brick = pseudoBrick()
+        self.color = color
+        self.identitaet = identitaet
+        self.handle = None
+        self.active = False
+        self.robot_type = 0
         self.message_id = 0
         self.outbox = outbox
         self.inbox = 10 + inbox
         self.timelist = []
         self.lock = threading.Lock()     
         self.start_app("explorer.rxe")
-        dispatcher = Thread(target=self.dispatch, args=())
-        dispatcher.setDaemon(True)
+        dispatcher = threading.Thread(target=self.dispatch, args=())
+        dispatcher.setDaemon(False)
         dispatcher.start()
+        worker = threading.Thread(target=self.work, args=())
+        worker.setDaemon(False)
+        worker.start()
         
     def __del__(self):
         pass
@@ -71,7 +85,7 @@ class Explorer():
         self.send_message(message='2,'+str(distance))
     
     def find_programs(self):
-        ff = FileFinder(robo.brick, "*.rxe")
+        ff = FileFinder(self.brick, "*.rxe")
         for f in ff:
             print(f)
     
@@ -83,13 +97,13 @@ class Explorer():
             self.message_id += 1
             self.message_id %= 10
             ident = self.message_id
-        robo.brick.message_write(self.outbox, typ+";"+str(ident)+";"+message)
+        self.brick.message_write(self.outbox, typ+";"+str(ident)+";"+message)
         if typ != 'a':
             dbg_print('timelist.append: '+str((time.time(), typ, ident, message)),3)
             self.timelist.append((time.time(), typ, ident, message))
 
     def recv_message(self):
-        t = robo.brick.message_read(self.inbox, self.inbox, True)
+        t = self.brick.message_read(self.inbox, self.inbox, True)
         dbg_print(t,6)
         return t 
 
@@ -110,8 +124,8 @@ class Explorer():
     def dispatch(self):       
         dbg_print("run dispatch",2)
         dbg_print("run timer",2)
-        t = Thread(target=self.timer, args=())
-        t.setDaemon(True)
+        t = threading.Thread(target=self.timer, args=())
+        t.setDaemon(False)
         t.start()
         dbg_print("BT-Empfang",1)
         count = 0
@@ -157,16 +171,69 @@ class Explorer():
             self.timelist_access('t', 0)
             self.lock.release()    
     
+    def work(self):
+        while(True):
+            time.sleep(1.0)
+            print "worker: %s , handle: %s" % (self.identitaet, self.handle)
+    
+class NXTClient():
+
+    def __init__(self, anzahl=1):
+        self.protocol = None
+        self.host = 'localhost'
+        self.port = 5000
+        self.anzahl = anzahl
+        self.robots = [None]*anzahl
+        self.connect()
+        loop = task.LoopingCall(self.run)
+        loop.start(1.0)
+        reactor.run()
+
+    def run(self):
+        pass
+
+    def connect(self):
+        deferred = defer.Deferred()
+        if self.protocol is not None:
+            self.protocol.transport.loseConnection()
+        factory = RobotFactory(reactor, RobotProtocol(), deferred)
+        #connector = reactor.connectTCP(self.host, self.port, factory)
+        reactor.connectTCP(self.host, self.port, factory)
+        deferred.addCallback(self.connected)
+        deferred.addErrback(self.failure)
+        #return deferred
+
+    def connected(self, protocol):
+        self.protocol = protocol
+        print 'connected to mcc'
+        for bot in range(self.anzahl):
+            try:
+                self.robots[bot] = Explorer(MAC[bot], bot, bot+1,5+bot,1+bot)
+            except:
+                print "Bot %s nicht gefunden" % MAC[bot]
+                self.robots[bot] = None
+            if self.robots[bot] != None:
+                deffered = protocol.callRemote(command.Register, 
+                                               robot_type=self.robots[bot].robot_type, 
+                                               color=self.robots[bot].color, rhandle=bot)
+                deffered.addCallback(self.activate)
+                deffered.addErrback(self.failure)
+
+    def activate(self, handle):
+        self.robots[handle['rhandle']].handle = handle['handle']
+        print "handle=%s" % (self.robots[handle['rhandle']].handle)
+        deffered = self.protocol.callRemote(command.Activate, handle=self.robots[handle['rhandle']].handle)
+        deffered.addCallback(self.activated)
+        deffered.addErrback(self.failure)
+
+    def activated(self, ACK):
+        print 'active'
+        self.active = True
+
+    def failure(self, error):
+        print 'Error: %s:%s\n%s' % (self.host, self.port, error)
 
 if __name__ == '__main__' and DEBUGLEVEL > 0:
-    dbg_print('suche robo',1)
-    robo = Explorer(mac=MAC1)
-    if robo != None: 
-        dbg_print("robo gefunden",1)
-    else: 
-        dbg_print("no robo",1)
-        sys.exit()
-    time.sleep(2.0);    
-    #max_int = 32768
-    
-    dbg_print("__main__ fertig",7)
+    dbg_print("__main__ start")
+    test = NXTClient()
+    dbg_print("__main__ fertig")
