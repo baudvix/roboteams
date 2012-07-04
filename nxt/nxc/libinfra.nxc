@@ -1,4 +1,5 @@
 #include "libinfra.h"
+#include "explorer.h"
 
 void BTCheck(int conn)
 {
@@ -15,10 +16,16 @@ message splitMsg(string in)
  message tmp;
  int in_len = strlen(in);
  tmp.typ = SubStr(in,0,1);
- tmp.id = StrToNum(SubStr(in,2,1));
+ tmp.id = StrToNum(SubStr(in,2,2));
  int f_p_trenner = Pos(",",in);
- tmp.msg.funktion = StrToNum(SubStr(in,4,f_p_trenner-4));
+ tmp.msg.funktion = StrToNum(SubStr(in,f_p_trenner-1,1));
  tmp.msg.param = StrToNum(SubStr(in,f_p_trenner+1,in_len-f_p_trenner+1));
+ 
+ #if DEBUG == 4
+ Acquire(print_mutex);
+ lcd_print(StrCat("typ=",tmp.typ,";id=",NumToStr(tmp.id),";",NumToStr(tmp.msg.funktion),",",NumToStr(tmp.msg.param)));
+ Release(print_mutex);
+ #endif
  
  return tmp;
 }
@@ -43,6 +50,22 @@ payload dequeue(int &queue1[], int &queue2[]){
   aus_index %= 10;
  Release(queue_mutex);
  return tmp;
+}
+
+void sd(int &queue1[], int &queue2[])
+{
+ Acquire(queue_mutex);
+ int t = 0;
+ while(t<10)
+ {
+  queue1[t] = 0;
+  queue2[t] = 0;
+  t++;
+ }
+ ein_index = 0;
+ aus_index = 0;
+ msg_count = 0;
+ Release(queue_mutex);
 }
 
 void enqueue(int &queue1[], int &queue2[], payload elem){

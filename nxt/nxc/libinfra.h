@@ -30,6 +30,7 @@ struct message{
  message splitMsg(string in);
  void lcd_print(string msg);
  
+ void sd(int &queue1[], int &queue2[]);
  void queueInit(int &queue1[], int &queue2[]);
  bool is_empty(void);
  payload dequeue(int &queue1[], int &queue2[]);

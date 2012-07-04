@@ -51,6 +51,7 @@ void drehen(char richtung, int winkel){
 
 void zurueck(int umdrehungen){
  RotateMotorEx(OUT_AB, MOTOR_POWER, -360*umdrehungen, 0, true/*=sync*/, true/*=bremsen*/);
+ Wait(500);
  Off(OUT_AB);
 }
 

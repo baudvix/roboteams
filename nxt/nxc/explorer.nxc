@@ -4,8 +4,6 @@
 #include "libmov.nxc" //noetig da kein linking
 #include "libinfra.nxc" //noetig da kein linking
 
-#define DEBUG 3
-
 task event()
 {
  #if DEBUG == 1
@@ -15,7 +13,7 @@ task event()
  #endif
  while(true)
  {
-  if(!found)
+  /*if(!found)
   {
    if(SensorRaw(S4) < 490)
    {
@@ -29,12 +27,12 @@ task event()
     SendResponseString(OUTBOX,fou);
    Release(blue_mutex);
    weiter=0;
-  }
+  } */
   Wait(500);
   
   Acquire(blue_mutex);
   string news;
-    news=StrCat("m;",NumToStr(id++),";s,",NumToStr(MotorTachoCount(OUT_A)));  // s: save_way
+    news=StrCat("m;",NumToStr(id++),";p,",NumToStr(MotorTachoCount(OUT_A)));  // s: save_way
     id %= 10;
     id += 10;
     SendResponseString(OUTBOX,news);
@@ -65,33 +63,32 @@ task movement()
   streckeninfo="";
   if(!is_empty()){
    dequeued = dequeue(queue1, queue2);
-   if(dequeued.funktion == 0){
+   /*if(dequeued.funktion == 0){
     Acquire(print_mutex);
      lcd_print("ERROR dequeue()");
     Release(print_mutex);
-   }
+   }*/
    #if DEBUG == 3
    Acquire(print_mutex);
      lcd_print(StrCat("dequeue=",NumToStr(dequeued.funktion)));
      lcd_print(StrCat(" param=",NumToStr(dequeued.param)));
    Release(print_mutex);
    #endif
-   if(dequeued.funktion == 0){weiter=0;}
-   else if(dequeued.funktion == 1)
+   if(dequeued.funktion == 1)
    {
 		weiter = 1; 
 	  vor(dequeued.param,strecke);
-    Acquire(blue_mutex);
      if(hit) {
       streckeninfo=StrCat("m;",NumToStr(id++),";h,",NumToStr(strecke.k),NumToStr(strecke.rest));
      } else {
       streckeninfo=StrCat("m;",NumToStr(id++),";t,",NumToStr(strecke.k),NumToStr(strecke.rest));
      }
-
+     Acquire(blue_mutex);
      id %= 10;
      id += 10;
+
      SendResponseString(OUTBOX,streckeninfo);
-    Release(blue_mutex);
+     Release(blue_mutex);
 	 }
    else if(dequeued.funktion == 2){zurueck(dequeued.param);}
    else if(dequeued.funktion == 3){drehen('l',dequeued.param);}
@@ -155,11 +152,21 @@ task dispatcher()
     Acquire(blue_mutex);
     SendResponseString(OUTBOX,tmp);
     Release(blue_mutex);
-    enqueue(queue1, queue2, m.msg);
+   
+    if(m.msg.funktion == 0) // queue sendback auch nullen
+    {
+     weiter = 0;
+     queueInit(queue1, queue2);
+    }
+    else
+    {
+     enqueue(queue1, queue2, m.msg);
+    }
+
    }else if(m.typ == "a"){
     //id-fertig
    }else if(m.typ == "r"){
-    tmp = StrCat("a;", NumToStr(m.id),";ack");
+    tmp = StrCat("a;",NumToStr(m.id),";ack");
     #if DEBUG == 2
     Acquire(print_mutex);
      lcd_print(tmp);
@@ -179,11 +186,13 @@ task main()
 {
  Precedes(dispatcher, movement, event, reply);
  queueInit(queue1, queue2);
-  //Init Sensoren:
+
  SetSensorLowspeed(S1);
  SetSensorTouch(S2);
  SetSensorTouch(S3);
  SetSensorLight(S4);
+ 
 
+  //Init Sensoren:
 
 }
