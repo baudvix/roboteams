@@ -1,118 +1,295 @@
-from time import gmtime
+#!/usr/bin/env python
+"""
+robot provides a model of the robots and their functionality
+"""
+from mcc.model import map
+from datetime import datetime
+import threading
 import Queue
 
 NXT_TYPE = 0
 NAO_TYPE = 1
 
+
 class EmptyError(Exception):
+    """
+    This error is raised if the queue is empty
+    """
     pass
 
-class RobotBase():
 
-    def __init__(self, handle, connection):
+class RobotBase():
+    """
+    the base class for NXT and NAO robots
+    """
+    def __init__(self, handle, connection, robot_type):
+        """
+        initialise the queues and sets the handle and the connection
+        """
         self.__in_queue = Queue.Queue()
         self.__out_queue = Queue.Queue()
         self.active = False
         self.handle = handle
         self.connection = connection
+        self._position = None
+        self._robot_type = robot_type
+        self._lock = threading.Lock()
 
     def put_out(self, *args, **kw):
-        self.__out_queue.put((args, kw), True)
+        """
+        add a command to the out_queue (thread safe)
+        """
+        with self._lock:
+            self.__out_queue.put((args, kw), True)
 
     def get_out(self):
-        if self.__out_queue.empty():
-            raise EmptyError("Out-Queue is empty")
-        else:
-            return self.__out_queue.get(True)
+        """
+        pop a command from the out_queue (thread safe)
+        """
+        with self._lock:
+            if self.__out_queue.empty():
+                raise EmptyError("Out-Queue is empty")
+            else:
+                return self.__out_queue.get(True)
 
-    def put_in(self, *args, **kw):
-        self.__out_queue.put((args, kw), True)
+    #PROPERTY --- robot_type
+    def fget_robot_type(self):
+        """The robot_type property getter"""
+        return self._robot_type
 
-    def get_in(self):
-        if self.__in_queue.empty():
-            raise EmptyError("In-Queue is empty")
-        else:
-            return self.__out_queue.get(True)
+    def fset_robot_type(self, value):
+        """The robot_type property setter"""
+        self._robot_type = value
+    robot_type = property(fget_robot_type, fset_robot_type)
+
+    #PROPERTY --- position
+    def fget_position(self):
+        """The position property getter"""
+        return self._position
+
+    def fset_position(self, value):
+        """The position property setter"""
+        self._position = value
+    position = property(fget_position, fset_position)
+
+
+class RobotSpec():
+    """
+        specifies the specs of the robot.
+        you have the measures, speed and rotation circles
+        etc.
+    """
+
+    def __init__(self, robot_type, width=None, length=None, speed=None, rotation_circle=None):
+        if robot_type == NXT_TYPE:
+            self.width = 9
+            self.length = 15
+            self.speed = 5
+            self.rotation_circle = 11
+        elif robot_type == NAO_TYPE:
+            self.width = 13
+            self.length = 14
+            self.speed = 3
+            self.rotation_circle = 18
+        if not width == None:
+            self.width = width
+        if not length == None:
+            self.length = length
+        if not speed == None:
+            self.speed = speed
+        if not rotation_circle == None:
+            self.rotation_circle = rotation_circle
 
 
 class RobotNXT(RobotBase):
-
+    """
+    implements the RobotBase and some NXT specific functions
+    i.e. the color
+    """
     def __init__(self, handle, connection, color):
-        RobotBase.__init__(self, handle, connection)
+        """
+        Constructor for a new NXT
+        """
+        RobotBase.__init__(self, handle, connection, NXT_TYPE)
         self.color = color
+        self._trace = []
+        self._data = []
+        self.map_overlay = map.MapModel('NXT #' + str(self.handle) + ' overlay')
+        self.last_calibration = None
+
+    def put(self, position, data_type, time=None):
+        """
+        adds new data received by the NXT
+        """
+        with self._lock:
+            if time is None:
+                self._data.append(DataNXT(position, data_type,
+                    DataNXT.DATA_NXT_NEW))
+                if data_type == map.POINT_FREE or data_type == map.POINT_TARGET:
+                    self._trace.append(TraceNXT(position))
+            else:
+                self._data.append(DataNXT(position, data_type,
+                    DataNXT.DATA_NXT_NEW, time))
+                if data_type == map.POINT_FREE or data_type == map.POINT_TARGET:
+                    self._trace.append(TraceNXT(position, time))
+
+    #PROPERTY --- data
+    def fget_data(self):
+        """
+        The data property getter.
+        Use put_data to add a new TraceNXT and DataNXT element
+        """
+        with self._lock:
+            return self._trace
+
+    def fset_data(self, value):
+        """The data property setter."""
+        with self._lock:
+            self._trace = value
+    data = property(fget_data, fset_data)
+
+    #PROPERTY --- trace
+    def fget_trace(self):
+        """
+        The trace property getter.
+        Use put_data to add a new TraceNXT and DataNXT element
+        """
+        with self._lock:
+            return self._trace
+
+    def fset_trace(self, value):
+        """The trace property setter."""
+        with self._lock:
+            self._trace = value
+    trace = property(fget_trace, fset_trace)
+
+    #PROPERTY --- last_calibration
+    def fget_last_calibration(self):
+        """The last_calibration property getter"""
+        return self._last_calibration
+
+    def fset_last_calibration(self, time):
+        """The last_calibration property setter"""
+        self._last_calibration = time
+    last_calibration = property(fget_last_calibration, fset_last_calibration)
+
+    #PROPERTY --- map_overlay
+    def fget_map_overlay(self):
+        """The map_overlay property getter"""
+        with self._lock:
+            return self._map_overlay
+
+    def fset_map_overlay(self, value):
+        """The map_overlay property setter"""
+        with self._lock:
+            self._map_overlay = value
+    map_overlay = property(fget_map_overlay, fset_map_overlay)
 
 
 class RobotNAO(RobotBase):
-
+    """
+    implements the RobotBase and some NAO specific functions
+    """
     def __init__(self, handle, connection):
-        RobotBase.__init__(self, connection, handle)
+        """
+        Constructor for a new NAO
+        """
+        RobotBase.__init__(self, handle, connection, NAO_TYPE)
 
-class NXTModel(object):
-    """
-        Model of an NXT
-    """
-    def __init__(self, position_point):
-        """
-            Constructor of the NXTModel
-        """
-        self.typ = None
-        self.last_calibration = None
-        self.position = position_point
-        self.free_space = None
-        self.trace = None
 
-    def updatePosition(self, point, tag):
-        """
-            updatePosition adds a position of the NXT to the FreeSpace Stack
-            :param point: Point of the NXT
-            :type point: Point
-            :param tag: Found Point tag of the Point
-            :type tag: Enum
-        """
-        self.free_space = FreeSpace(point, tag, self.free_space)
-
-class Trace(object):
+class TraceNXT(object):
     """
         The precessed NXT information as a Que
     """
 
-    def __init__(self, position_point):
+    def __init__(self, position, time=None):
         """
-            Constructor of the Trace Class
-            :param positionPoint: Point of the NXT
-            :type positionPoint: Point
+        Constructor for a new Trace element
         """
-        self.position = position_point
-        self.next = None
-        Trace.last = self
+        if time is None:
+            self._time = datetime.now()
+        else:
+            self._time = time
+        self._position = position
 
-    def addNewPoint(self, position_point):
-        """
-            adds a new Point to the Que
-            :param positionPoint: point which is added to the Que
-            :type x_coord: Point
-        """
-        new_trace = Trace(position_point)
-        self.next = new_trace
-        return  new_trace
+    #PROPERTY --- time
+    def fget_time(self):
+        """The time property getter."""
+        return self._time
+
+    def fset_time(self, value):
+        """The time property setter."""
+        self._time = value
+    time = property(fget_time, fset_time)
+
+    #PROPERTY --- position
+    def fget_position(self):
+        """The position property getter."""
+        return self._position
+
+    def fset_position(self, value):
+        """The position property setter."""
+        self._position = value
+    position = property(fget_position, fset_position)
 
 
-class FreeSpace(object):
+class DataNXT(object):
     """
         Model of the unprocessed data
     """
 
-    def __init__(self, position_point, position_tag, parent_point):
+    DATA_NXT_NEW = 0
+    DATA_NXT_CURRENT = 1
+    DATA_NXT_CALIBRATED = 2
+
+    def __init__(self, point_position, point_type, status, time=None):
         """
-            Constructor of the FreeSpace class
-            :param position_point: position of the Point
-            :type position_point: Point
-            :param position_tag: tag of the Point
-            :type position_tag: Enum
-            :param x_coord: link to the parrent FreeSpace in the Que
-            :type x_coord: FreeSpace
+        Constructor for a new data element
         """
-        self.time = gmtime()
-        self.position = position_point
-        self.pointTag = position_tag
-        self.previousFreeSpace = parent_point
+        if time is None:
+            self._time = datetime.now()
+        else:
+            self._time = time
+        self._position = point_position
+        self._point_type = point_type
+        self._status = status
+
+    #PROPERTY --- time
+    def fget_time(self):
+        """The time property getter."""
+        return self._time
+
+    def fset_time(self, value):
+        """The time property setter."""
+        self._time = value
+    time = property(fget_time, fset_time)
+
+    #PROPERTY --- position
+    def fget_position(self):
+        """The position property getter."""
+        return self._position
+
+    def fset_position(self, value):
+        """The position property setter."""
+        self._position = value
+    position = property(fget_position, fset_position)
+
+    #PROPERTY --- point_type
+    def fget_type(self):
+        """The type property getter."""
+        return self._point_type
+
+    def fset_type(self, value):
+        """The type property setter."""
+        self._point_type = value
+    point_type = property(fget_type, fset_type)
+
+    #PROPERTY --- status
+    def fget_status(self):
+        """The status property getter."""
+        return self._status
+
+    def fset_status(self, value):
+        """The status property setter."""
+        self._status = value
+    status = property(fget_status, fset_status)
