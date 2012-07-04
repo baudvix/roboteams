@@ -24,7 +24,7 @@ class NaoWalk():
     # NAO will walk up closely to the Redball and call the MCC to
     # request the NXT to move to his next position
     # After the NXT left his initial Position, call
-    #       walkToTarget()
+    #       walkToPosition()
     #
     # and NAO makes his few last steps.
     #
