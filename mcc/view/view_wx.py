@@ -8,6 +8,8 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from OpenGL.GL import *
 
+from mcc.model import map
+
 APP_EXIT = 1
 
 
@@ -69,7 +71,7 @@ class MainFrame(wx.Frame):
 
         # --- arrange Map Monitor Panel ---
         mm_hbox.Add(c_panel, 0.3, wx.EXPAND | wx.LEFT, 20)
-        #mm_hbox.Add(canvas, 1, wx.EXPAND | wx.ALL, 10)
+        #mm_hbox.Add(canvas, 1, wx.ALL, 10)
         mm_hbox.Add(canvas)
         mm_panel.SetSizer(mm_hbox)
         self.test()
@@ -189,8 +191,9 @@ class WxGLCanvas(GLCanvas):
         wx.EVT_PAINT(self, self.on_draw)
         wx.EVT_SIZE(self, self.on_size)
         wx.EVT_WINDOW_DESTROY(self, self.on_destroy)
-        self.SetSize((1067, 981))
+        self.SetSize((980, 980))
 
+        self._map_draw = map.MapModel('drawable map')
         self.trace_active = trace_active
         self.map_active = map_active
         self._unit = 0.0125
@@ -229,6 +232,20 @@ class WxGLCanvas(GLCanvas):
         """The zoom_factor property setter"""
         self._zoom_factor = value
     zoom_factor = property(fget_zoom_factor, fset_zoom_factor)
+
+    def update_points(self, points):
+        self._map_draw(points)
+
+
+    def map_propotional(self):
+        expand = self._map_draw
+        t, r, b, l = expand
+        while (t + b) < (r + l):
+            self._map_draw.expand_map(2)
+            b += 1
+        while (r + l) < (t + b):
+            self._map_draw.expand_map(1)
+            r += 1
 
     def draw_lines(self, lines):
         glBegin(GL_LINES)

@@ -201,6 +201,26 @@ class MapModel(object):
             raise ValueError("Can't add MapSection with this offset - \
                              position is occupied.")
 
+    def expand_map(self, direction):
+        """
+        0 - top
+        1 - left
+        2 - bottom
+        3 - right
+        """
+        if direction == 0:
+            with self._lock:
+                self._add_map_section(0, self.expand[0] + 1)
+        elif direction == 1:
+            with self._lock:
+                self._add_map_section(self.expand[1] + 1, 0)
+        elif direction == 2:
+            with self._lock:
+                self._add_map_section(0, (self.expand[2] + 1) * -1)
+        elif direction == 3:
+            with self._lock:
+                self._add_map_section((self.expand[3] + 1) * -1, 0)
+
     def get_point(self, x_coord, y_coord):
         """
         Returns the value of a given point and creates a map section, if
