@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
-
+import random
 import sys
 import time
 import threading
@@ -15,6 +15,7 @@ from mcc.control import command
 from nxt_debug import dbg_print, DEBUGLEVEL
 from nxt.brick import FileFinder
 from nxt.locator import find_one_brick, Method
+
 
 TIMEOFFSET = 3.0 #zeit bis zum nochmaligen Senden
 MAC = ["00:16:53:10:49:4D", "00:16:53:10:48:E7", "00:16:53:10:48:F3"]
@@ -55,14 +56,15 @@ class RobotFactory(_InstanceFactory):
 
 class Explorer():
     def __init__(self, mac, identitaet, color, outbox=5, inbox=1):
-        self.brick = find_one_brick(host=mac, method=Method(usb=True, bluetooth=True))
+        self.brick = find_one_brick(host=mac, method=Method(usb=True))#, bluetooth=True))
         self.color = color
         self.ausrichtung = 90; # 0 - 359 Grad; 0 Osten, 90 Norden, 180 Westen, 270 Sueden 
         self.identitaet = identitaet
         self.handle = None
         self.active = False
         self.blockiert = False
-        self.abbruch = False
+        self.abbruch = True
+        self.abbr_lock = threading.Lock()
         self.robot_type = 0
         self.message_id = 0
         self.position = {'x': 0.0,'y': 0.0}
@@ -71,12 +73,19 @@ class Explorer():
         self.timelist = []
         self.lock = threading.Lock()     
         self.start_app("explorer.rxe")
+        random.seed()
         dispatcher = threading.Thread(target=self.dispatch, args=())
         dispatcher.setDaemon(True)
         dispatcher.start()
         worker = threading.Thread(target=self.work, args=())
         worker.setDaemon(False)
         worker.start()
+      
+    def getAbbruch(self):
+        return self.abbruch
+    
+    def setAbbruch(self, abbruch):
+        self.abbruch = abbruch
         
     def __del__(self):
         pass
@@ -113,8 +122,8 @@ class Explorer():
                 self.blockiert = True
                 if not first:
                     self.go_back(1)
-                    linksrechts = 0 #0=links || 1=rechts
-                    grad = 90 # 30 - 160
+                    linksrechts = random.choice([0,1]) #0=links || 1=rechts
+                    grad = random.randrange(30, 161, 1) # 30 - 160
                     if linksrechts == 0:
                         self.turnleft(grad)
                     else:
@@ -123,10 +132,10 @@ class Explorer():
                 self.go_forward(0)
     
     def exploration_circle(self): 
-        pass
+        print "exploration_circle"
     
     def exploration_radar(self):
-        pass
+        print "exploration_radar"
     
     def exploration_cancel(self):
         self.abbruch = True
@@ -138,14 +147,14 @@ class Explorer():
         return pos
     
     def berechneVektor(self, standort={'x':0.0, 'y':0.0}, ziel={'x': 0.0, 'y': 0.0}):
-        relativ_ziel = {'x': ziel['x']-standort['x'],'y': ziel['x']-standort['x']}
+        relativ_ziel = {'x': ziel['x']-standort['x'],'y': ziel['y']-standort['y']}
         entfernung = math.sqrt(relativ_ziel['x']**2+relativ_ziel['y']**2)
         if relativ_ziel['x'] == 0: 
             winkel = 0
         elif relativ_ziel['x'] < 0:
-            winkel = math.atan(relativ_ziel['y']/relativ_ziel['x'])*(math.pi/180.0)+180
+            winkel = math.atan(relativ_ziel['y']/relativ_ziel['x'])*(180.0/math.pi)+180
         else:
-            winkel = math.atan(relativ_ziel['y']/relativ_ziel['x'])*(math.pi/180.0)+360
+            winkel = math.atan(relativ_ziel['y']/relativ_ziel['x'])*(180.0/math.pi)+360
         return {'winkel': winkel%360, 'entfernung': entfernung*CM2GRAD}
     
     def find_programs(self):
@@ -206,8 +215,10 @@ class Explorer():
                     dbg_print("message-parsing-error: falsches Format")
                 dbg_print("typ="+str(typ)+" ident="+str(t_id)+" msg="+str(payload),4)   
                 if typ == 'm':
+                    self.send_message(typ='r', ident=ident, message='resp')
                     # irgendetwas mit payload machen
                     csv = payload.split(',') # payload = event, entfernung, sensor(optional)
+                    print csv
                     if csv[0] == 's': #nach Zeitintervall 500ms update_position (Entfernung)
                         print "%d Einheiten gefahren" % csv[1]
                         print self.berechnePunkt(self.ausrichtung, csv[1], self.position)#TODO an MCC
@@ -218,13 +229,13 @@ class Explorer():
                         self.position = t
                         print self.position
                     elif csv[0] == 't': #strecke ohne vorkommnisse abgefahren
+                        self.blockiert = False
                         print "%d Einheiten gefahren" % csv[1]
                         t = self.berechnePunkt(self.ausrichtung, csv[1], self.position) #TODO an MCC
                         self.position = t
                         print self.position
                     elif csv[0] == 'f': #ziel gefunden gleich kommt t
                         print "Ziel gefunden"
-                    self.send_message(typ='r', ident=ident, message='resp')
                     
                 elif typ == 'r':
                     self.lock.acquire()
@@ -250,24 +261,26 @@ class Explorer():
             self.lock.release()    
     
     def work(self):
+        random.seed()
         while(True):
             time.sleep(1.0)
             if self.handle == None:
                 continue
             state = 0#FIXME  
-            if not self.blockiert:
+            if self.abbruch:
+                self.abbruch = False
                 if state == 0:
-                    algo = 0
-                    explorationsintervall = 10.0
+                    algo = random.choice([0,1,2])
+                    explorationsintervall = random.randrange(10,61,5)
+                    expl_abbr = threading.Timer(explorationsintervall, self.exploration_cancel())
+                    expl_abbr.start()
+                    print "intervall %d" % explorationsintervall
                     if algo == 0:           
                         self.exploration_simple()
                     elif algo == 1:
                         self.exploration_radar()
                     elif algo == 2:
                         self.exploration_circle()
-                    expl_abbr = threading.Timer(explorationsintervall,self.exploration_cancel())
-                    expl_abbr.setDaemon(True)
-                    expl_abbr.start()
                         
                 
     
