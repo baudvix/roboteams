@@ -65,7 +65,7 @@ class Explorer():
         self.abbruch = False
         self.robot_type = 0
         self.message_id = 0
-        self.position = {'x':0,'y':0}
+        self.position = {'x': 0.0,'y': 0.0}
         self.outbox = outbox
         self.inbox = 10 + inbox
         self.timelist = []
@@ -102,6 +102,9 @@ class Explorer():
         
     def go_back(self, distance):
         self.send_message(message='2,'+str(distance))
+        t = self.berechnePunkt(self.ausrichtung, -1*distance*360, self.position)
+        self.position = t
+        print self.position
     
     def exploration_simple(self):
         first = True
@@ -128,11 +131,22 @@ class Explorer():
     def exploration_cancel(self):
         self.abbruch = True
     
-    def berechnePunkt(self, ausrichtung, entfernung, standort={'x':0, 'y':0}):
-        pos = {'x':0, 'y':0}
+    def berechnePunkt(self, ausrichtung, entfernung, standort={'x':0.0, 'y':0.0}):
+        pos = {'x':0.0, 'y':0.0}
         pos['x'] = standort['x'] + entfernung*GRAD2CM*math.cos(ausrichtung*(math.pi/180.0))
         pos['y'] = standort['y'] + entfernung*GRAD2CM*math.sin(ausrichtung*(math.pi/180.0))
         return pos
+    
+    def berechneVektor(self, standort={'x':0.0, 'y':0.0}, ziel={'x': 0.0, 'y': 0.0}):
+        relativ_ziel = {'x': ziel['x']-standort['x'],'y': ziel['x']-standort['x']}
+        entfernung = math.sqrt(relativ_ziel['x']**2+relativ_ziel['y']**2)
+        if relativ_ziel['x'] == 0: 
+            winkel = 0
+        elif relativ_ziel['x'] < 0:
+            winkel = math.atan(relativ_ziel['y']/relativ_ziel['x'])*(math.pi/180.0)+180
+        else:
+            winkel = math.atan(relativ_ziel['y']/relativ_ziel['x'])*(math.pi/180.0)+360
+        return {'winkel': winkel%360, 'entfernung': entfernung*CM2GRAD}
     
     def find_programs(self):
         ff = FileFinder(self.brick, "*.rxe")
@@ -196,11 +210,18 @@ class Explorer():
                     csv = payload.split(',') # payload = event, entfernung, sensor(optional)
                     if csv[0] == 's': #nach Zeitintervall 500ms update_position (Entfernung)
                         print "%d Einheiten gefahren" % csv[1]
+                        print self.berechnePunkt(self.ausrichtung, csv[1], self.position)#TODO an MCC
                     elif csv[0] == 'h': #kollision update_position (Entfernung)
                         self.blockiert = False
                         print "Kollision: %d Einheiten gefahren" % csv[1]
+                        t = self.berechnePunkt(self.ausrichtung, csv[1], self.position) #TODO an MCC
+                        self.position = t
+                        print self.position
                     elif csv[0] == 't': #strecke ohne vorkommnisse abgefahren
                         print "%d Einheiten gefahren" % csv[1]
+                        t = self.berechnePunkt(self.ausrichtung, csv[1], self.position) #TODO an MCC
+                        self.position = t
+                        print self.position
                     elif csv[0] == 'f': #ziel gefunden gleich kommt t
                         print "Ziel gefunden"
                     self.send_message(typ='r', ident=ident, message='resp')
@@ -245,6 +266,7 @@ class Explorer():
                     elif algo == 2:
                         self.exploration_circle()
                     expl_abbr = threading.Timer(explorationsintervall,self.exploration_cancel())
+                    expl_abbr.setDaemon(True)
                     expl_abbr.start()
                         
                 
