@@ -4,6 +4,10 @@ from twisted.internet.protocol import _InstanceFactory
 from twisted.protocols import amp
 from mcc.control import command
 from nao.NAOCalibration import *
+<<<<<<< HEAD
+=======
+from nao.NaoWalk import *
+>>>>>>> nao-master
 
 
 class RobotProtocol(amp.AMP):
@@ -34,6 +38,11 @@ class NXTProtocol(RobotProtocol):
 
 class NAOProtocol(RobotProtocol):
 
+<<<<<<< HEAD
+=======
+    self.target_reached = False
+
+>>>>>>> nao-master
     def nxt_missing(self, nxt_handle, color):
         print 'Searching for NXT #%d, color=%d' % (nxt_handle, color)
         return {'ack': 'searching'}
@@ -54,6 +63,29 @@ class NAOProtocol(RobotProtocol):
         return {'ack': 'follow path'}
     command.SendPath.responder(send_path)
 
+<<<<<<< HEAD
+=======
+    def nao_walk(self, nxt_handle):
+        print 'NAOWalk started'
+        while not self.target_reached:
+            if not hasBall():
+                print 'Cannot see ball, searching ...'
+                if not retrieveBall():
+                    print 'Ball lost'
+                    self.callRemote(command.BallLost, nxt_handle = nxt_handle)
+            else:
+                walkUpToBall()
+                self.callRemote(command.NearlyArrived, nxt_handle = nxt_handle)
+                self.addCallback(walkToPosition)
+        return {'ack': 'walk finished'}
+    command.NaoWalk.responder(nao_walk)
+
+    def target_reached(self):
+        print 'Target reached'
+        self.target_reached = True
+    command.TargetReached.responder(target_reached)
+
+>>>>>>> nao-master
 
 class RobotFactory(_InstanceFactory):
     def __init__(self, reactor, instance, deferred):

@@ -1,8 +1,20 @@
 __author__ = 'Lorenz'
 
+<<<<<<< HEAD
 import sys
 sys.path.append("/home/guenthse/uni/semesterprojekt/naoqi")
 print sys.path
+=======
+import NAOCalibration
+from optparse import OptionParser
+
+class queue():
+    def __init__(self):
+        self.arr = []
+
+    def enqueue(self, element):
+        self.arr.append(element)
+>>>>>>> nao-master
 
 import NAOCalibration
 from twisted.internet.protocol import Protocol

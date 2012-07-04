@@ -11,7 +11,7 @@ class NAOCalibration():
 
     # initial definitions for Marker, IP, PORT, NXT's
     def __init__(self):
-        self.IP = "194.95.174.189"
+        self.IP = "localhost"
         self.PORT = 9559
         self.naoCameraHeight = 50
         self.markerHeight = 12
@@ -144,7 +144,8 @@ class NAOCalibration():
                 self.allDetectedMarker[i][4] = distancesToMarker
 
         # TODO: do not return all detected marker but only the marker with belongs to the nxt with color c
-        return self.allDetectedMarker
+        
+        return
 
     # this method makes the NAO look for a certain nxt (has certain color and marker numbers)
     def findNXT(self, NXTColor):

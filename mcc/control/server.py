@@ -102,22 +102,17 @@ class MCCProtocol(amp.AMP):
         for nxt_robo in self.factory.robots:
             if nxt_robo.handle == nxt_handle:
                 print '#%d Roboter spotted NXT #%d' % (handle, nxt_handle)
-<<<<<<< HEAD
                 #self.go_to_position(robo, robo.x_axis, robo.y_axis)
                 self.calibrate_nxt(nao_robo, nxt_robo)
-=======
                 self.go_to_position(robo, robo.x_axis, robo.y_axis)
                 #TODO: calibrate nxt
->>>>>>> mcc-master
                 return {'ack': 'got spotted'}
         raise command.CommandNXTHandleError("No NXT robot with handle")
     command.NXTSpotted.responder(nxt_spotted)
 
-<<<<<<< HEAD
     def calibrate_nxt(self, nao_robo,  nxt_robo):
         deffered = nao_robo.connection.callRemote(command.PerformCalibration, nxt_handle = nxt_robo.handle, color = nxt_robo.color)
         deffered.addErrback(self.default_failure)
-=======
     def nxt_followed(self, handle, nxt_handle, x_axis, y_axis):
         """
         move the nxt to the next position of the path
@@ -125,7 +120,6 @@ class MCCProtocol(amp.AMP):
         print "moving nxt to next point of the path"
         return {'ack': 'got followed'}
     command.NXTFollowed.responder(nxt_followed)
->>>>>>> mcc-master
 
     def send_data(self, handle, point_tag, x_axis, y_axis, yaw):
         """
@@ -238,7 +232,7 @@ class MCCServer(object):
         """
         if self.protocol is not None:
             self.protocol.transport.loseConnection()
-        self.factory = MCCFactory()
+        self.factory = MCCFactory(0)
         reactor.listenTCP(self.port, self.factory)
 
     def listening(self):

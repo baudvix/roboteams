@@ -195,11 +195,9 @@ class RobotNAO(RobotBase):
         """
         Constructor for a new NAO
         """
-<<<<<<< HEAD
         RobotBase.__init__(self, handle, connection)
-=======
         RobotBase.__init__(self, handle, connection, NAO_TYPE)
->>>>>>> mcc-master
+        mcc-master
 
 
 class TraceNXT(object):
