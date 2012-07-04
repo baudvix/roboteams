@@ -23,7 +23,7 @@ class RobotBase():
     """
     the base class for NXT and NAO robots
     """
-    def __init__(self, handle, connection):
+    def __init__(self, handle, connection, robot_type):
         """
         initialise the queues and sets the handle and the connection
         """
@@ -32,7 +32,8 @@ class RobotBase():
         self.active = False
         self.handle = handle
         self.connection = connection
-        self.position = None
+        self._position = None
+        self._robot_type = robot_type
         self._lock = threading.Lock()
 
     def put_out(self, *args, **kw):
@@ -52,6 +53,54 @@ class RobotBase():
             else:
                 return self.__out_queue.get(True)
 
+    #PROPERTY --- robot_type
+    def fget_robot_type(self):
+        """The robot_type property getter"""
+        return self._robot_type
+
+    def fset_robot_type(self, value):
+        """The robot_type property setter"""
+        self._robot_type = value
+    robot_type = property(fget_robot_type, fset_robot_type)
+
+    #PROPERTY --- position
+    def fget_position(self):
+        """The position property getter"""
+        return self._position
+
+    def fset_position(self, value):
+        """The position property setter"""
+        self._position = value
+    position = property(fget_position, fset_position)
+
+
+class RobotSpec():
+    """
+        specifies the specs of the robot.
+        you have the measures, speed and rotation circles
+        etc.
+    """
+
+    def __init__(self, robot_type, width=None, length=None, speed=None, rotation_circle=None):
+        if robot_type == NXT_TYPE:
+            self.width = 9
+            self.length = 15
+            self.speed = 5
+            self.rotation_circle = 11
+        elif robot_type == NAO_TYPE:
+            self.width = 13
+            self.length = 14
+            self.speed = 3
+            self.rotation_circle = 18
+        if not width == None:
+            self.width = width
+        if not length == None:
+            self.length = length
+        if not speed == None:
+            self.speed = speed
+        if not rotation_circle == None:
+            self.rotation_circle = rotation_circle
+
 
 class RobotNXT(RobotBase):
     """
@@ -62,7 +111,7 @@ class RobotNXT(RobotBase):
         """
         Constructor for a new NXT
         """
-        RobotBase.__init__(self, handle, connection)
+        RobotBase.__init__(self, handle, connection, NXT_TYPE)
         self.color = color
         self._trace = []
         self._data = []
@@ -146,7 +195,11 @@ class RobotNAO(RobotBase):
         """
         Constructor for a new NAO
         """
+<<<<<<< HEAD
         RobotBase.__init__(self, handle, connection)
+=======
+        RobotBase.__init__(self, handle, connection, NAO_TYPE)
+>>>>>>> mcc-master
 
 
 class TraceNXT(object):

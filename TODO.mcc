@@ -1,0 +1,36 @@
+VIEW
+====
+
+choose multiple maps 
+- Trace overlay
+- DataNXT overlay
+- calibrated Map
+- etc
+manage dynamically maps and robots
+
+MODEL
+=====
+
+MAP
+mark points between to incomming points
+- forward
+- rotate
+
+ROBOT
+
+add specs for nao / nxt - width speed etc
+
+CONTROL
+=======
+
+filter for incoming Data ?
+logic for calibration - Cordt
+logic for guided exploration - Cordt
+logic for state machine - Cordt
+
+NAOWALK
+
+calculate path from map
+send path to nao and start naowalk
+on nao arrived at point send nxt to the next point
+

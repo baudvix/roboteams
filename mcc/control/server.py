@@ -5,10 +5,13 @@ server provides the communication between the mcc and the robots
 
 from twisted.protocols import amp
 from twisted.internet import reactor, task
+from twisted.internet import error as err
 from twisted.internet.protocol import Factory
 
 from mcc.control import command
-from mcc.model import robot, map
+from mcc.control.map_update import UpdateNXTData
+from mcc.control.interpolate import Interpolate
+from mcc.model import robot, map, state
 from mcc.utils import Color, Point
 
 from mcc.view import view
@@ -33,8 +36,7 @@ class MCCProtocol(amp.AMP):
             self.factory.robots.append(robot.RobotNXT(self.factory.last_handle,
                                                       self, color))
         else:
-            self.factory.robots.append(robot.RobotNAO(self.factory.last_handle,
-                                                      self))
+            self.factory.robots.append(robot.RobotNAO(self.factory.last_handle, self))
         self.factory.last_handle += 1
         return {'handle': (self.factory.last_handle - 1)}
     command.Register.responder(register)
@@ -45,6 +47,7 @@ class MCCProtocol(amp.AMP):
         error if the handle doesn't exist. Else it will activate the robot in
         the pool of robots
         """
+        print "got activate %d " % handle
         for robo in self.factory.robots:
             if robo.handle == handle:
                 robo.active = True
@@ -72,7 +75,8 @@ class MCCProtocol(amp.AMP):
         for robo in self.factory.robots:
             if robo.handle == nxt_handle:
                 self.update_position(robo, x_axis, y_axis, yaw, True)
-                #TODO: call thread with error calculation
+                #NOTE TO SELF: use thread if this is a blocker
+                robo.data = Interpolate(robo.data, [x_axis, y_axis])
                 print '#%d NXT calibrated #%d (%d, %d, %d)' % (handle,
                                                                nxt_handle,
                                                                x_axis, y_axis,
@@ -98,25 +102,42 @@ class MCCProtocol(amp.AMP):
         for nxt_robo in self.factory.robots:
             if nxt_robo.handle == nxt_handle:
                 print '#%d Roboter spotted NXT #%d' % (handle, nxt_handle)
+<<<<<<< HEAD
                 #self.go_to_position(robo, robo.x_axis, robo.y_axis)
                 self.calibrate_nxt(nao_robo, nxt_robo)
+=======
+                self.go_to_position(robo, robo.x_axis, robo.y_axis)
+                #TODO: calibrate nxt
+>>>>>>> mcc-master
                 return {'ack': 'got spotted'}
         raise command.CommandNXTHandleError("No NXT robot with handle")
     command.NXTSpotted.responder(nxt_spotted)
 
+<<<<<<< HEAD
     def calibrate_nxt(self, nao_robo,  nxt_robo):
         deffered = nao_robo.connection.callRemote(command.PerformCalibration, nxt_handle = nxt_robo.handle, color = nxt_robo.color)
         deffered.addErrback(self.default_failure)
+=======
+    def nxt_followed(self, handle, nxt_handle, x_axis, y_axis):
+        """
+        move the nxt to the next position of the path
+        """
+        print "moving nxt to next point of the path"
+        return {'ack': 'got followed'}
+    command.NXTFollowed.responder(nxt_followed)
+>>>>>>> mcc-master
 
     def send_data(self, handle, point_tag, x_axis, y_axis, yaw):
         """
         saves incoming data from the NXT
         """
-        #TODO: save data in nxt (freespace, update position)
         for robo in self.factory.robots:
             if robo.handle == handle:
                 robo.put(Point(x_axis, y_axis, yaw), point_tag)
-                print '#%d Send data %d: (%d, %d, %d)' % (handle, point_tag,
+                #TODO: Respect dodges in update_map
+                test = self.factory.tmp_update_map.insert_position_data(x_axis, y_axis, yaw)
+                self.factory.maps[0].increase_points(test)
+                print '#%d Send data %d: (%d, %d, %f)' % (handle, point_tag,
                                                           x_axis, y_axis, yaw)
                 return{'ack': 'got data'}
         raise command.CommandHandleError("No NXT robot with handle")
@@ -141,7 +162,7 @@ class MCCProtocol(amp.AMP):
                 print 'Connection Lost to robo %d ' % robo.handle
 
     def update_position(self, robo, x_axis, y_axis, yaw, to_nxt=False):
-        robo.point = Point(x_axis, y_axis, yaw)
+        robo.position = Point(x_axis, y_axis, yaw)
         if not to_nxt:
             return
         deffered = robo.connection.callRemote(command.UpdatePosition,
@@ -156,6 +177,9 @@ class MCCProtocol(amp.AMP):
         deffered.addErrback(self.default_failure)
 
     def default_failure(self, error):
+        if type(error) == err.ConnectionDone:
+            print 'Error: Connection Done'
+            #TODO: deactivate, wait for reactivation, ...
         print 'Error occurred', error
 
     def print_out(self, ack):
@@ -169,13 +193,18 @@ class MCCFactory(Factory):
     """
     protocol = MCCProtocol
 
-    def __init__(self):
+    def __init__(self, start_state):
         self.last_handle = 0
+        self.state_machine = state.StateMachine(start_state)
         self.robots = []
         self.maps = []
+        self.tmp_update_map = UpdateNXTData()
         self.maps.append(map.MapModel('Calibrated_Map'))
         #TODO: start a thread for heavy calculation
         #TODO: start a thread for view
+        self.initGUI()
+
+    def initGUI(self):
         self._viewThread = view.View(self.maps[0])
         self._viewThread.daemon = True
         self._viewThread.start()
@@ -193,6 +222,7 @@ class MCCServer(object):
         5000
         """
         self.protocol = None
+        self.factory = None
         self.host = 'localhost'
         self.port = 5000
         self.robots = None
@@ -208,8 +238,8 @@ class MCCServer(object):
         """
         if self.protocol is not None:
             self.protocol.transport.loseConnection()
-        factory = MCCFactory()
-        reactor.listenTCP(self.port, factory)
+        self.factory = MCCFactory()
+        reactor.listenTCP(self.port, self.factory)
 
     def listening(self):
         """
@@ -227,6 +257,7 @@ class MCCServer(object):
         run is called in every loop of the reactor. so if you want to do
         something regularly you put it in here
         """
+        pass
 
 
 def main():

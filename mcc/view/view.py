@@ -21,13 +21,13 @@ class View(threading.Thread):
         pygame.display.set_caption('MCC - Mission Control Center')
 
         #Create the background
-        graph_tile = pygame.image.load('background.jpg').convert()
-        graph_rect = graph_tile.get_rect()
-        background = pygame.Surface(screen.get_size())
-        background.blit(graph_tile, graph_rect)
+        #graph_tile = pygame.image.load('background.jpg').convert()
+        #graph_rect = graph_tile.get_rect()
+        #background = pygame.Surface(screen.get_size())
+        #background.blit(graph_tile, graph_rect)
 
         #Display The Background
-        screen.blit(background, (0, 0))
+        #screen.blit(background, (0, 0))
 
         # Init GUI
         self.re = Renderer()
@@ -80,7 +80,7 @@ class View(threading.Thread):
     def drawMap(self, parent):
         #Draw Background
         pygame.draw.rect(parent, (0, 0, 0), (0, 0, 604, 604))
-
+        #TODO: Draw color calculated with map.max_free_count/ dodge_count
         for x in range(200):
             for y in range(200):
                 point = self.map.get_point(x, y)
@@ -98,6 +98,10 @@ class View(threading.Thread):
                     color = (25, 210, 25)
 
                 pygame.draw.rect(parent, color, (2 + 3 * x, 2 + 3 * y, 3, 3))
+
+    #TODO: Draw updated points ( more efficent)
+    #TODO: Draw map based on overlay / map selection
+    #TODO: increase the reaction time of the gui - draw map / point = new Thread??
 
     def update(self, events):
         #Events

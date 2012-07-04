@@ -46,6 +46,13 @@ class CommandColorError(Exception):
     pass
 
 
+class CommandMissionCompleteError(Exception):
+    """
+    Well done mission completed. Lose connection please
+    """
+    pass
+
+
 #Commands from NXT or NAO to MCC
 class Register(Command):
     """
@@ -86,6 +93,7 @@ class NXTCalibrated(Command):
                  ('yaw', Integer())]
     response = [('ack', String())]
     error = [(CommandHandleError, 'COMMAND_HANDLE_ERROR'),
+             (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR'),
              (CommandActiveError, 'COMMAND_ACTIVE_ERROR')]
 
 
@@ -99,7 +107,23 @@ class NXTSpotted(Command):
                  ('nxt_handle', Integer())]
     response = [('ack', String())]
     error = [(CommandHandleError, 'COMMAND_HANDLE_ERROR'),
+             (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR'),
              (CommandActiveError, 'COMMAND_ACTIVE_ERROR')]
+
+
+class NXTFollowed(Command):
+    """
+    The NAO notifies the MCC about his arrival at the point of the path,
+    where the NXT stands
+    """
+    arguments = [('handle', Integer()),
+                 ('nxt_handle', Integer()),
+                 ('x_axis', Integer()),
+                 ('y_axis', Integer())]
+    response = [('ack', String())]
+    error = [(CommandMissionCompleteError, 'COMMAND_MISSION_COMPLETE_ERROR'),
+             (CommandHandleError, 'COMMAND_HANDLE_ERROR'),
+             (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR'),]
 
 
 #Commands from NXT to MCC
@@ -152,6 +176,7 @@ class UpdatePosition(Command):
     response = [('ack', String())]
 
 
+#TODO: this will never work. make a real type - module picke?
 class SendMap(Command):
     """
     The MCC sends to the robot a copy of the current map
@@ -175,9 +200,16 @@ class PerformCalibration(Command):
     """
     The MCC requests a calibration of a given NXT
     """
-    arguments = [('nxt_handle', Integer()),
+    arguments = [('nao_handle', Integer()),
+                 ('nxt_handle', Integer()),
                  ('color', Integer())]
-    response = [('ack', String())]
+    response = [('nao_handle', Integer()),
+                ('nxt_handle', Integer()),
+                ('x_axis', Integer()),
+                ('y_axis', Integer()),
+                ('yaw', Integer())]
+    # errors = [(Exception, 'CALIBRATION_ERROR'),
+    #          (NXTNotFoundException, 'NXT_NOT_FOUND')]
 
 
 class SendPath(Command):
@@ -186,7 +218,7 @@ class SendPath(Command):
     """
     arguments = [('path', AmpList([('x_axis', Integer()),
                                    ('y_axis', Integer())]))]
-    response = [('ack'), String()]
+    response = [('ack', String())]
 
 
 #Commands from MCC to NXT

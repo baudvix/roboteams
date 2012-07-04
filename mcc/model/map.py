@@ -33,6 +33,46 @@ class MapModel(object):
         self.__target_position = None
         self.name = name
         self._lock = threading.Lock()
+        self.__max_free_count = 0
+        self.__max_dodge_count = 0
+        # self._expand [top,right,bottom,left]
+        self._expand = [0, 0, 0, 0]
+
+    #PROPERTY --- expand
+    def fget_expand(self):
+        """The expand property getter"""
+        with self._lock:
+            return self._expand
+
+    def fset_expand(self, value):
+        """The expand property setter"""
+        with self._lock:
+            self._expand = value
+    expand = property(fget_expand, fset_expand)
+
+    #PROPERTY --- max_free_count
+    def fget__max_free_count(self):
+        """The max_free_count property getter"""
+        with self._lock:
+            return self.__max_free_count
+
+    def fset__max_free_count(self, value):
+        """The max_free_count property setter"""
+        with self._lock:
+            self.__max_free_count = value
+    max_free_count = property(fget__max_free_count, fset__max_free_count)
+
+    #PROPERTY --- max_dodge_count
+    def fget_max_dodge_count(self):
+        """The max_dodge_count property getter"""
+        with self._lock:
+            return self.__max_dodge_count
+
+    def fset_max_dodge_count(self, value):
+        """The max_dodge_count property setter"""
+        with self._lock:
+            self.__max_dodge_count = value
+    max_dodge_count = property(fget_max_dodge_count, fset_max_dodge_count)
 
     def get_first_map_section(self):
         """
@@ -115,21 +155,25 @@ class MapModel(object):
         if offset_x > 0:
             for _ in range(0, offset_x):
                 if tmp_map_section.right_grid is None:
+                    self._expand[1] += 1
                     tmp_map_section.right_grid = MapSection()
                 tmp_map_section = tmp_map_section.right_grid
         elif offset_x < 0:
             for _ in range(0, offset_x, -1):
                 if tmp_map_section.left_grid is None:
+                    self._expand[3] += 1
                     tmp_map_section.left_grid = MapSection()
                 tmp_map_section = tmp_map_section.left_grid
         if offset_y > 0:
             for _ in range(0, offset_y):
                 if tmp_map_section.top_grid is None:
+                    self._expand[0] += 1
                     tmp_map_section.top_grid = MapSection()
                 tmp_map_section = tmp_map_section.top_grid
         elif offset_y < 0:
             for _ in range(0, offset_y, -1):
                 if tmp_map_section.bottom_grid is None:
+                    self._expand[2] += 1
                     tmp_map_section.bottom_grid = MapSection()
                 tmp_map_section = tmp_map_section.bottom_grid
 
@@ -187,7 +231,7 @@ class MapModel(object):
         with self._lock:
             return tmp_map_section.get_point_value(x_abs, y_abs)
 
-    def set_point(self, x_coord, y_coord, option=0):
+    def _set_point(self, x_coord, y_coord, option=0):
         """
         Increases the value of a given point or sets a dodge point
         and creates a map section, if necessary
@@ -212,8 +256,7 @@ class MapModel(object):
 
         # make sure that the grid exists; pass if it already does
         try:
-            with self._lock:
-                self._add_map_section(offset_x, offset_y)
+            self._add_map_section(offset_x, offset_y)
         except ValueError:
             pass
 
@@ -231,11 +274,16 @@ class MapModel(object):
         elif offset_y < 0:
             for _ in range(0, offset_y, -1):
                 tmp_map_section = tmp_map_section.bottom_grid
-        with self._lock:
-            if option == 0:
-                tmp_map_section.update_grid([[x_abs, y_abs]])
-            elif option == 1 and tmp_map_section.get_point_value(x_abs, y_abs, 1) != 1:
-                tmp_map_section.update_grid([[x_abs, y_abs]], 1)
+        if option == 0:
+            count = tmp_map_section.get_point_value(x_abs, y_abs)
+            if count >= self.__max_free_count:
+                self.__max_free_count = count + 1
+            tmp_map_section.update_grid([[x_abs, y_abs]])
+        elif option == 1 and tmp_map_section.get_point_value(x_abs, y_abs, 1) != 1:
+            count = tmp_map_section.get_point_value(x_abs, y_abs, 1)
+            if count >= self.__max_dodge_count:
+                self.__max_dodge_count = count + 1
+            tmp_map_section.update_grid([[x_abs, y_abs]], 1)
 
     def increase_points(self, points):
         """
@@ -250,10 +298,9 @@ class MapModel(object):
             raise TypeError("Type \"list\" excepted, but", type(points), ", ",
                             " given.")
 
-        while not points.__sizeof__():
-            p = points.pop()
+        for p in points:
             with self._lock:
-                self.set_point(p[0], p[1])
+                self._set_point(p[0], p[1])
 
 
 class MapSection(object):
