@@ -115,6 +115,7 @@ class NaoWalk():
                     self.motion.stopWalk()
                     self.__turnToBall()
                     self.__safePosition()
+                    self.__setTopCamera()
                     print 'Waiting for NXT to move'
                     self.nxt_reached = False
                     deferred = self.protocol.callRemote(command.NXTFollowed, handle = 1, nxt_handle = 0, x_axis = 0, y_axis = 0)
@@ -126,7 +127,7 @@ class NaoWalk():
                     
                     # walkToPosition() muss vom mcc aufgerufen werden und hier entfernt werden
                     # self.walkToPosition()
-                    self.__setTopCamera()
+                    
                     break
 
     def waitForNXT(self, e):
@@ -146,14 +147,8 @@ class NaoWalk():
         #     else:
         #         self.__setBottomCamera()
         argument = self.tracker.isNewData()
-        if argument == True:
-            self.tracker.getPosition()
-            return argument
-        if argument == False:
-            self.tracker.getPosition()
-            return argument
-
-
+        self.tracker.getPosition()
+        return argument
 
     def __safePosition(self):
         if self.hasBall():
@@ -191,7 +186,6 @@ class NaoWalk():
     def followRedBall(self):
         while not self.target_reached:
             if self.nxt_reached:
-                self.__setTopCamera()
                 while not self.hasBall():
                     print 'retrieve ball'
                     self.retrieveBall()
