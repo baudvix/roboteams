@@ -1,5 +1,5 @@
 import threading
-DEBUGLEVEL = 2
+DEBUGLEVEL = 7
 print_lock = threading.Lock()
 
 def synchronized(lock):
