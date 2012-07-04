@@ -10,7 +10,6 @@ import Queue
 NXT_TYPE = 0
 NAO_TYPE = 1
 
-NAO_COLOR = -1
 
 class EmptyError(Exception):
     """
@@ -195,9 +194,7 @@ class RobotNAO(RobotBase):
         """
         Constructor for a new NAO
         """
-        RobotBase.__init__(self, handle, connection)
         RobotBase.__init__(self, handle, connection, NAO_TYPE)
-        mcc-master
 
 
 class TraceNXT(object):

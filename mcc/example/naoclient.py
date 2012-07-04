@@ -1,9 +1,10 @@
 import pprint
+import sys
 from twisted.internet import reactor, defer, task
 from twisted.internet.protocol import _InstanceFactory
 from twisted.protocols import amp
 from mcc.control import command
-from nao.NAOCalibration import *
+from nao.testfile import *
 from nao.NaoWalk import *
 
 
@@ -35,7 +36,8 @@ class NXTProtocol(RobotProtocol):
 
 class NAOProtocol(RobotProtocol):
 
-    self.target_reached = False
+    def __init__(self):
+        self.target_reached = False
 
     def nxt_missing(self, nxt_handle, color):
         print 'Searching for NXT #%d, color=%d' % (nxt_handle, color)
@@ -64,13 +66,13 @@ class NAOProtocol(RobotProtocol):
                 print 'Cannot see ball, searching ...'
                 if not retrieveBall():
                     print 'Ball lost'
-                    self.callRemote(command.BallLost, nxt_handle = nxt_handle)
+                    self.callRemote(command.BallLost, nao_handle = 0, nxt_handle = nxt_handle)
             else:
                 walkUpToBall()
-                self.callRemote(command.NearlyArrived, nxt_handle = nxt_handle)
+                self.callRemote(command.NXTFollowed, nao_handle = 0, nxt_handle = nxt_handle, x_axis = 0, y_axis = 0)
                 self.addCallback(walkToPosition)
         return {'ack': 'walk finished'}
-    command.NaoWalk.responder(nao_walk)
+    command.NAOWalk.responder(nao_walk)
 
     def target_reached(self):
         print 'Target reached'
@@ -84,12 +86,13 @@ class RobotFactory(_InstanceFactory):
 
 class NAOClient():
 
-    def __init__(self):
+    def __init__(self, ip):
         self.protocol = None
-        self.host = '194.95.174.187'
+        self.host = ip
         self.port = 5000
         self.color = 0
         self.handle = None
+        self.rhandle = 0
         self.active = False
         self.robot_type = 1
         self.connect()
@@ -113,7 +116,7 @@ class NAOClient():
     def connected(self, protocol):
         self.protocol = protocol
         print 'connected to mcc'
-        deffered = protocol.callRemote(command.Register, robot_type=self.robot_type, color=self.color)
+        deffered = protocol.callRemote(command.Register, robot_type=self.robot_type, color=self.color, rhandle = self.rhandle)
         deffered.addCallback(self.activate)
         deffered.addErrback(self.failure)
 
@@ -135,5 +138,5 @@ class NAOClient():
         print 'Error: %s:%s::%s' % (self.host, self.port, error)
 
 if __name__ == '__main__':
-    nao_client = NAOClient()
+    nao_client = NAOClient(sys.argv[1])
     print 'x'

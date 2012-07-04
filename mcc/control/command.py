@@ -61,8 +61,9 @@ class Register(Command):
     If the robot type doesn't exist an CommandTypeError is send back.
     """
     arguments = [('robot_type', Integer()),
-                 ('color', Integer())]
-    response = [('handle', Integer())]
+                 ('color', Integer()),
+                 ('rhandle', Integer())]
+    response = [('rhandle', Integer()), ('handle', Integer())]
     error = [(CommandTypeError, 'COMMAND_TYPE_ERROR'),
              (CommandColorError, 'COMMAND_COLOR_ERROR')]
 
@@ -110,19 +111,6 @@ class NXTSpotted(Command):
              (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR'),
              (CommandActiveError, 'COMMAND_ACTIVE_ERROR')]
 
-class NearlyArrived(Command):
-    """
-    The NAO notifies the MCC that it has naerly reached the point
-    the NXT was standing on. So that the NXT has to move forward to
-    its next position.
-    """
-    arguments = [('nxt_handle', Integer())]
-    response = [('nxt_moved', String())]
-
-class BallLost(Command):
-    arguments = [('nxt_handle', Integer())]
-    response = [('ack', String())]
-
 
 class NXTFollowed(Command):
     """
@@ -137,6 +125,11 @@ class NXTFollowed(Command):
     error = [(CommandMissionCompleteError, 'COMMAND_MISSION_COMPLETE_ERROR'),
              (CommandHandleError, 'COMMAND_HANDLE_ERROR'),
              (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR'),]
+
+class BallLost(Command):
+    arguments = [('nao_handle', Integer()),
+                 ('nxt_handle', Integer())]
+    response = [('ack', String())]
 
 
 #Commands from NXT to MCC
@@ -229,22 +222,17 @@ class SendPath(Command):
     """
     The MCC sends to the NAO the path to the target
     """
-    arguments = [('path', AmpList([('x', Integer()),
-                                   ('y', Integer())]))]
-    response = [('ACK', String())]
+    arguments = [('path', AmpList([('x_axis', Integer()),
+                                   ('y_axis', Integer())]))]
+    response = [('ack', String())]
 
 class NAOWalk(Command):
-    """
-    The MCC sends a Signal to make the NAO walk and follow the NXT
-    """
-    arguments = []
+    arguments = [('nao_handle', Integer()),
+                 ('nxt_handle', Integer())]
     response = [('ack', String())]
 
 class TargetReached(Command):
-    """
-    The MCC informs the NAO that the target is reached
-    """
-    arguments = []
+    arguments = [('nao_handle', Integer())]
     response = [('ack', String())]
 
 

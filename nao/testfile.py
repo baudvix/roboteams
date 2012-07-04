@@ -11,7 +11,7 @@ class NAOCalibration():
 
     # initial definitions for Marker, IP, PORT, NXT's
     def __init__(self):
-        self.IP = "194.95.174.189"
+        self.IP = 'localhost'
         self.PORT = 9559
         self.naoCameraHeight = 50
         self.markerHeight = 12
@@ -295,8 +295,8 @@ class NAOCalibration():
         self.myBroker.shutdown()
 
 
-n = NAOCalibration()
-n.performCalibration(1)
+#n = NAOCalibration()
+#n.performCalibration(1)
 
 
 class NXTNotFoundException(Exception):
