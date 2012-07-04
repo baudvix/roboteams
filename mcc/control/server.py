@@ -15,7 +15,7 @@ from mcc.model import robot, map, state
 from mcc.utils import Color, Point
 
 from mcc.view import view
-
+from mcc.example.logic import *
 
 class MCCProtocol(amp.AMP):
     """
@@ -160,6 +160,12 @@ class MCCProtocol(amp.AMP):
                                                         y_axis=y_axis)
         deffered.addErrback(self.default_failure)
 
+    def ball_lost(self, nao_handle, nxt_handle):
+        print 'Ball lost'
+        #do something, eg move nxt
+        return {'ack': 'NXT moved'}
+    command.BallLost.responder(ball_lost)
+
     def default_failure(self, error):
         if type(error) == err.ConnectionDone:
             print 'Error: Connection Done'
@@ -182,11 +188,13 @@ class MCCFactory(Factory):
         self.state_machine = state.StateMachine(start_state)
         self.robots = []
         self.maps = []
+        self.calibration = LogicCalibration()
+        self.naowalk = NaoWalk()
         self.tmp_update_map = UpdateNXTData()
         self.maps.append(map.MapModel('Calibrated_Map'))
         #TODO: start a thread for heavy calculation
         #TODO: start a thread for view
-        self.initGUI()
+        # self.initGUI()
 
     def initGUI(self):
         self._viewThread = view.View(self.maps[0])
@@ -241,7 +249,9 @@ class MCCServer(object):
         run is called in every loop of the reactor. so if you want to do
         something regularly you put it in here
         """
-        pass
+        #self.factory.calibration.run(self.factory.robots)
+        self.factory.naowalk.run(self.factory.robots)
+
 
 
 def main():

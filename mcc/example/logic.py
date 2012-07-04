@@ -11,11 +11,12 @@ class LogicCalibration():
     tell the nao to locate the nxt
     onCalibration updating position and inform nxt
     """
-    def __init__(self, robots):
+    def __init__(self):
         self.called_calibration = False
+        self.robots = None
+        
+    def run(self, robots):
         self.robots = robots
-
-    def run(self):
         if self.called_calibration:
             return
         has_nxt = False
@@ -54,16 +55,17 @@ class LogicCalibration():
 class NaoWalk(object):
 
     #NXT stands on (0, 10) NAO on (0,0)
-    def __init__(self, robots):
+    def __init__(self):
         self._path = [(0, 0), (0, 90), (60, 90), (80, 120)]
         self._status = -1
-        self._robots = robots
+        self._robots = None
         self._connected = False
         self._started = False
         self._robot_nxt = None
         self._robot_nao = None
 
-    def run(self):
+    def run(self, robots):
+        self._robots = robots
         if not self._connected:
             has_nxt = False
             has_nao = False
@@ -88,8 +90,7 @@ class NaoWalk(object):
             for i in range(0, len(self._path)):
                 plist.append({'x_axis': self._path[i][0],
                     'y_axis': self._path[i][1]})
-            d_nao = self._robot_nao.connection.callRemote(command.SendPath,
-                path=plist)
+            d_nao = self._robot_nao.connection.callRemote(command.NAOWalk, nao_handle = self._robot_nao.handle, nxt_handle = self._robot_nxt.handle)
             d_nao.addCallback(self.print_out)
             d_nao.addErrback(self.failure)
             d_nxt = self._robot_nxt.connection.callRemote(
