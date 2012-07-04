@@ -229,10 +229,6 @@ class SendPath(Command):
     """
     The MCC sends to the NAO the path to the target
     """
-<<<<<<< HEAD
-    arguments = [('path', AmpList([('x_axis', Integer()),
-                                   ('y_axis', Integer())]))]
-=======
     arguments = [('path', AmpList([('x', Integer()),
                                    ('y', Integer())]))]
     response = [('ACK', String())]
@@ -249,7 +245,6 @@ class TargetReached(Command):
     The MCC informs the NAO that the target is reached
     """
     arguments = []
->>>>>>> nao-master
     response = [('ack', String())]
 
 
