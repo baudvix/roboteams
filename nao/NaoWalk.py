@@ -106,6 +106,7 @@ class NaoWalk():
                 self.walkUpToBall()
                 break
             dist = self.__getDistance()
+            print dist
             if self.currentCam == 0:
                 if dist < 0.75:
                     self.__setBottomCamera()
@@ -118,15 +119,15 @@ class NaoWalk():
                     self.__setTopCamera()
                     print 'Waiting for NXT to move'
                     self.nxt_reached = False
-                    deferred = self.protocol.callRemote(command.NXTFollowed, handle = 1, nxt_handle = 0, x_axis = 0, y_axis = 0)
-                    deferred.addCallback(self.walkToPosition)
-                    deferred.addErrback(self.waitForNXT)
+                    # deferred = self.protocol.callRemote(command.NXTFollowed, handle = 1, nxt_handle = 0, x_axis = 0, y_axis = 0)
+                    # deferred.addCallback(self.walkToPosition)
+                    # deferred.addErrback(self.waitForNXT)
                     # !!
                     # meldung ans mcc dass nxt weiterlaufen soll
                     # !!
                     
-                    # walkToPosition() muss vom mcc aufgerufen werden und hier entfernt werden
-                    # self.walkToPosition()
+                     # walkToPosition() muss vom mcc aufgerufen werden und hier entfernt werden
+                    self.walkToPosition('bla')
                     
                     break
 
@@ -135,7 +136,8 @@ class NaoWalk():
 
     # has to be called after walkUpToBall() and the nxt`s gone
     # to the next position to make the last few steps
-    def walkToPosition(self):
+    def walkToPosition(self, ack):
+        print 'Success: %s' %ack
         x = (self.targetPosition[0]/2)
         self.motion.walkTo(x,0,0)
         self.nxt_reached = True
@@ -172,9 +174,9 @@ class NaoWalk():
     def __turnToBall(self):
         if not self.hasBall():
             print 'Ball lost'
-            deferred = self.protocol.callRemote(command.BallLost, nao_handle = 1, nxt_handle = 0)
-            #moeglicher call ans mcc um retrieveBall aufzurufen
-            deferred.addCallback(self.retrieveBall)
+            # deferred = self.protocol.callRemote(command.BallLost, nao_handle = 1, nxt_handle = 0)
+            # #moeglicher call ans mcc um retrieveBall aufzurufen
+            # deferred.addCallback(self.retrieveBall)
             return False
         self.ballPosition = self.tracker.getPosition()
         b = self.ballPosition[1]/self.ballPosition[0]
