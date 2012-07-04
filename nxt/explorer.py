@@ -22,6 +22,23 @@ MAC = ["00:16:53:10:49:4D", "00:16:53:10:48:E7", "00:16:53:10:48:F3"]
 GRAD2CM = 17.59/360.0
 CM2GRAD = 360.0/17.59
 
+def berechnePunkt(ausrichtung, entfernung, standort={'x':0.0, 'y':0.0}):
+    pos = {'x':0.0, 'y':0.0}
+    pos['x'] = standort['x'] + entfernung*GRAD2CM*math.cos(ausrichtung*(math.pi/180.0))
+    pos['y'] = standort['y'] + entfernung*GRAD2CM*math.sin(ausrichtung*(math.pi/180.0))
+    return pos
+
+def berechneVektor(standort={'x':0.0, 'y':0.0}, ziel={'x': 0.0, 'y': 0.0}):
+    relativ_ziel = {'x': ziel['x']-standort['x'],'y': ziel['y']-standort['y']}
+    entfernung = math.sqrt(relativ_ziel['x']**2+relativ_ziel['y']**2)
+    if relativ_ziel['x'] == 0: 
+        winkel = 0
+    elif relativ_ziel['x'] < 0:
+        winkel = math.atan(relativ_ziel['y']/relativ_ziel['x'])*(180.0/math.pi)+180
+    else:
+        winkel = math.atan(relativ_ziel['y']/relativ_ziel['x'])*(180.0/math.pi)+360
+    return {'winkel': winkel%360, 'entfernung': entfernung*CM2GRAD}
+
 class RobotProtocol(amp.AMP):
 
     def update_state(self, state):
@@ -63,6 +80,7 @@ class Explorer():
         self.handle = None
         self.active = False
         self.blockiert = False
+        self.blockiert_lock = threading.Lock()
         self.abbruch = True
         self.abbruch_lock = threading.Lock()
         self.robot_type = 0
@@ -113,26 +131,34 @@ class Explorer():
         print self.position
     
     def exploration_simple(self):
-        first = True
+        state = 0
         while(True):
             self.abbruch_lock.acquire()
             if self.abbruch:
                 self.abbruch_lock.release()
                 break
             self.abbruch_lock.release()
+            self.blockiert_lock.acquire()
             if not self.blockiert:
                 self.blockiert = True
-                print "exploration_simple"
-                if first:
-                    first = False
-                    self.go_forward(0)   
-                self.go_back(1)
-                linksrechts = random.choice([0,1]) #0=links || 1=rechts
-                grad = random.randint(30, 160) # 30 - 160
-                if linksrechts == 0:
-                    self.turnleft(grad)
-                else:
-                    self.turnright(grad)
+                self.blockiert_lock.release()
+                print "exploration_simple - state=%d" % state
+                
+                if state == 0:
+                    self.go_forward(0)
+                elif state == 1:
+                    self.go_back(1)
+                elif state == 2:
+                    linksrechts = random.choice([0,1]) #0=links || 1=rechts
+                    grad = random.randint(30, 160) # 30 - 160
+                    if linksrechts == 0:
+                        self.turnleft(grad)
+                    else:
+                        self.turnright(grad)
+                state += 1
+                state %= 2
+            else:
+                self.blockiert_lock.release()       
                 
     def exploration_circle(self): 
         while(True):
@@ -166,23 +192,6 @@ class Explorer():
             self.timelist_access('l', 0)
             self.timelist_lock.release()
             print "exploration_cancel - abbruch= True gewartet für %d sek" % intervall
-    
-    def berechnePunkt(self, ausrichtung, entfernung, standort={'x':0.0, 'y':0.0}):
-        pos = {'x':0.0, 'y':0.0}
-        pos['x'] = standort['x'] + entfernung*GRAD2CM*math.cos(ausrichtung*(math.pi/180.0))
-        pos['y'] = standort['y'] + entfernung*GRAD2CM*math.sin(ausrichtung*(math.pi/180.0))
-        return pos
-    
-    def berechneVektor(self, standort={'x':0.0, 'y':0.0}, ziel={'x': 0.0, 'y': 0.0}):
-        relativ_ziel = {'x': ziel['x']-standort['x'],'y': ziel['y']-standort['y']}
-        entfernung = math.sqrt(relativ_ziel['x']**2+relativ_ziel['y']**2)
-        if relativ_ziel['x'] == 0: 
-            winkel = 0
-        elif relativ_ziel['x'] < 0:
-            winkel = math.atan(relativ_ziel['y']/relativ_ziel['x'])*(180.0/math.pi)+180
-        else:
-            winkel = math.atan(relativ_ziel['y']/relativ_ziel['x'])*(180.0/math.pi)+360
-        return {'winkel': winkel%360, 'entfernung': entfernung*CM2GRAD}
     
     def find_programs(self):
         ff = FileFinder(self.brick, "*.rxe")
@@ -221,8 +230,7 @@ class Explorer():
                     self.timelist.remove(tupel)
                     self.send_message(message=tupel[3], typ=tupel[1], ident=tupel[2])
         elif choose == 'l':         
-            for tupel in self.timelist:
-                self.timelist.remove(tupel)
+            self.timelist = []
         dbg_print("timelist: "+str(self.timelist),3)
         dbg_print("timelist_access unlock choose="+str(choose)+" ident="+str(ident),3)
 
@@ -232,7 +240,6 @@ class Explorer():
         t = threading.Thread(target=self.timer, args=())
         t.setDaemon(True)
         t.start()
-        dbg_print("BT-Empfang",1)
         count = 0
         while(True):
             if count%100000 == 0:
@@ -252,17 +259,21 @@ class Explorer():
                     csv = payload.split(',') # payload = event, entfernung, sensor(optional)
                     if str(csv[0]) == 'p': #nach Zeitintervall 500ms update_position (Entfernung)
                         print "%d Einheiten gefahren" % csv[1]
-                        print self.berechnePunkt(self.ausrichtung, csv[1], self.position)#TODO an MCC
+                        print berechnePunkt(self.ausrichtung, csv[1], self.position)#TODO an MCC
                     elif str(csv[0]) == 'h': #kollision update_position (Entfernung)
+                        self.blockiert_lock.acquire()
                         self.blockiert = False
+                        self.blockiert_lock.release()
                         print "Kollision: %d Einheiten gefahren" % csv[1]
-                        t = self.berechnePunkt(self.ausrichtung, csv[1], self.position) #TODO an MCC
+                        t = berechnePunkt(self.ausrichtung, csv[1], self.position) #TODO an MCC
                         self.position = t
                         print self.position
                     elif str(csv[0]) == 't': #strecke ohne vorkommnisse abgefahren
+                        self.blockiert_lock.acquire()
                         self.blockiert = False
+                        self.blockiert_lock.release()
                         print "%d Einheiten gefahren" % csv[1]
-                        t = self.berechnePunkt(self.ausrichtung, csv[1], self.position) #TODO an MCC
+                        t = berechnePunkt(self.ausrichtung, csv[1], self.position) #TODO an MCC
                         self.position = t
                         print self.position
                     elif str(csv[0]) == 'f': #ziel gefunden gleich kommt t
@@ -308,11 +319,11 @@ class Explorer():
                 if state == 0:
                     algo = random.choice([0])
                     if algo == 0:           
-                        self.exploration_simple()
+                        self.exploration_simple() #blockierender Aufruf
                     elif algo == 1:
-                        self.exploration_radar()
+                        self.exploration_radar() #blockierender Aufruf
                     elif algo == 2:
-                        self.exploration_circle()
+                        self.exploration_circle() #blockierender Aufruf
             else:
                 self.abbruch_lock.release()
                         
