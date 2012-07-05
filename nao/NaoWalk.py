@@ -90,7 +90,7 @@ class NaoWalk():
     # lets the nao walk close up to the ball
     # Redball in vision is mandatory to call this method!
     # !! NEED TO INCLUDE MCC-CALL TO MOVE NXT TO NEXT POSITION IN LINE 85 !!
-    @defer.deferredGenerator
+    
     def walkUpToBall(self):
         ballPosi = self.tracker.getPosition()
         headYawTreshold = ((math.pi*10)/180)
@@ -120,8 +120,9 @@ class NaoWalk():
                     self.__setTopCamera()
                     print 'Waiting for NXT to move'
                     self.tts.say('Waiting for NXT to move')
-                    sleepUntilDFRDresult(deferred = self.protocol.callRemote(command.NXTFollowed, handle = 1, nxt_handle = 0, x_axis = 0, y_axis = 0), timeout=60):
-                    # deferred = self.protocol.callRemote(command.NXTFollowed, handle = 1, nxt_handle = 0, x_axis = 0, y_axis = 0)
+                    deferred = self.protocol.callRemote(command.NXTFollowed, handle = 1, nxt_handle = 0, x_axis = 0, y_axis = 0)
+                    res = sleepUntilDFRDresult(deferred, timeout = 60)
+                    print res
                             
                     deferred.addCallback(self.walkToPosition)
                     #deferred.addErrback(self.waitForNXT)
@@ -238,7 +239,7 @@ __main__/<module> #L1',)
                 reactor.iterate(0.055)
             except Exception as err:
                 pass
-            Htime.sleep(0.001)
+            time.sleep(0.001)
         if dfrd.called and hasattr(dfrd, 'result'):
             return dfrd.result
     func_name, module_name, line_no = tools.getCallerNameLocation()
