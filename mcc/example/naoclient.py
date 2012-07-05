@@ -5,7 +5,7 @@ from twisted.internet import reactor, defer, task
 from twisted.internet.protocol import _InstanceFactory
 from twisted.protocols import amp
 from mcc.control import command
-from nao.testfile import *
+from nao.NAOCalibration import *
 from nao.NaoWalk import *
 
 
@@ -60,6 +60,7 @@ class NAOProtocol(RobotProtocol):
         pprint.pprint(path)
         self.walk = NaoWalk(self)
         for line in path:
+            print line
             self.walk.followRedBall()
         return {'ack': 'follow path'}
     command.SendPath.responder(send_path)

@@ -118,6 +118,7 @@ class NaoWalk():
                     self.__safePosition()
                     self.__setTopCamera()
                     print 'Waiting for NXT to move'
+                    self.tts.say('Waiting for NXT to move')
                     self.nxt_reached = False
                     deferred = self.protocol.callRemote(command.NXTFollowed, handle = 1, nxt_handle = 0, x_axis = 0, y_axis = 0)
                             
