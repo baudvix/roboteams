@@ -69,16 +69,21 @@ class NXTProtocol(RobotProtocol):
     def go_to_point(self,x ,y ):
         dbg_print('Going to Point ('+str(x)+','+str(y)+')',2)
         if self.factory.robots[0].go_to_point(x,y):#TODO rhandle von NXT benoetigt
+            self.factory.robots[0].position_lock.acquire()
             self.callRemote(command.ArrivedPoint, 
                             handle=self.factory.robots[0].handle, #FIXME
-                            x=self.factory.robots[0].position['x'],#FIXME 
-                            y=self.factory.robots[0].position['y']) #FIXME
+                            x=x,#self.factory.robots[0].position['x'],#FIXME 
+                            y=y)#self.factory.robots[0].position['y']) #FIXME
+            self.factory.robots[0].position_lock.release()
             return {'ACK': 'got point'}
-        else:#FIXME : Exception
+        else:#FIXME : Exception 
+            #FIXME: roboter.go_to_point() returned false
+            self.factory.robots[0].position_lock.acquire()
             self.callRemote(command.ArrivedPoint, 
                             handle=self.factory.robots[0].handle, #FIXME
-                            x=self.factory.robots[0].position['x'],#FIXME 
-                            y=self.factory.robots[0].position['y']) #FIXME
+                            x=x,#self.factory.robots[0].position['x'],#FIXME 
+                            y=y)#self.factory.robots[0].position['y']) #FIXME
+            self.factory.robots[0].position_lock.release()
             return {'ACK': 'not'}
     command.GoToPoint.responder(go_to_point)
 
@@ -95,7 +100,7 @@ class Explorer():
         self.color = color
         self.ausrichtung = 90; # 0 - 359 Grad; 0 Osten, 90 Norden, 180 Westen, 270 Sueden 
         self.identitaet = identitaet
-        self.phase = 1
+        self.phase = 0
         self.status = None
         self.status_lock = threading.Lock()
         self.handle = None
@@ -106,6 +111,7 @@ class Explorer():
         self.abbruch_lock = threading.Lock()
         self.robot_type = 0
         self.message_id = 0
+        self.position_lock = threading.Lock()
         self.position = {'x': 0.0,'y': 0.0}
         self.outbox = outbox
         self.inbox = 10 + inbox
@@ -151,13 +157,15 @@ class Explorer():
         
     def go_back(self, distance):
         self.send_message(message='2,'+str(distance))
-        t = berechnePunkt(self.ausrichtung, -1*distance*360, self.position)
-        self.position = t
-        print self.position
+        self.position_lock.acquire()
+        self.position = berechnePunkt(self.ausrichtung, -1*distance*360, self.position)
+        self.position_lock.release()
     
     def go_to_point(self, x, y):
         self.stop()
+        self.position_lock.acquire()
         vektor = berechneVektor(self.position, {'x': x, 'y': y})
+        self.position_lock.release()
         self.blockiert_lock.acquire()
         self.blockiert = True
         self.blockiert_lock.release()
@@ -174,6 +182,9 @@ class Explorer():
         self.status_lock.acquire()
         if self.status == 'arrived':
             self.status_lock.release()
+            self.position_lock.acquire()
+            self.position = {'x': x, 'y': y} #FIXME
+            self.position_lock.release()
             return True
         elif self.status == 'hit':
             self.status_lock.release()
@@ -313,7 +324,7 @@ class Explorer():
                     csv = payload.split(',') # payload = event, entfernung, sensor(optional)
                     if int(csv[0]) == 1: #nach Zeitintervall 500ms update_position (Entfernung)
                         dbg_print("Update: "+str(csv[1])+" Einheiten gefahren") 
-                        print berechnePunkt(self.ausrichtung, csv[1], self.position)#TODO an MCC
+                        #print berechnePunkt(self.ausrichtung, csv[1], self.position)#TODO an MCC
                     elif int(csv[0]) == 2: #kollision update_position (Entfernung)
                         self.blockiert_lock.acquire()
                         self.blockiert = False
@@ -322,8 +333,9 @@ class Explorer():
                         self.status = 'hit'
                         self.status_lock.release()
                         dbg_print("Kollision: "+str(csv[1])+" Einheiten gefahren") 
-                        t = berechnePunkt(self.ausrichtung, csv[1], self.position) #TODO an MCC
-                        self.position = t
+                        self.position_lock.acquire()
+                        self.position = berechnePunkt(self.ausrichtung, csv[1], self.position) #TODO an MCC
+                        self.position_lock.release()
                         dbg_print(str(self.position))
                     elif int(csv[0]) == 3: #strecke ohne vorkommnisse abgefahren
                         self.blockiert_lock.acquire()
@@ -331,10 +343,10 @@ class Explorer():
                         self.blockiert_lock.release()
                         self.status_lock.acquire()
                         self.status = 'arrived'
-                        self.position = berechnePunkt(self.ausrichtung, int(csv[1]), self.position) #TODO an MCC
                         self.status_lock.release()
-                        dbg_print(self.status)
-                        dbg_print(str(self.position))
+                        self.position_lock.acquire()
+                        self.position = berechnePunkt(self.ausrichtung, int(csv[1]), self.position) #TODO an MCC
+                        self.position_lock.release()
                         dbg_print(str(csv[1])+" Einheiten gefahren") 
                     elif int(csv[0]) == 4: #beendet rueckwaerts und drehen
                         self.blockiert_lock.acquire()
