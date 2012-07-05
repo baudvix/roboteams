@@ -4,6 +4,7 @@ import time
 import math
 import config
 import motion_poseInit
+import colourDetection
 from naoqi import ALProxy
 from naoqi import ALBroker
 
@@ -11,7 +12,7 @@ class NAOCalibration():
 
     # initial definitions for Marker, IP, PORT, NXT's
     def __init__(self):
-        self.IP = "194.95.174.189"
+        self.IP = "194.95.174.187"
         self.PORT = 9559
         self.naoCameraHeight = 50
         self.markerHeight = 12
@@ -25,11 +26,14 @@ class NAOCalibration():
         self.pitchIntervals = [0, 10, 20]
         self.yawIntervals = [0, -30, -60, 0, 30, 60]
 
+        self.resolutionHeight = 400
+        self.resolutionWidth = 680
 
         # allDetectedMarker = [ Marker1, Marker2, Marker3, Marker4, Marker5, Marker6]
         # MarkerX = [alphaArray, betaArray, heightArray, idArray, [distancesToMarker] (-> calculated at last)]
         # distancesToMarker = [c, a, b] with c as the direct distance, a as the y-distance, b as the x-distance
         self.allDetectedMarker = [[[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []]]
+        self.allDetectedMarkerAVG = [[[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []]]
 
         # listen to anyone # find a free port and use it # parent broker IP # parent broker port
         self.myBroker = ALBroker("myBroker", "0.0.0.0", 0, self.IP, self.PORT)
@@ -80,21 +84,15 @@ class NAOCalibration():
             exit(1)
         return tts
 
-    def getArrayOfMarker(self):
-        return self.memoryProxy.getData("LandmarkDetected")
-
-    def resetAllDetectedMarker(self):
-        self.allDetectedMarker = [[[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []]]
-
-    def detectMarkerAndCalcDist(self):
+    def detectMarker(self, numberOfMeasurements):
         self.resetAllDetectedMarker()
 
         # repeat the hole measurement numberOfMeasurements times
-        for i in range(0, self.numberOfMeasurements):
-            time.sleep(0.1)
+        for i in range(0, numberOfMeasurements):
+            time.sleep(0.5)
 
             # this is the array of information about the markers (time, ids, wights, angles or nothing at all!)
-            arrayOfMarker = self.getArrayOfMarker()
+            arrayOfMarker = self.memoryProxy.getData("LandmarkDetected")
 
             # set the number of recognized markers on nxt's
             if(len(arrayOfMarker)>=2):
@@ -128,25 +126,54 @@ class NAOCalibration():
                 # this should not happen because before method starts nao enshures that the head centres the right marker
                 print "No landmark detected"
 
+    def resetAllDetectedMarker(self):
+        self.allDetectedMarker = [[[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []]]
+        self.allDetectedMarkerAVG = [[[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []]]
+
+    def calcAvgOfAllDetectedMarker(self):
         # calculate the distances for all possible 6 markers
-        for i in range(0,6):
+        for i in range(0,len(self.allDetectedMarker)):
 
             # only calculate if there is one marker
             if(self.allDetectedMarker[i][0] != []):
 
-                print self.allDetectedMarker[i][0]
-                self.allDetectedMarker[i][0] = self.calculateAVG(self.allDetectedMarker[i][0]) #avgAlphaArray
-                self.allDetectedMarker[i][1] = self.calculateAVG(self.allDetectedMarker[i][1]) #avgBetaArray
-                self.allDetectedMarker[i][2] = self.calculateAVG(self.allDetectedMarker[i][2]) #avgHeightArray
-                self.allDetectedMarker[i][3] = self.mostFrequent(self.allDetectedMarker[i][3]) #avgIDArray
+                self.allDetectedMarkerAVG[i][0] = self.calculateAVG(self.allDetectedMarker[i][0]) #avgAlphaArray
+                self.allDetectedMarkerAVG[i][1] = self.calculateAVG(self.allDetectedMarker[i][1]) #avgBetaArray
+                self.allDetectedMarkerAVG[i][2] = self.calculateAVG(self.allDetectedMarker[i][2]) #avgHeightArray
+                self.allDetectedMarkerAVG[i][3] = self.mostFrequent(self.allDetectedMarker[i][3]) #avgIDArray
 
-                distancesToMarker = [self.calculateDirectDistance(self.allDetectedMarker[i]), self.calculateXDistance(self.allDetectedMarker[i]), self.calculateYDistance(self.allDetectedMarker[i])]
+
+    def measureAgainAndCalcDist(self):
+        self.detectMarker(10)
+        # update the average values
+        self.calcAvgOfAllDetectedMarker()
+
+        for i in range(0,len(self.allDetectedMarker)):
+
+            # only calculate if there is one marker
+            if(self.allDetectedMarker[i][0] != []):
+
+                distancesToMarker = [self.calculateDirectDistance(self.allDetectedMarkerAVG[i]), self.calculateXDistance(self.allDetectedMarkerAVG[i]), self.calculateYDistance(self.allDetectedMarkerAVG[i])]
                 self.allDetectedMarker[i][4] = distancesToMarker
+                self.allDetectedMarkerAVG[i][4] = distancesToMarker
 
-        # TODO: do not return all detected marker but only the marker with belongs to the nxt with color c
-        return self.allDetectedMarker
 
-    # this method makes the NAO look for a certain nxt (has certain color and marker numbers)
+    def getNearestMarker(self):
+        dist = -1
+        minDist = -1
+        nearest = -1
+        for i in range(0, len(self.allDetectedMarkerAVG)):
+            if(self.allDetectedMarkerAVG[i][0] != []):
+                dist = math.sqrt(abs(self.allDetectedMarkerAVG[i][0]) + abs(self.allDetectedMarkerAVG[i][1]))
+
+                if(dist < minDist or minDist == -1):
+                    minDist = dist
+                    nearest = i
+        if(nearest != -1):
+            return self.allDetectedMarkerAVG[nearest]
+        return []
+
+
     def findNXT(self, NXTColor):
 
         # set the initial head position for NAO
@@ -158,76 +185,44 @@ class NAOCalibration():
             # move head horizontal
             for h in range(0, len(self.yawIntervals)):
 
+                time.sleep(2.5)
+
                 # set the head position to the current yaw and pitch interval
                 motion_poseInit.setMotion(self.yawIntervals[h], self.pitchIntervals[g])
 
                 #make 5 measurements to be sure that there is / is no marker detected
-                for i in range(0, 5):
+                self.detectMarker(5)
 
-                    # sleep time is necessary otherwise the NAO has no chance to realize marker because of head movement
-                    time.sleep(0.8)
-                    arrayOfMarker = self.getArrayOfMarker()
-                    #print arrayOfMarker
+                # calculate the averages for all detected markers
+                self.calcAvgOfAllDetectedMarker()
 
-                    # same like in detectMarkerAndCalcDist
-                    if(len(arrayOfMarker)>=2):
-                        numberOfMarker = len(arrayOfMarker[1])
-                    else:
-                        numberOfMarker = 0
-
-                    # Check whether we found some markers
-                    if(numberOfMarker >= 1):
-
-                        # fill array with all possible makers
-                        for j in range(0, numberOfMarker):
-                            try:
-                                # First Field = Data field
-                                markerDataField = arrayOfMarker[1][j][0]
-                                self.allDetectedMarker[j][0].append(markerDataField[1])    #insert the alphaValue
-                                self.allDetectedMarker[j][1].append(markerDataField[2])    #insert the betaValue
-                                self.allDetectedMarker[j][2].append(markerDataField[3])    #insert the sizeXValue (=sizeYValue) for the height
-
-                                # Second Field = Extra info (ie, mark ID)
-                                markerID = arrayOfMarker[1][j][1][0]
-                                self.allDetectedMarker[j][3].append(markerID) #insert the markerID
-
-                            except Exception, e:
-                                print "Naomarks detected, but it seems getData is invalid. ALValue = "
-                                print arrayOfMarker
-                                print "Error msg %s" % (str(e))
-                        print self.allDetectedMarker
-
-                # calculate the averages for all detected markers and the color of the marker
-                for i in range(0,6):
-
-                    # only calculate if there is one marker
-                    if(self.allDetectedMarker[i][0] != []):
-                        # average ID is too error-prone!
-                        #avgID = self.mostFrequent(self.allDetectedMarker[i][3])
-
-                        avgAlpha = self.calculateAVG(self.allDetectedMarker[i][0]) #avgAlphaArray
-                        avgBeta = self.calculateAVG(self.allDetectedMarker[i][1]) #avgBetaArray
-                        avgSize = self.calculateAVG(self.allDetectedMarker[i][2]) #avgHeightArray
-
-                        # TODO: make color recognition of this marker
-                        if(self.markerHasColor(NXTColor, i)):
-                            #motion_poseInit.setMotion(self.toDEG(getHead()[0]+avgAlpha), self.toDEG(getHead()[1]+avgBeta))
-                            pass
-
-                        # center the head of the nao to the nxt marker if the right Marker was found
-                        for ID in self.allDetectedMarker[i][3]:
-                            if(ID in self.markerPosition[0]):
-                                motion_poseInit.setMotion(self.toDEG(self.getHead()[0]+avgAlpha), self.toDEG(self.getHead()[1]+avgBeta))
-                                self.textToSpeechProxy.say('NXT with color ' + str(NXTColor) + ' found!')
-                                return True
+                # TODO: make more effective
+                found = self.centerHeadToMarkerWithColor(NXTColor)
+                if(found != -1):
+                    self.textToSpeechProxy.say('NXT with color' + str(NXTColor) + ' found!')
+                    return True
 
         self.textToSpeechProxy.say('NXT ' + str(NXTColor) + ' not found!')
         return False
 
-    def markerHasColor(self, NXTColor, markerInAllDetectedMarker):
-        avgSize = self.allDetectedMarker[markerInAllDetectedMarker][2]
-        return True
-        #return colorDetection.
+    # called by findNXT
+    def centerHeadToMarkerWithColor(self, NXTColor):
+        for i in range(0, len(self.allDetectedMarker)):
+
+            # only calculate if there is one marker
+            if(self.allDetectedMarker[i][0] != []):
+
+                avgAlpha = self.allDetectedMarkerAVG[i][0]
+                avgBeta = self.allDetectedMarkerAVG[i][1]
+                motion_poseInit.setMotion(self.toDEG(self.getHead()[0]+avgAlpha), self.toDEG(self.getHead()[1]+avgBeta))
+
+                if(colourDetection.getColour(self.IP, self.PORT, 320, 240) == NXTColor):
+                    # head is centered to the right marker with the color of nxt
+                    return i
+        return -1
+
+    def getXPixelWithYawAngle(self, yawAngle):
+        return yawAngle
 
     #to get the current head position of the nao
     def getHead(self):
@@ -275,20 +270,29 @@ class NAOCalibration():
         found = self.findNXT(color)
 
         if(found):
-            self.textToSpeechProxy.say('Start to calculate distance')
-            allMarker = self.detectMarkerAndCalcDist()
-            print allMarker
-            directDistance = int(allMarker[0][4][0])
-            x = int(allMarker[0][4][1])
-            y = int(allMarker[0][4][2])
-            orientation = self.markerPosition[1][self.markerPosition[0].index(allMarker[0][3])]
+            # now the head of the nao should be centred to the right colored marker
+            # then calc again to get better data
+            self.measureAgainAndCalcDist()
 
-            if(len(allMarker)>0):
-                self.textToSpeechProxy.say('The nxt is '+ str(directDistance) + 'centimeter away from me!')
-                self.textToSpeechProxy.say('The position of the NXT is ' + str(orientation))
-                return x, y, orientation
+            self.textToSpeechProxy.say('Calculate distance')
+            centerMarker = self.getNearestMarker()
+            print "Center Marker"
+            print centerMarker
+
+            if(centerMarker!=[]):
+                directDistance = int(centerMarker[4][0])
+                x = int(centerMarker[4][1])
+                y = int(centerMarker[4][2])
+                if(centerMarker[3] in self.markerPosition[0]):
+                    orientation = self.markerPosition[1][self.markerPosition[0].index(centerMarker[3])]
+                    self.textToSpeechProxy.say('The nxt is '+ str(directDistance) + 'centimeter away from me!')
+                    self.textToSpeechProxy.say('The position of the NXT is ' + str(orientation))
+                    return x, y, orientation
+                else:
+                    raise NXTNotFoundException("Unknown ID found!")
             else:
                 self.textToSpeechProxy.say('Error! Could not calculate distance. Make sure that the nxt didn\'t move')
+                raise NXTNotFoundException("Could not calculate distance. Make sure that the nxt didn\'t move.")
         else:
             raise NXTNotFoundException("NXT not found.")
 
@@ -296,7 +300,8 @@ class NAOCalibration():
 
 
 n = NAOCalibration()
-n.performCalibration(1)
+colors = ['red', 'yellow', 'green', 'blue']
+n.performCalibration(0)
 
 
 class NXTNotFoundException(Exception):
