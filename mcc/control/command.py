@@ -154,7 +154,8 @@ class ArrivedPoint(Command):
                  ('x_axis', Integer()),
                  ('y_axis', Integer())]
     response = [('ack', String())]
-    error = [(CommandHandleError, 'COMMAND_HANDLE_ERROR'),
+    error = [(CommandMissionCompleteError, 'COMMAND_MISSION_COMPLETE_ERROR'),
+             (CommandHandleError, 'COMMAND_HANDLE_ERROR'),
              (CommandActiveError, 'COMMAND_ACTIVE_ERROR')]
 
 
@@ -163,7 +164,8 @@ class UpdateState(Command):
     """
     The MCC notifies the robot about the current mission state
     """
-    arguments = [('state', Integer())]
+    arguments = [('handle', Integer()),
+                 ('state', Integer())]
     response = [('ack', String())]
 
 
@@ -171,7 +173,8 @@ class UpdatePosition(Command):
     """
     The MCC notifies the robot about his current position
     """
-    arguments = [('x_axis', Integer()),
+    arguments = [('handle', Integer()),
+                 ('x_axis', Integer()),
                  ('y_axis', Integer()),
                  ('yaw', Integer())]
     response = [('ack', String())]
@@ -192,7 +195,8 @@ class NXTMissing(Command):
     """
     The MCC notifies the NAO about an missing NXT
     """
-    arguments = [('nxt_handle', Integer()),
+    arguments = [('handle', Integer()),
+                 ('nxt_handle', Integer()),
                  ('color', Integer())]
     response = [('ack', String())]
 
@@ -201,7 +205,7 @@ class PerformCalibration(Command):
     """
     The MCC requests a calibration of a given NXT
     """
-    arguments = [('nao_handle', Integer()),
+    arguments = [('handle', Integer()),
                  ('nxt_handle', Integer()),
                  ('color', Integer())]
     response = [('nao_handle', Integer()),
@@ -217,7 +221,8 @@ class SendPath(Command):
     """
     The MCC sends to the NAO the path to the target
     """
-    arguments = [('path', AmpList([('x_axis', Integer()),
+    arguments = [('handle', Integer()),
+                 ('path', AmpList([('x_axis', Integer()),
                                    ('y_axis', Integer())]))]
     response = [('ack', String())]
 
@@ -227,6 +232,7 @@ class GoToPoint(Command):
     """
     The MCC sends to the NXT a point to go to
     """
-    arguments = [('x_axis', Integer()),
+    arguments = [('handle', Integer()),
+                 ('x_axis', Integer()),
                  ('y_axis', Integer())]
     response = [('ack', String())]

@@ -3,6 +3,7 @@
 import wx
 import math
 import random
+import pprint
 
 import Queue
 import threading
@@ -15,6 +16,8 @@ from OpenGL.GL import *
 from mcc.model import map
 
 APP_EXIT = 1
+MAP_CHECKLIST = wx.NewId()
+TRACE_CHECKLIST = wx.NewId()
 
 
 class Gui(wx.Frame):
@@ -23,6 +26,10 @@ class Gui(wx.Frame):
         super(Gui, self).__init__(*args, **kwargs)
         self.map_active_list = []
         self.trace_active_list = []
+        self.map_id = 0
+        self.trace_id = 0
+        self._maps = []
+        self._traces = []
         self.initUI()
 
     def initUI(self):
@@ -53,14 +60,14 @@ class Gui(wx.Frame):
         c_vbox = wx.BoxSizer(wx.VERTICAL)
 
         #   - Map List -
-        self.map_list_box = wx.CheckListBox(c_panel, -1)
+        self.map_list_box = wx.CheckListBox(c_panel, MAP_CHECKLIST)
         self.map_list_box.ExtraStyle = wx.LB_MULTIPLE
-        self.Bind(wx.EVT_CHECKLISTBOX, self.on_check_map)
+        self.Bind(wx.EVT_CHECKLISTBOX, self.on_check, id=MAP_CHECKLIST)
 
         #   - Trace List -
-        self.trace_list_box = wx.CheckListBox(c_panel, -1)
+        self.trace_list_box = wx.CheckListBox(c_panel, TRACE_CHECKLIST)
         self.trace_list_box.ExtraStyle = wx.LB_MULTIPLE
-        self.Bind(wx.EVT_CHECKLISTBOX, self.on_check_trace)
+        self.Bind(wx.EVT_CHECKLISTBOX, self.on_check, id=TRACE_CHECKLIST)
 
         # -- arrange Control --
         c_vbox.Add(self.map_list_box, 1, wx.EXPAND | wx.ALL, 5)
@@ -75,27 +82,33 @@ class Gui(wx.Frame):
         #mm_hbox.Add(self.canvas, 1, wx.ALL, 10)
         mm_hbox.Add(self.canvas)
         mm_panel.SetSizer(mm_hbox)
-        self.test()
+
         self.Show(True)
 
     def on_quit(self, e):
         self.Close()
 
-    def on_check_map(self, e):
-        cd = self.map_list_box.GetClientData(e.GetSelection())
-        try:
-            self.map_active_list.index(cd)
-            self.map_active_list.remove(cd)
-        except ValueError:
-            self.map_active_list.append(cd)
+    def on_check(self, e):
+        eid = e.GetId()
+        sel = e.GetSelection()
 
-    def on_check_trace(self, e):
-        cd = self.trace_list_box.GetClientData(e.GetSelection())
-        try:
-            self.trace_active_list.index(cd)
-            self.trace_active_list.remove(cd)
-        except ValueError:
-            self.trace_active_list.append(cd)
+        if eid == MAP_CHECKLIST:
+            cd = self.map_list_box.GetClientData(sel)
+            print cd
+            try:
+                self.map_active_list.index(cd)
+                self.map_active_list.remove(cd)
+            except ValueError:
+                self.map_active_list.append(cd)
+        else:
+            cd = self.trace_list_box.GetClientData(sel)
+            try:
+                self.trace_active_list.index(cd)
+                self.trace_active_list.remove(cd)
+            except ValueError:
+                self.trace_active_list.append(cd)
+        self.canvas.active_maps = self.get_active_maps()
+        self.canvas.map_generate()
 
     def fake_register_map(self, title, client_data):
         self.map_list_box.Insert(title, 0, client_data)
@@ -104,14 +117,29 @@ class Gui(wx.Frame):
         self.trace_list_box.Insert(title, 0, client_data)
 
     def register_map(self, new_map):
-        self.map_list_box.Insert(new_map.name, new_map)
+        id = self.map_id
+        self.map_id += 1
+        self.map_list_box.Insert(new_map.name, 0, id)
+        self._maps.append({'id': id, 'map': new_map})
+
+    def get_active_maps(self):
+        m_list = []
+        for id_map in self.map_active_list:
+            for a_map in self._maps:
+                if a_map['id'] == id_map:
+                    m_list.append(a_map['map'])
+        return m_list
 
     def register_trace(self, new_trace, title):
         self.trace_list_box.Insert(title, new_trace)
 
-    def notify_map_change(self, redraw=False):
-        if redraw:
-            self.canvas.map_generate(self.map_active_list)
+    def notify_map_change(self):
+        points = []
+        a_map = self.get_active_maps()
+        for m in a_map:
+            points.extend(m.latest_update)
+            m.latest_update = []
+        self.canvas.update_points(points)
 
     def notify_trace_change(self, redraw=False):
         if redraw:
@@ -140,15 +168,20 @@ class WxGLCanvas(GLCanvas):
         wx.EVT_PAINT(self, self.on_draw)
         wx.EVT_SIZE(self, self.on_size)
         wx.EVT_WINDOW_DESTROY(self, self.on_destroy)
-        self.SetSize((980, 980))
+
+        self.SetSize((500, 500))
+
+        self._active_maps = []
 
         self._map_draw = map.MapModel('drawable map')
+        self._map_draw.expand = [1, 1, 0, 0]
         self._unit = 0.0125
         self._map_correction = (0, 0)
 
         self._zoom_factor = 0.5
 
         self._to_draw_squares = Queue.Queue()
+        self.max_color = 0
         self.map_color = [(0.0549, 0.3608, 0.0196),
                           (0.102, 0.4471, 0.0431),
                           (0.149, 0.5098, 0.0588),
@@ -162,6 +195,17 @@ class WxGLCanvas(GLCanvas):
                           (0.9490, 0.2863, 0.1333),
                           (0.9255, 0.2431, 0.1333),
                           (0.8824, 0.251, 0.1373)]
+        self.calc_draw_value()
+
+    #PROPERTY --- active_maps
+    def fget_active_maps(self):
+        """The active_maps property getter"""
+        return self._active_maps
+
+    def fset_active_maps(self, value):
+        """The active_maps property setter"""
+        self._active_maps = value
+    active_maps = property(fget_active_maps, fset_active_maps)
 
     #PROPERTY --- unit
     def fget_unit(self):
@@ -184,23 +228,34 @@ class WxGLCanvas(GLCanvas):
     zoom_factor = property(fget_zoom_factor, fset_zoom_factor)
 
     def update_points(self, points):
+       # print 'update'
         self._map_draw.increase_points(points)
+        self._map_draw.latest_update = []
         self.map_propotional()
         if self._map_draw.need_redraw:
             self.calc_draw_value()
             self.draw_map()
+            self._map_draw.need_redraw = False
         else:
             for p in points:
                 x, y = p
                 cx, cy = self._map_correction
-                dx -= cx
-                dy -= cy
-                self._to_draw_squares.put(self.calc_color(
-                    [dx, dy,
-                     dx + 1,
-                     dy + 1,
-                     self._map_draw.get_point(x, y)],
-                    self._map_draw.max_free_count))
+                dx = (x - cx) * self._unit - 1
+                dy = (y - cy) * self._unit - 1
+                ex = (x + 1 - cx) * self._unit - 1
+                ey = (y + 1 - cy) * self._unit - 1
+                new_ele = [dx, dy, ex, ey,
+                    self.calc_simple_color(self._map_draw.get_point(x, y))]
+                self._to_draw_squares.put(new_ele)
+            #draw squares
+            self.SetCurrent()
+            glLoadIdentity()
+            squares = []
+            while not self._to_draw_squares.empty():
+                squares.append(self._to_draw_squares.get())
+            self.draw_squares(squares)
+
+            self.SwapBuffers()
 
     def map_propotional(self):
         t, r, b, l = self._map_draw.expand
@@ -211,20 +266,22 @@ class WxGLCanvas(GLCanvas):
             self._map_draw.expand_map(1)
             r += 1
 
-    def map_generate(self, active_map):
+    def map_generate(self):
         self._map_draw = map.MapModel("map_draw")
         t_expand = [0, 0, 0, 0]
-        for m in active_map:
+        for m in self.active_maps:
+            m.latest_update = []
             for i in range(0, 4):
-                if t_expand[i] < active_map.expand[i]:
-                    t_expand[i] = active_map.expand[i]
+                if t_expand[i] < m.expand[i]:
+                    t_expand[i] = m.expand[i]
         t, r, b, l = t_expand
         for x in range(l * -100, r * 100):
             for y in range(b * -100, t * 100):
                 v = 0
-                for m in active_map:
+                for m in self.active_maps:
                     v += m.get_point(x, y)
-                self._map_draw = v
+                self._map_draw.set_point(x, y, v)
+
         self.draw_map()
 
     def calc_draw_value(self):
@@ -234,9 +291,10 @@ class WxGLCanvas(GLCanvas):
         cx = (((r + l) / 2) - l) * -1
         cy = (((t + b) / 2) - t) * -1
 
-        self._map_correction(cx, cy)
+        self._map_correction = (cx, cy)
 
     def draw_map(self):
+        self._to_draw_squares = Queue.Queue()
         squares = []
         t, r, b, l = self._map_draw.expand
         cx, cy = self._map_correction
@@ -246,13 +304,18 @@ class WxGLCanvas(GLCanvas):
             for y in range(b * -100, t * 100):
                 value = self._map_draw.get_point(x, y)
                 if not value == 0:
-                    squares.append([(x - cx) * self.unit,
-                                    (y - cy) * self.unit,
-                                    (x + 1 - cx) * self.unit,
-                                    (y + 1 - cy) * self.unit, value])
-        squares = self.calc_color(squares, self._map_draw.max_free_count)
-        for s in squares:
-            self._to_draw_squares.put(s)
+                    squares.append([(x - cx) * self.unit - 1,
+                                    (y - cy) * self.unit - 1,
+                                    (x + 1 - cx) * self.unit - 1,
+                                    (y + 1 - cy) * self.unit - 1,
+                                    self.calc_simple_color(value)])
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        self.SetCurrent()
+        glLoadIdentity()
+        self.draw_squares(squares)
+
+        self.SwapBuffers()
 
     def draw_lines(self, lines):
         glBegin(GL_LINES)
@@ -314,6 +377,14 @@ class WxGLCanvas(GLCanvas):
             square[4] = self.map_color[int((square[4] / max_value) * 11)]
         self.draw_squares(squares)
 
+    def calc_simple_color(self, value):
+        if value > 4:
+            return self.map_color[0]
+        if value > 2:
+            return self.map_color[5]
+        else:
+            return self.map_color[11]
+
     def on_draw(self, event):
         print 'on_draw'
         self.SetCurrent()
@@ -321,14 +392,9 @@ class WxGLCanvas(GLCanvas):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
 
-        # tmp_squares = self.map_color_example()
-        # self.draw_squares(tmp_squares)
-        # self.draw_triangle(0, 0, (1, 1, 1))
-
-        # test_squares = self.map_random_squares()
-        # self.draw_squares(test_squares)
+        self.draw_map()
         squares = []
-        while not self._to_draw_squares.empty:
+        while not self._to_draw_squares.empty():
             squares.append(self._to_draw_squares.get())
         self.draw_squares(squares)
 
@@ -367,13 +433,13 @@ class ViewMng():
         pass
 
     def run(self):
-        print 'run'
+        #print 'run'
         self.app = wx.App()
         self.gui = Gui(None, -1)
-        self.app.MainLoop()
         t = threading.Thread(target=self.app.MainLoop)
-        t.setDaemon(1)
+        #t.setDaemon(1)
         t.start()
+        #print 'x'
 
 if __name__ == '__main__':
     vm = ViewMng()

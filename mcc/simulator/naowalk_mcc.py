@@ -23,11 +23,11 @@ class NaoWalkProtocol(server.MCCProtocol):
         if self.factory.state_machine.state == state.STATE_NAOWALK:
             x, y = self.factory.naowalk_logic.get_next_point(robot.NAO_TYPE)
             if x == None:
-                print "mission complete"
+                raise command.CommandMissionCompletedError("Mission complete")
             else:
                 robo = self.factory.naowalk_logic._robot_nao
                 robo.connection.callRemote(command.GoToPoint,
-                    x_axis=x, y_axis=y)
+                    handle=robo.handle, x_axis=x, y_axis=y)
         else:
             #TODO: Guided Exploration
             pass
@@ -48,7 +48,7 @@ class NaoWalkProtocol(server.MCCProtocol):
                 if x == None:
                     raise command.CommandMissionCompletedError("Mission complete")
                 robo.connection.callRemote(command.GoToPoint,
-                    x_axis=x, y_axis=y)
+                    handle=robo.handle, x_axis=x, y_axis=y)
                 return {'ack': 'got followed'}
         raise command.CommandNXTHandleError("no nxt with handle")
 
@@ -57,8 +57,9 @@ class NaoWalkFactory(server.MCCFactory):
 
     protocol = NaoWalkProtocol
 
-    def __init__(self, start_state=0):
-        server.MCCFactory.__init__(self, start_state)
+    def __init__(self, start_state=state.STATE_NAOWALK):
+        server.MCCFactory.__init__(self)
+        self.state_machine = state.StateMachine(start_state)
         self.naowalk_logic = logic.NaoWalk(self.robots)
 
     def initGUI(self):

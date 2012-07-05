@@ -110,11 +110,11 @@ class NAOClient():
     def connected(self, protocol):
         self.protocol = protocol
         print 'connected to mcc'
-        deffered = protocol.callRemote(command.Register, robot_type=self.robot_type, color=self.color, rhandle = self.rhandle)
+        deffered = protocol.callRemote(command.Register, robot_type=self.robot_type, color=self.color, rhandle=self.rhandle)
         deffered.addCallback(self.activate)
         deffered.addErrback(self.failure)
 
-    def activate(self, handle):
+    def activate(self, rhandle, handle):
         self.handle = handle['handle']
         print self.handle
         deffered = self.protocol.callRemote(command.Activate, handle=self.handle)

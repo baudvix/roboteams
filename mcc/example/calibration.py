@@ -34,7 +34,7 @@ class LogicCalibration():
                         if robo2.robot_type == robot.NXT_TYPE:
                             nxt_robo = robo2
                     self.called_calibration = True
-                    defferd = robo.connection.callRemote(command.PerformCalibration, nao_handle=robo.handle, nxt_handle=nxt_robo.handle, color=nxt_robo.color)
+                    defferd = robo.connection.callRemote(command.PerformCalibration, handle=robo.handle, nxt_handle=nxt_robo.handle, color=nxt_robo.color)
                     print "Call for calib"
                     defferd.addCallback(self.print_out)
                     defferd.addErrback(self.failure)
