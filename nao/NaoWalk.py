@@ -45,6 +45,10 @@ class NaoWalk():
         self.tracker.setWholeBodyOn(False)
         self.tracker.stopTracker()
         self.tracker.startTracker()
+        self.nxt_moved = True
+        follower = threading.Thread(target = self.followRedBall, args=())
+        follower.setDaemon(True)
+        follower.start()
         self.ballPosition = []
         self.targetPosition = []
         self.protocol = protocol
@@ -120,9 +124,8 @@ class NaoWalk():
                     self.__setTopCamera()
                     print 'Waiting for NXT to move'
                     self.tts.say('Waiting for NXT to move')
+                    self.nxt_moved = False
                     deferred = self.protocol.callRemote(command.NXTFollowed, handle = 1, nxt_handle = 0, x_axis = 0, y_axis = 0)
-                    res = sleepUntilDFRDresult(deferred, timeout = 60)
-                    print res
                             
                     deferred.addCallback(self.walkToPosition)
                     #deferred.addErrback(self.waitForNXT)
@@ -199,51 +202,9 @@ class NaoWalk():
     command.GoToPoint.responder(go_to_point)
 
     def followRedBall(self):
-        while not self.hasBall():
-            print 'retrieve ball'
-            self.retrieveBall()
-        print 'walk to ball'
-        self.walkUpToBall()
-
-def sleepUntilDFRDresult(dfrd, timeout=60):
-    '''Hack to make non-blocking deferred waiting for its result or error for
-    in `timeout` specified number of seconds, but not to block reactor loop.
-    This wrapper *block* the caller until deferred.result or timeout appears.
-
-    >>> dfrd = defer.Deferred() #.addBoth(cbReactorStop)
-    >>> sleepUntilDFRDresult(dfrd)       # doctest:+ELLIPSIS
-    Exception(u'ERROR sleepUntilDFRDresult server not running for: <Deferred at 0x...> from <doctest
-__main__/<module> #L1',)
-
-    >>> startTime = time.time()
-    >>> f = lambda: print(sleepUntilDFRDresult(dfrd, timeout=999), 'in:', time.time()-startTime,
-'sec.' )
-    >>> s1 = reactor.callWhenRunning( f );
-    >>> dc2 = reactor.callLater(2, dfrd.callback, 'CALLED')
-    >>> dc0 = reactor.callLater(3, reactor.crash); reactor.run()   # doctest:+ELLIPSIS
-    WARNING sleepUntilDFRDresult timeout=999 sec. dangerous
-    CALLED in: 2.0... sec.
-    '''
-    if timeout > 600:
-        print('WARNING sleepUntilDFRDresult timeout={0} sec. dangerous'.format(timeout) )
-
-    err = None
-    if not isinstance(dfrd, defer.Deferred):
-        err = 'ERROR sleepUntilDFRDresult dfrd "{0}" not Deferred: '.format(type(dfrd))
-    elif not reactor.running:
-        err = 'ERROR sleepUntilDFRDresult server not running for: '
-    else:
-        toTime = time.time() + timeout
-        while not dfrd.called and toTime >= time.time():
-            try:
-                reactor.iterate(0.055)
-            except Exception as err:
-                pass
-            time.sleep(0.001)
-        if dfrd.called and hasattr(dfrd, 'result'):
-            return dfrd.result
-    func_name, module_name, line_no = tools.getCallerNameLocation()
-    repr_dfrd = '{0} from {2}/{1} #L{3}'.format(dfrd, func_name, module_name, line_no)
-    err = Exception( (err or 'ERROR TIMEOUT sleepUntilDFRDresult for: ') + repr_dfrd )
-##     print(err)
-    return err
+        while not self.nxt_moved:
+            while not self.hasBall():
+                print 'retrieve ball'
+                self.retrieveBall()
+            print 'walk to ball'
+            self.walkUpToBall()
