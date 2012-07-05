@@ -2,7 +2,7 @@ from naoqi import motion
 from naoqi import ALProxy
 
 #IP = "194.95.174.145" # set your Ip adress here
-IP = "localhost"
+IP = "194.95.174.187"
 PORT = 9559
 
 if (IP == ""):
