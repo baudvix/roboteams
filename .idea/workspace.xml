@@ -2,16 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2b3f0bc5-1a81-44d6-a9a8-ba04217144cc" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mcc/control/server.py.orig" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/nao/colourDetection.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/nao/test.py" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/nao/NAOCalibration.py" afterPath="$PROJECT_DIR$/nao/NAOCalibrationOld.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nao/camImage.png" afterPath="$PROJECT_DIR$/nao/camImage.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nao/NAOCalibration.py" afterPath="$PROJECT_DIR$/nao/NAOCalibration.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nao/NAOController.py" afterPath="$PROJECT_DIR$/nao/NAOController.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nao/config.py" afterPath="$PROJECT_DIR$/nao/config.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nao/testfile.py" afterPath="$PROJECT_DIR$/nao/testfile.py" />
     </list>
     <ignored path="roboteams.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -70,7 +61,7 @@
       <file leaf-file-name="NAOCalibration.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/nao/NAOCalibration.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="14" column="33" selection-start="283" selection-end="297" vertical-scroll-proportion="-9.204327">
+            <state line="14" column="28" selection-start="292" selection-end="292" vertical-scroll-proportion="0.5048077">
               <folding>
                 <element signature="e#23#34#0" expanded="true" />
               </folding>
@@ -150,7 +141,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="46" />
+    <option name="x" value="48" />
     <option name="y" value="22" />
     <option name="width" value="1394" />
     <option name="height" value="878" />
@@ -487,7 +478,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="46" y="22" width="1394" height="878" extended-state="6" />
+    <frame x="48" y="22" width="1394" height="878" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -660,7 +651,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/nao/NAOCalibration.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="33" selection-start="283" selection-end="297" vertical-scroll-proportion="-9.204327">
+        <state line="14" column="28" selection-start="292" selection-end="292" vertical-scroll-proportion="0.5048077">
           <folding>
             <element signature="e#23#34#0" expanded="true" />
           </folding>
