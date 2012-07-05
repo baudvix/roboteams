@@ -59,8 +59,8 @@ class NAOProtocol(RobotProtocol):
         print 'Follow path'
         pprint.pprint(path)
         self.walk = NaoWalk(self)
-        for line in path:
-            print line
+        for point in path:
+            print point
             self.walk.followRedBall()
         return {'ack': 'follow path'}
     command.SendPath.responder(send_path)
