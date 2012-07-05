@@ -43,12 +43,12 @@ class NaoWalk():
         self.tts = ALProxy("ALTextToSpeech")
         self.currentCam = 0
         self.tracker.setWholeBodyOn(False)
+        self.tracker.stopTracker()
         self.tracker.startTracker()
         self.ballPosition = []
         self.targetPosition = []
         self.protocol = protocol
         self.target_reached = False
-        self.nxt_reached = True
         self.__setTopCamera()
 
     def __del__(self):
@@ -119,15 +119,16 @@ class NaoWalk():
                     self.__setTopCamera()
                     print 'Waiting for NXT to move'
                     self.nxt_reached = False
-                    # deferred = self.protocol.callRemote(command.NXTFollowed, handle = 1, nxt_handle = 0, x_axis = 0, y_axis = 0)
-                    # deferred.addCallback(self.walkToPosition)
-                    # deferred.addErrback(self.waitForNXT)
+                    deferred = self.protocol.callRemote(command.NXTFollowed, handle = 1, nxt_handle = 0, x_axis = 0, y_axis = 0)
+                            
+                    deferred.addCallback(self.walkToPosition)
+                    #deferred.addErrback(self.waitForNXT)
                     # !!
                     # meldung ans mcc dass nxt weiterlaufen soll
                     # !!
                     
                      # walkToPosition() muss vom mcc aufgerufen werden und hier entfernt werden
-                    self.walkToPosition('bla')
+                    #self.walkToPosition('bla')
                     
                     break
 
@@ -174,9 +175,9 @@ class NaoWalk():
     def __turnToBall(self):
         if not self.hasBall():
             print 'Ball lost'
-            # deferred = self.protocol.callRemote(command.BallLost, nao_handle = 1, nxt_handle = 0)
-            # #moeglicher call ans mcc um retrieveBall aufzurufen
-            # deferred.addCallback(self.retrieveBall)
+            deferred = self.protocol.callRemote(command.BallLost, nao_handle = 1, nxt_handle = 0)
+            #moeglicher call ans mcc um retrieveBall aufzurufen
+            deferred.addCallback(self.retrieveBall)
             return False
         self.ballPosition = self.tracker.getPosition()
         b = self.ballPosition[1]/self.ballPosition[0]
@@ -185,13 +186,18 @@ class NaoWalk():
         self.motion.walkInit()
         self.motion.walkTo(0,0,z)
 
+    def print_out(self, ack):
+        print 'Success: %s' %ack
+
+    def go_to_point(self, x_axis, y_axis):
+        self.walkToPosition()
+        return {'ack':'got position'}
+    command.GoToPoint.responder(go_to_point)
+
     def followRedBall(self):
-        while not self.target_reached:
-            if self.nxt_reached:
-                while not self.hasBall():
-                    print 'retrieve ball'
-                    self.retrieveBall()
-                print 'walk to ball'
-                self.walkUpToBall()
-        self.tts.say('target area reached')
+        while not self.hasBall():
+            print 'retrieve ball'
+            self.retrieveBall()
+        print 'walk to ball'
+        self.walkUpToBall()
 

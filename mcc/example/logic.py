@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import time
+
 from mcc.model import robot
 from mcc.control import command
 
@@ -90,13 +92,17 @@ class NaoWalk(object):
             for i in range(0, len(self._path)):
                 plist.append({'x_axis': self._path[i][0],
                     'y_axis': self._path[i][1]})
-            d_nao = self._robot_nao.connection.callRemote(command.NAOWalk, nao_handle = self._robot_nao.handle, nxt_handle = self._robot_nxt.handle)
+            print 'Path send'
+            d_nao = self._robot_nao.connection.callRemote(command.SendPath, path = plist)
             d_nao.addCallback(self.print_out)
             d_nao.addErrback(self.failure)
             d_nxt = self._robot_nxt.connection.callRemote(
                 command.UpdatePosition, x_axis=0, y_axis=10, yaw=0)
             d_nxt.addCallback(self.print_out)
             d_nxt.addErrback(self.failure)
+        # if self._connected and self._started:
+        #     time.sleep(120)
+        #     self._robot_nao.connection.callRemote(command.TargetReached, nao_handle= self._robot_nao.handle)
 
     def print_out(self, ack):
         print 'Success: %s' % ack

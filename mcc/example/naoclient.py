@@ -58,17 +58,21 @@ class NAOProtocol(RobotProtocol):
     def send_path(self, path):
         print 'Follow path'
         pprint.pprint(path)
+        self.walk = NaoWalk(self)
+        for line in path:
+            self.walk.followRedBall()
         return {'ack': 'follow path'}
     command.SendPath.responder(send_path)
 
     def nao_walk(self, nao_handle, nxt_handle):
         print 'NAOWalk started'
         self.walk = NaoWalk(self)
-        self.walk.followRedBall()
+        while not self.walk.target_reached:
+            self.walk.followRedBall()
         return {'ack': 'walk finished'}
     command.NAOWalk.responder(nao_walk)
 
-    def target_reached(self):
+    def target_reached(self, nao_handle):
         print 'Target reached'
         self.walk.target_reached = True
     command.TargetReached.responder(target_reached)

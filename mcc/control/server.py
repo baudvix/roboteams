@@ -2,9 +2,10 @@
 """
 server provides the communication between the mcc and the robots
 """
+import time
 
 from twisted.protocols import amp
-from twisted.internet import reactor, task
+from twisted.internet import reactor, task, defer
 from twisted.internet import error as err
 from twisted.internet.protocol import Factory
 
@@ -108,6 +109,7 @@ class MCCProtocol(amp.AMP):
         move the nxt to the next position of the path
         """
         print "moving nxt to next point of the path"
+        time.sleep(5)
         return {'ack': 'got followed'}
     command.NXTFollowed.responder(nxt_followed)
 
