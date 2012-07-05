@@ -52,7 +52,7 @@ payload dequeue(int &queue1[], int &queue2[]){
  return tmp;
 }
 
-void sd(int &queue1[], int &queue2[])
+void clean_queue(int &queue1[], int &queue2[])
 {
  Acquire(queue_mutex);
  int t = 0;
@@ -80,37 +80,4 @@ void enqueue(int &queue1[], int &queue2[], payload elem){
 
 bool is_empty(){
  return msg_count <= 0;
-}
-
-
-string CharToStr(char c){
-switch(c){
-case 'a': return "a\0"; break;
-case 'b': return "b\0"; break;
-case 'c': return "c\0"; break;
-case 'd': return "d\0"; break;
-case 'e': return "e\0"; break;
-case 'f': return "f\0"; break;
-case 'g': return "g\0"; break;
-case 'h': return "h\0"; break;
-case 'i': return "i\0"; break;
-case 'j': return "j\0"; break;
-case 'k': return "k\0"; break;
-case 'l': return "l\0"; break;
-case 'm': return "m\0"; break;
-case 'n': return "n\0"; break;
-case 'o': return "o\0"; break;
-case 'p': return "p\0"; break;
-case 'q': return "q\0"; break;
-case 'r': return "r\0"; break;
-case 's': return "s\0"; break;
-case 't': return "t\0"; break;
-case 'u': return "u\0"; break;
-case 'v': return "v\0"; break;
-case 'w': return "w\0"; break;
-case 'x': return "x\0"; break;
-case 'y': return "y\0"; break;
-case 'z': return "z\0"; break;
-default: return "\0";
-}
 }

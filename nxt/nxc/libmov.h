@@ -15,7 +15,7 @@ struct distance{
  #define TEPPICH_ABWEICHUNG_L = 1.035
  #define TEPPICH_ABWEICHUNG_R = 0.881
  void vor(int strecke, distance& d);
- void zurueck(int umdrehungen);
+ void zurueck(int umdrehungen, distance& d);
  void drehen(char richtung, int winkel);
 
 #endif
