@@ -27,6 +27,9 @@ class MCCProtocol(amp.AMP):
             if robo.handle == handle:
                 robo.active = True
                 print '#%d activated' % handle
+                self.callRemote(command.GoToPoint, 
+                                x=0, 
+                                y=50)
                 return {'ACK': 'got activate'}
         raise command.CommandHandleError('No robot with handle')
     command.Activate.responder(activate)
@@ -79,7 +82,7 @@ class MCCServer(object):
         self.robots = None
         self.listen()
         loop = task.LoopingCall(self.run)
-        loop.start(0.5)
+        loop.start(30.0)
         print 'MCC is started and listens on %d' % self.port
         reactor.run()
 
