@@ -1,5 +1,6 @@
 __author__ = 'Lorenz'
 
+import sys
 import time
 import math
 import config
@@ -274,8 +275,8 @@ class NAOCalibration():
             self.measureAgainAndCalcDist()
 
             self.textToSpeechProxy.say('Calculate distance')
-            centerMarker = self.getNearestMarker()[0]
-            centerMarkerAVG = self.getNearestMarker()[1]
+            centerMarkerAVG = self.getNearestMarker()[0]
+            centerMarker = self.getNearestMarker()[1]
             print "Center Marker"
             print centerMarker
 
@@ -288,7 +289,7 @@ class NAOCalibration():
                 IDs = centerMarker[3]
                 for i in range(0, len(IDs)):
                     if(IDs[i] in self.markerPosition[0]):
-                        orientation = self.markerPosition[1][self.markerPosition[0].index(centerMarker[3])]
+                        orientation = self.markerPosition[1][self.markerPosition[0].index(centerMarkerAVG[3])]
                         self.textToSpeechProxy.say('The nxt is '+ str(directDistance) + 'centimeter away from me!')
                         self.textToSpeechProxy.say('The position of the NXT is ' + str(orientation))
                         return x, y, orientation
@@ -308,7 +309,11 @@ class NXTNotFoundException(Exception):
     def __str__(self):
         return repr(self.parameter)
 
+def main():
+    n = NAOCalibration()
+    colors = ['red', 'yellow', 'green', 'blue']
+    n.performCalibration(3)
+    sys.exit(1)
 
-n = NAOCalibration()
-colors = ['red', 'yellow', 'green', 'blue']
-n.performCalibration(3)
+if __name__ == '__main__':
+    main()
