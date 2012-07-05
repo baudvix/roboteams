@@ -89,7 +89,7 @@ class NAOCalibration():
 
         # repeat the hole measurement numberOfMeasurements times
         for i in range(0, numberOfMeasurements):
-            time.sleep(0.8)
+            time.sleep(0.6)
 
             # this is the array of information about the markers (time, ids, wights, angles or nothing at all!)
             arrayOfMarker = self.memoryProxy.getData("LandmarkDetected")
@@ -144,7 +144,7 @@ class NAOCalibration():
 
 
     def measureAgainAndCalcDist(self):
-        self.detectMarker(10)
+        self.detectMarker(8)
         # update the average values
         self.calcAvgOfAllDetectedMarker()
 
@@ -170,7 +170,7 @@ class NAOCalibration():
                     minDist = dist
                     nearest = i
         if(nearest != -1):
-            return self.allDetectedMarkerAVG[nearest]
+            return self.allDetectedMarkerAVG[nearest], self.allDetectedMarker[nearest]
         return []
 
 
@@ -274,7 +274,8 @@ class NAOCalibration():
             self.measureAgainAndCalcDist()
 
             self.textToSpeechProxy.say('Calculate distance')
-            centerMarker = self.getNearestMarker()
+            centerMarker = self.getNearestMarker()[0]
+            centerMarkerAVG = self.getNearestMarker()[1]
             print "Center Marker"
             print centerMarker
 
@@ -282,13 +283,17 @@ class NAOCalibration():
                 directDistance = int(centerMarker[4][0])
                 x = int(centerMarker[4][1])
                 y = int(centerMarker[4][2])
-                if(centerMarker[3] in self.markerPosition[0]):
-                    orientation = self.markerPosition[1][self.markerPosition[0].index(centerMarker[3])]
-                    self.textToSpeechProxy.say('The nxt is '+ str(directDistance) + 'centimeter away from me!')
-                    self.textToSpeechProxy.say('The position of the NXT is ' + str(orientation))
-                    return x, y, orientation
-                else:
-                    raise NXTNotFoundException("Unknown ID found!")
+                print x
+                print y
+                IDs = centerMarker[3]
+                for i in range(0, len(IDs)):
+                    if(IDs[i] in self.markerPosition[0]):
+                        orientation = self.markerPosition[1][self.markerPosition[0].index(centerMarker[3])]
+                        self.textToSpeechProxy.say('The nxt is '+ str(directDistance) + 'centimeter away from me!')
+                        self.textToSpeechProxy.say('The position of the NXT is ' + str(orientation))
+                        return x, y, orientation
+                    else:
+                        raise NXTNotFoundException("Unknown ID found!")
             else:
                 self.textToSpeechProxy.say('Error! Could not calculate distance. Make sure that the nxt didn\'t move')
                 raise NXTNotFoundException("Could not calculate distance. Make sure that the nxt didn\'t move.")
@@ -297,15 +302,13 @@ class NAOCalibration():
 
         self.myBroker.shutdown()
 
-
-n = NAOCalibration()
-colors = ['red', 'yellow', 'green', 'blue']
-n.performCalibration(3)
-
-
 class NXTNotFoundException(Exception):
     def __init__(self, value):
         self.parameter = value
     def __str__(self):
         return repr(self.parameter)
 
+
+n = NAOCalibration()
+colors = ['red', 'yellow', 'green', 'blue']
+n.performCalibration(3)
