@@ -4,20 +4,48 @@
 #include "libmov.nxc" //noetig da kein linking
 #include "libinfra.nxc" //noetig da kein linking
 
-mutex print_mutex;
-mutex blue_mutex;
-
-#define DEBUG 3
-
-task event(){
+task event()
+{
  #if DEBUG == 1
  Acquire(print_mutex);
  lcd_print("sen_event gestartet");//DEBUGINFO
  Release(print_mutex);
  #endif
+ while(true)
+ {
+  #if DEBUG == 0
+  if(SensorRaw(S4) < 480)
+  {
+   if(!found)
+   {
+    Acquire(blue_mutex);
+    string fou;
+    fou=StrCat("m;",NumToStr(id++),";9,0"); // 9: found
+    id %= 10;
+    id += 10;
+    SendResponseString(OUTBOX,fou);
+    Release(blue_mutex);
+    weiter=0;
+    found = 1;
+   }
+  }
+  #endif
+  Wait(1000);
+  
+  #if DEBUG == 0
+  Acquire(blue_mutex);
+  string news;
+  news=StrCat("m;",NumToStr(id++),";1,",NumToStr(MotorTachoCount(OUT_A)));  // s: save_way
+  id %= 10;
+  id += 10;
+  SendResponseString(OUTBOX,news);
+  Release(blue_mutex);
+  #endif
+ }
 }
  
-task movement(){
+task movement()
+{
  #if DEBUG == 1
  Acquire(print_mutex);
  lcd_print("movement gestartet");//DEBUGINFO
@@ -25,45 +53,88 @@ task movement(){
  #endif
  payload dequeued;
  string streckeninfo;
- int strecke;
- int id=10;
- while(true){
-  strecke=0;
+ distance strecke;
+ while(true)
+ {
   streckeninfo="";
-  if(!is_empty()){
+  if(!is_empty())
+  {
    dequeued = dequeue(queue1, queue2);
-   if(dequeued.funktion == 0){
-    Acquire(print_mutex);
-     lcd_print("ERROR dequeue()");
-    Release(print_mutex);
-   }
    #if DEBUG == 3
    Acquire(print_mutex);
      lcd_print(StrCat("dequeue=",NumToStr(dequeued.funktion)));
      lcd_print(StrCat(" param=",NumToStr(dequeued.param)));
    Release(print_mutex);
    #endif
-   if(dequeued.funktion == 1){
+   if(dequeued.funktion == 1)
+   {
 		weiter = 1; 
-		strecke = vor(0);
-    /*Acquire(blue_mutex);
-    streckeninfo=StrCat("m;",NumToStr(id++),";s,",NumToStr(strecke));
+	  vor(dequeued.param,strecke);
+	  
+    Acquire(print_mutex);    // ermöglicht das korrekte setzen von strecke
+    lcd_print(StrCat("grad:",NumToStr(strecke.rest)));
+    Release(print_mutex);
+	  
+	  Acquire(blue_mutex);
+	  string tmp = "";
+    if(strecke.k!=0) tmp=NumToStr(strecke.k);
+    if(hit)
+    {
+     streckeninfo=StrCat("m;",NumToStr(id++),";2,",tmp,NumToStr(strecke.rest));
+     hit = 0;
+    }
+    else
+    {
+     streckeninfo=StrCat("m;",NumToStr(id++),";3,",tmp,NumToStr(strecke.rest));
+    }
     id %= 10;
     id += 10;
     SendResponseString(OUTBOX,streckeninfo);
-    Release(blue_mutex);*/
+    Release(blue_mutex);
+	 }
+   else if(dequeued.funktion == 2)
+   {
+    zurueck(dequeued.param);
+    Acquire(blue_mutex);
+    streckeninfo=StrCat("m;",NumToStr(id++),";4,0");
+    id %= 10;
+    id += 10;
+    SendResponseString(OUTBOX,streckeninfo);
+    Release(blue_mutex);
    }
-   else if(dequeued.funktion == 2){zurueck(1);}
-   else if(dequeued.funktion == 3){drehen('l',90);}
-   else if(dequeued.funktion == 4){drehen('r',90);}
-   else{
-     Acquire(print_mutex);
-      lcd_print("M_PARSING-ERROR: ");
-      lcd_print(StrCat("dequeue=",NumToStr(dequeued.funktion)));
-      lcd_print(StrCat(" param=",NumToStr(dequeued.param)));
-     Release(print_mutex);
+   else if(dequeued.funktion == 3)
+   {
+    drehen('l',dequeued.param);
+    Acquire(blue_mutex);
+    streckeninfo=StrCat("m;",NumToStr(id++),";4,0");
+    id %= 10;
+    id += 10;
+    SendResponseString(OUTBOX,streckeninfo);
+    Release(blue_mutex);
    }
-  }else{
+   else if(dequeued.funktion == 4)
+   {
+    Acquire(blue_mutex);
+    drehen('r',dequeued.param);
+    streckeninfo=StrCat("m;",NumToStr(id++),";4,0");
+    id %= 10;
+    id += 10;
+    SendResponseString(OUTBOX,streckeninfo);
+    Release(blue_mutex);
+   }
+   else if(dequeued.funktion == 5){} // sendet ein wert vom ultraschall
+   //else if(dequeued.funktion == 0){} // abbruch --> weiter=0
+   else
+   {
+    Acquire(print_mutex);
+    lcd_print("M_PARSING-ERROR: ");
+    lcd_print(StrCat("dequeue=",NumToStr(dequeued.funktion)));
+    lcd_print(StrCat(" param=",NumToStr(dequeued.param)));
+    Release(print_mutex);
+   }
+  }
+  else
+  {
    #if DEBUG == 2
    Acquire(print_mutex);
     lcd_print("queue is empty");//DEBUGINFO
@@ -115,34 +186,39 @@ task dispatcher()
     Acquire(blue_mutex);
     SendResponseString(OUTBOX,tmp);
     Release(blue_mutex);
-    enqueue(queue1, queue2, m.msg);
-   }else if(m.typ == "a"){
-    //id-fertig
-   }else if(m.typ == "r"){
-    tmp = StrCat("a;", NumToStr(m.id),";ack");
-    #if DEBUG == 2
-    Acquire(print_mutex);
-     lcd_print(tmp);
-    Release(print_mutex);
-    #endif
-    Acquire(blue_mutex);
-    SendResponseString(OUTBOX,tmp);
-    Release(blue_mutex);
+   
+    if(m.msg.funktion == 0) // queue sendback auch nullen
+    {
+     weiter = 0;
+     Acquire(print_mutex);
+     lcd_print("exp. abbruch");
+     Release(print_mutex);
+     clean_queue(queue1, queue2);
+    }
+    else
+    {
+     enqueue(queue1, queue2, m.msg);
+    }
    }
   }
   Wait(500);
  }
 }
 
+void undo_found()
+{
+    found=0;
+}
 
 task main()
 {
  Precedes(dispatcher, movement, event);
+ queueInit(queue1, queue2);
 
- queueInit(queue1, queue2); 
  //Init Sensoren:
- SetSensorTouch(S1);
+ SetSensorLowspeed(S1);
  SetSensorTouch(S2);
  SetSensorTouch(S3);
+ SetSensorLight(S4);
 
 }
