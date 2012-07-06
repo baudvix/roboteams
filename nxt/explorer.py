@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: latin-1 -*-
+# -*- coding: utf-8 -*-
 OFFLINE = False
 
 import random
@@ -22,7 +22,6 @@ if OFFLINE == False:
 else:
     from pseudobrick import find_one_brick
 
-TIMEOFFSET = 3.0 #zeit bis zum nochmaligen Senden
 MAC = ["00:16:53:10:49:4D", "00:16:53:10:48:E7", "00:16:53:10:48:F3"]
 GRAD2CM = 17.59/360.0
 CM2GRAD = 360.0/17.59
@@ -68,26 +67,26 @@ class NXTProtocol(RobotProtocol):
 
     def go_to_point(self,x ,y ):
         dbg_print('Going to Point ('+str(x)+','+str(y)+')',2)
-        if self.factory.robots[0].go_to_point(x,y):#TODO rhandle von NXT benoetigt
+        if self.factory.robots[0].go_to_point(x,y):#TODO: rhandle von NXT benoetigt
             self.factory.robots[0].position_lock.acquire()
             self.callRemote(command.ArrivedPoint, 
-                            handle=self.factory.robots[0].handle, #FIXME
-                            x=x,#self.factory.robots[0].position['x'],#FIXME 
-                            y=y)#self.factory.robots[0].position['y']) #FIXME
+                            handle=self.factory.robots[0].handle, #FIXME: eigen Standort an Protokoll übergeben
+                            x=x,#self.factory.robots[0].position['x'],#FIXME: eigen Standort an Protokoll übergeben
+                            y=y)#self.factory.robots[0].position['y']) #FIXME: eigen Standort an Protokoll übergeben
             self.factory.robots[0].position_lock.release()
             return {'ACK': 'got point'}
-        else:#FIXME : Exception 
+        else:#FIXME: Exception 
             #FIXME: roboter.go_to_point() returned false
             self.factory.robots[0].position_lock.acquire()
             self.callRemote(command.ArrivedPoint, 
-                            handle=self.factory.robots[0].handle, #FIXME
-                            x=x,#self.factory.robots[0].position['x'],#FIXME 
-                            y=y)#self.factory.robots[0].position['y']) #FIXME
+                            handle=self.factory.robots[0].handle,
+                            x=self.factory.robots[0].position['x'],
+                            y=self.factory.robots[0].position['y'])
             self.factory.robots[0].position_lock.release()
             return {'ACK': 'not'}
     command.GoToPoint.responder(go_to_point)
 
-class RobotFactory(_InstanceFactory):    
+class RobotFactory(_InstanceFactory):
     def __init__(self, reactor, instance, deferred, anzahl):
         _InstanceFactory.__init__(self, reactor, instance, deferred)
         self.anzahl = anzahl
@@ -95,9 +94,11 @@ class RobotFactory(_InstanceFactory):
 
 
 class Explorer():
+    '''Die Explorer-Klasse stellt die Verbindung zu einem durch seine MAC-Adresse identifizierten NXT her und stellt die Funktionalität zur Steuerung bereit.'''
+    #FIXME: trennen von blosser Steuerung und Logik
     def __init__(self, mac, identitaet, color, outbox=5, inbox=1):
         self.brick = find_one_brick(host=mac, method=Method(usb=True, bluetooth=True))
-        self.color = color
+        self.color = color# FIXME: potentiell unnoetig
         self.ausrichtung = 90; # 0 - 359 Grad; 0 Osten, 90 Norden, 180 Westen, 270 Sueden 
         self.identitaet = identitaet
         self.phase = 0
@@ -114,9 +115,7 @@ class Explorer():
         self.position_lock = threading.Lock()
         self.position = {'x': 0.0,'y': 0.0}
         self.outbox = outbox
-        self.inbox = 10 + inbox
-        self.timelist = []
-        self.timelist_lock = threading.Lock()     
+        self.inbox = 10 + inbox 
         self.start_app("explorer.rxe")
         random.seed()
         dispatcher = threading.Thread(target=self.dispatch, args=())
@@ -183,11 +182,14 @@ class Explorer():
         if self.status == 'arrived':
             self.status_lock.release()
             self.position_lock.acquire()
-            self.position = {'x': x, 'y': y} #FIXME
+            self.position = {'x': x, 'y': y}
             self.position_lock.release()
             return True
         elif self.status == 'hit':
             self.status_lock.release()
+            self.position_lock.acquire()
+            self.position = {'x': x, 'y': y}
+            self.position_lock.release()
             return False
         else: # potentiell Exception, oder ziel gefunden
             self.status_lock.release()
@@ -253,10 +255,7 @@ class Explorer():
                 self.abbruch = True
                 self.abbruch_lock.release()
                 self.stop()
-                self.timelist_lock.acquire()
-                self.timelist_access('l', 0)
-                self.timelist_lock.release()
-                print "exploration_cancel - abbruch= True gewartet f�r %d sek" % intervall
+                print "exploration_cancel - abbruch= True gewartet f�r %d sek" % intervall
     
     def find_programs(self):
         ff = FileFinder(self.brick, "*.rxe")
@@ -274,37 +273,14 @@ class Explorer():
         tstr = typ+";"+str(ident)+";"+message
         dbg_print(tstr, 6)
         self.brick.message_write(self.outbox, tstr)
-        if typ != 'a':
-            dbg_print('timelist.append: '+str((time.time(), typ, ident, message)),3)
-            self.timelist.append((time.time(), typ, ident, message))
 
     def recv_message(self):
         t = self.brick.message_read(self.inbox, self.inbox, True)
         dbg_print(t,6)
         return t 
 
-    def timelist_access(self, choose, ident):
-        dbg_print("timelist_access timelist_lock choose="+str(choose)+" ident="+str(ident),3)
-        if choose == 'r' or choose == 'a':
-            for tupel in self.timelist:
-                if tupel[2] == ident:
-                    self.timelist.remove(tupel)
-        elif choose == 't':         
-            for tupel in self.timelist:
-                if tupel[0]+TIMEOFFSET <= time.time():
-                    self.timelist.remove(tupel)
-                    self.send_message(message=tupel[3], typ=tupel[1], ident=tupel[2])
-        elif choose == 'l':         
-            self.timelist = []
-        dbg_print("timelist: "+str(self.timelist),3)
-        dbg_print("timelist_access unlock choose="+str(choose)+" ident="+str(ident),3)
-
     def dispatch(self):       
         dbg_print("run dispatch",2)
-        dbg_print("run timer",2)
-        t = threading.Thread(target=self.timer, args=())
-        t.setDaemon(True)
-        t.start()
         count = 0
         while(True):
             if count%100000 == 0:
@@ -356,28 +332,11 @@ class Explorer():
                     elif int(csv[0]) == 9: #ziel gefunden gleich kommt t
                         dbg_print("Ziel gefunden") 
     
-                elif typ == 'r':
-                    self.timelist_lock.acquire()
-                    self.timelist_access(typ, ident)
-                    self.timelist_lock.release()
-                    self.send_message(typ='a', ident=ident, message='ack')
-
-                elif typ == 'a':
-                    self.timelist_lock.acquire()
-                    self.timelist_access(typ, ident)
-                    self.timelist_lock.release()
                 else:
                     dbg_print('Falscher Nachrichtentyp')
             except:
                 pass
-            count += 1
-            
-    def timer(self):
-        while(True):
-            time.sleep(3.0)
-            self.timelist_lock.acquire()
-            self.timelist_access('t', 0)
-            self.timelist_lock.release()    
+            count += 1  
     
     def work(self):
         time.sleep(3.0)
