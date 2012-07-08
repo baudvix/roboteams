@@ -1,5 +1,5 @@
+from mcc.utils import *
 import math
-
 
 class UpdateNXTData(object):
     """
@@ -45,7 +45,7 @@ class UpdateNXTData(object):
         for point in new_points:
             self.get_put(self.__filled, point, self.__filled_max)
         self.get_put(self.__points, [x_coord, y_coord], self.__points_max)
-        self.__filled = self.sort_by_distance(self.__filled, [x_coord, y_coord])
+        self.__filled = sort_by_distance(self.__filled, [x_coord, y_coord])
 
         return new_points
 
@@ -216,52 +216,3 @@ class UpdateNXTData(object):
             if element in list_1:
                 list_1.remove(element)
         return list_1
-
-
-    def point_distance(self, point_1, point_2):
-        """
-
-        """
-        x1 = point_1[0]
-        x2 = point_2[0]
-        y1 = point_1[1]
-        y2 = point_2[1]
-
-        distance = math.sqrt(math.pow(x2 - x1, 2) + math.pow(y2 - y1, 2))
-        return distance
-
-
-    def merge(self, left, right, bench_mark):
-        """
-
-        """
-
-        result = []
-        i, j = 0, 0
-        while i < len(left) and j < len(right):
-            if self.point_distance(left[i], bench_mark) <= self.point_distance(right[j], bench_mark):
-                result.append(left[i])
-                i += 1
-            else:
-                result.append(right[j])
-                j += 1
-
-        result += left[i:]
-        result += right[j:]
-        return result
-
-
-    def sort_by_distance(self, points, bench_mark):
-        """
-        :param points: list of points to be sorted
-        :type points: list
-        :param bench_mark: bench mark
-        :type bench_mark: list
-        """
-
-        if len(points) < 2:
-            return points
-        middle = len(points) / 2
-        left = self.sort_by_distance(points[:middle], bench_mark)
-        right = self.sort_by_distance(points[middle:], bench_mark)
-        return self.merge(left, right, bench_mark)
