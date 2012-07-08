@@ -8,17 +8,17 @@ from mcc.control import command
 
 class RobotProtocol(amp.AMP):
 
-    def update_state(self, state):
+    def update_state(self, handle, state):
         print 'Updating state to %d' % state
         return {'ack': 'got state'}
     command.UpdateState.responder(update_state)
 
-    def update_position(self, x_axis, y_axis, yaw):
+    def update_position(self, handle, x_axis, y_axis, yaw):
         print 'Updating position (%d, %d, %d)' % (x_axis, y_axis, yaw)
         return {'ack': 'got position'}
     command.UpdatePosition.responder(update_position)
 
-    def send_map(self, map):
+    def send_map(self, handle, map):
         print 'Updating map '
         pprint.pprint(map)
         return {'ack': 'got map'}
@@ -26,7 +26,7 @@ class RobotProtocol(amp.AMP):
 
 
 class NXTProtocol(RobotProtocol):
-    def go_to_point(self, x_axis, y_axis):
+    def go_to_point(self, handle, x_axis, y_axis):
         print 'Going to Point (%d, %d)' % (x_axis, y_axis)
         return {'ack': 'got point'}
     command.GoToPoint.responder(go_to_point)
@@ -34,17 +34,17 @@ class NXTProtocol(RobotProtocol):
 
 class NAOProtocol(RobotProtocol):
 
-    def nxt_missing(self, nxt_handle, color):
+    def nxt_missing(self, handle, nxt_handle, color):
         print 'Searching for NXT #%d, color=%d' % (nxt_handle, color)
         return {'ack': 'searching'}
     command.NXTMissing.responder(nxt_missing)
 
-    def perform_calibration(self, nxt_handle, color):
+    def perform_calibration(self, handle, nxt_handle, color):
         print 'Performing calibration on NXT #%d, color=%d' % (nxt_handle, color)
         return {'ack': 'try calibration'}
     command.PerformCalibration.responder(perform_calibration)
 
-    def send_path(self, path):
+    def send_path(self, handle, path):
         print 'Follow path'
         pprint.pprint(path)
         return {'ack': 'follow path'}
