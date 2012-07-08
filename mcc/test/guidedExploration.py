@@ -1,7 +1,4 @@
-from mcc.model.map import *
-from mcc.simulator.fake import *
 from mcc.utils import *
-import math
 
 class FindFreeSpace(object):
     """
@@ -274,22 +271,3 @@ class FindDestinations(object):
             if list[i] == value:
                 list.pop(i)
                 return list
-
-    def duplicates(self, list):
-        """
-        Removes the duplicate entries in the given list
-
-        :param list: the list
-        :type list: list
-        :return: the list without duplicate entries
-        :rtype: list
-        """
-
-        result = []
-        result2 = []
-        for element in list:
-            if element not in result:
-                result.append(element)
-            else:
-                result2.append(element)
-        return result2
