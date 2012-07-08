@@ -3,6 +3,8 @@
 server provides the communication between the mcc and the robots
 """
 
+import pprint
+
 from twisted.protocols import amp
 from twisted.internet import reactor, task
 from twisted.internet import error as err
@@ -14,7 +16,8 @@ from mcc.control.interpolate import Interpolate
 from mcc.model import robot, map, state
 from mcc.utils import Color, Point
 
-from mcc.view import view
+#from mcc.view import view
+from mcc.view import view_wx
 
 
 class MCCProtocol(amp.AMP):
@@ -25,7 +28,7 @@ class MCCProtocol(amp.AMP):
         amp.AMP.__init__(self)
         self.factory = None
 
-    def register(self, robot_type, color=None):
+    def register(self, robot_type, rhandle, color=None):
         """
         register defines the reaction on a new robot. the robot is added to
         the pool of robots and gets a unique handle
@@ -39,7 +42,7 @@ class MCCProtocol(amp.AMP):
         else:
             self.factory.robots.append(robot.RobotNAO(self.factory.last_handle, self))
         self.factory.last_handle += 1
-        return {'handle': (self.factory.last_handle - 1)}
+        return {'rhandle': rhandle, 'handle': (self.factory.last_handle - 1)}
     command.Register.responder(register)
 
     def activate(self, handle):
@@ -75,6 +78,8 @@ class MCCProtocol(amp.AMP):
                 self.update_position(robo, x_axis, y_axis, yaw, True)
                 #NOTE TO SELF: use thread if this is a blocker
                 robo.data = Interpolate(robo.data, [x_axis, y_axis])
+                #TODO: Interpolate robo.trace
+                #TODO: notify(redraw=true)
                 print '#%d NXT calibrated #%d (%d, %d, %d)' % (handle,
                                                                nxt_handle,
                                                                x_axis, y_axis,
@@ -121,6 +126,7 @@ class MCCProtocol(amp.AMP):
                 #TODO: Respect dodges in update_map
                 test = self.factory.tmp_update_map.insert_position_data(x_axis, y_axis, yaw)
                 self.factory.maps[0].increase_points(test)
+                self.factory._view.gui.notify_map_change()
                 print '#%d Send data %d: (%d, %d, %f)' % (handle, point_tag,
                                                           x_axis, y_axis, yaw)
                 return{'ack': 'got data'}
@@ -150,12 +156,14 @@ class MCCProtocol(amp.AMP):
         if not to_nxt:
             return
         deffered = robo.connection.callRemote(command.UpdatePosition,
+                                                        handle=robo.handle,
                                                         x_axis=x_axis,
                                                         y_axis=y_axis, yaw=yaw)
         deffered.addErrback(self.default_failure)
 
     def go_to_position(self, robo, x_axis, y_axis):
         deffered = robo.connection.callRemote(command.GoToPoint,
+                                                        handle=robo.handle,
                                                         x_axis=x_axis,
                                                         y_axis=y_axis)
         deffered.addErrback(self.default_failure)
@@ -177,21 +185,25 @@ class MCCFactory(Factory):
     """
     protocol = MCCProtocol
 
-    def __init__(self, start_state):
+    def __init__(self):
         self.last_handle = 0
-        self.state_machine = state.StateMachine(start_state)
+        self.state_machine = state.StateMachine(state.STATE_INIT)
         self.robots = []
         self.maps = []
         self.tmp_update_map = UpdateNXTData()
         self.maps.append(map.MapModel('Calibrated_Map'))
+        self.maps[0].get_point(0, 1)
         #TODO: start a thread for heavy calculation
         #TODO: start a thread for view
         self.initGUI()
 
     def initGUI(self):
-        self._viewThread = view.View(self.maps[0])
-        self._viewThread.daemon = True
-        self._viewThread.start()
+        self._view = view_wx.ViewMng()
+        self._view.run()
+        self._view.gui.register_map(self.maps[0])
+        #self._viewThread = view.View(self.maps[0])
+        #self._viewThread.daemon = True
+        #self._viewThread.start()
 
 
 class MCCServer(object):

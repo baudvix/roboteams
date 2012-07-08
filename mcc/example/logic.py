@@ -37,14 +37,14 @@ class LogicCalibration():
                             nxt_robo = robo2
                     self.called_calibration = True
                     defferd = robo.connection.callRemote(
-                        command.PerformCalibration, nao_handle=robo.handle,
+                        command.PerformCalibration, handle=robo.handle,
                         nxt_handle=nxt_robo.handle, color=nxt_robo.color)
                     print "Call for calib"
                     defferd.addCallback(self.print_out)
                     defferd.addErrback(self.failure)
 
     def print_out(self, response):
-        print 'Success: NAO %d found NXT %d on (%d,%d)  with orientation %d' % (response['nao_handle'], response['nxt_handle'], response['x_axis'], response['y_axis'], response['yaw'])
+        print 'Success: NAO %d found NXT %d on (%d,%d)  with orientation %d' % (response['handle'], response['nxt_handle'], response['x_axis'], response['y_axis'], response['yaw'])
         self.called_calibration = False
 
     def failure(self, error):
@@ -55,7 +55,7 @@ class NaoWalk(object):
 
     #NXT stands on (0, 10) NAO on (0,0)
     def __init__(self, robots):
-        self._path = [(0, 0), (0, 90), (60, 90), (80, 120)]
+        self._path = [(0, 0), (0, 90), (60, 90), (80, 120), (80, 130)]
         self._status = -1
         self._robots = robots
         self._connected = False
@@ -89,11 +89,11 @@ class NaoWalk(object):
                 plist.append({'x_axis': self._path[i][0],
                     'y_axis': self._path[i][1]})
             d_nao = self._robot_nao.connection.callRemote(command.SendPath,
-                path=plist)
+                handle=self._robot_nao.handle, path=plist)
             d_nao.addCallback(self.print_out)
             d_nao.addErrback(self.failure)
             d_nxt = self._robot_nxt.connection.callRemote(
-                command.UpdatePosition, x_axis=0, y_axis=10, yaw=0)
+                command.UpdatePosition, handle=self._robot_nxt.handle, x_axis=0, y_axis=10, yaw=0)
             d_nxt.addCallback(self.print_out)
             d_nxt.addErrback(self.failure)
 
@@ -108,5 +108,7 @@ class NaoWalk(object):
         if robot_type == robot.NXT_TYPE:
             self._status += 1
         if self._status >= len(self._path):
+            return (None, None)
+        if robot_type == robot.NAO_TYPE and self._status + 1 == len(self._path):
             return (None, None)
         return self._path[self._status]
