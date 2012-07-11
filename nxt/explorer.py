@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf8 -*-
+
 OFFLINE = False
+phase = 1 # TODO phase von mcc
 
 import random
 import sys
@@ -70,9 +71,9 @@ class NXTProtocol(RobotProtocol):
         if self.factory.robots[0].go_to_point(x, y):#TODO: rhandle von NXT benoetigt
             self.factory.robots[0].position_lock.acquire()
             self.callRemote(command.ArrivedPoint,
-                            handle = self.factory.robots[0].handle, #FIXME: eigen Standort an Protokoll übergeben
-                            x = x, #self.factory.robots[0].position['x'],#FIXME: eigen Standort an Protokoll übergeben
-                            y = y)#self.factory.robots[0].position['y']) #FIXME: eigen Standort an Protokoll übergeben
+                            handle = self.factory.robots[0].handle, 
+                            x = self.factory.robots[0].position['x'],
+                            y = self.factory.robots[0].position['y'])
             self.factory.robots[0].position_lock.release()
             return {'ACK': 'got point'}
         else:#FIXME: Exception 
@@ -94,15 +95,14 @@ class RobotFactory(_InstanceFactory):
 
 
 class Explorer():
-    '''Die Explorer-Klasse stellt die Verbindung zu einem durch seine MAC-Adresse identifizierten NXT her und stellt die Funktionalität zur Steuerung bereit.'''
+    '''Die Explorer-Klasse stellt die Verbindung zu einem durch seine MAC-Adresse identifizierten NXT her und stellt die Funktionalitaet zur Steuerung bereit.'''
     #FIXME: trennen von blosser Steuerung und Logik
     def __init__(self, mac, identitaet, color, outbox = 5, inbox = 1):
         self.brick = find_one_brick(host = mac, method = Method(usb = True, bluetooth = True))
         self.color = color# FIXME: potentiell unnoetig
         self.ausrichtung = 90; # 0 - 359 Grad; 0 Osten, 90 Norden, 180 Westen, 270 Sueden 
         self.identitaet = identitaet
-        self.phase = 0
-        self.status = None
+        self.status = -1
         self.status_lock = threading.Lock()
         self.handle = None
         self.active = False
@@ -146,7 +146,7 @@ class Explorer():
 
     def stop(self):
         self.send_message(message = '0,0')
-        time.sleep(4.0)
+        time.sleep(2.0)
         self.blockiert_lock.acquire()
         self.blockiert = False
         self.blockiert_lock.release()
@@ -165,34 +165,47 @@ class Explorer():
         self.position_lock.acquire()
         vektor = berechneVektor(self.position, {'x': x, 'y': y})
         self.position_lock.release()
-        self.blockiert_lock.acquire()
-        self.blockiert = True
-        self.blockiert_lock.release()
+        while(True):
+            self.blockiert_lock.acquire()
+            if self.blockiert:
+                self.blockiert_lock.release()
+                time.sleep(0.2)
+                continue
+            self.blockiert = True
+            self.blockiert_lock.release()
+            break
         if vektor['winkel'] > 90 and vektor['winkel'] <= 270:
-            self.turnleft(vektor['winkel'])
+            self.turnleft(int(round(vektor['winkel'])))
         else:
-            self.turnright(vektor['winkel'])
-        self.blockiert_lock.acquire()
-        self.blockiert = True
-        self.blockiert_lock.release()
+            self.turnright(int(round(vektor['winkel'])))
+        while(True):
+            self.blockiert_lock.acquire()
+            if self.blockiert:
+                self.blockiert_lock.release()
+                time.sleep(0.2)
+                continue
+            self.blockiert = True
+            self.blockiert_lock.release()
+            break
         self.go_forward(int(round(vektor['entfernung'])))
-        self.blockiert_lock.acquire()
-        self.blockiert_lock.release()
+        while(True):
+            self.blockiert_lock.acquire()
+            if self.blockiert:
+                self.blockiert_lock.release()
+                time.sleep(0.2)
+                continue
+            self.blockiert_lock.release()
+            break
         self.status_lock.acquire()
-        if self.status == 'arrived':
+        if self.status == 0:
             self.status_lock.release()
-            self.position_lock.acquire()
-            self.position = {'x': 5, 'y': 5}#FIXME: 
-            self.position_lock.release()
             return True
-        elif self.status == 'hit':
+        elif self.status == 1:
             self.status_lock.release()
-            self.position_lock.acquire()
-            self.position = {'x': 3, 'y': 3}#FIXME:
-            self.position_lock.release()
             return False
         else: # potentiell Exception, oder ziel gefunden
             self.status_lock.release()
+            dbg_print('brick.go_to_point(): else', 1)
             return False
 
 
@@ -247,15 +260,15 @@ class Explorer():
             time.sleep(1.0)
 
     def exploration_cancel(self):
-        while(self.phase == 0):
+        while(phase == 0):
             intervall = random.choice([60.0])
             time.sleep(intervall)
-            if self.phase == 0:
+            if phase == 0:
                 self.abbruch_lock.acquire()
                 self.abbruch = True
                 self.abbruch_lock.release()
                 self.stop()
-                print "exploration_cancel - abbruch= True gewartet f�r %d sek" % intervall
+                print "exploration_cancel - abbruch= True gewartet fuer %d sek" % intervall
 
     def find_programs(self):
         ff = FileFinder(self.brick, "*.rxe")
@@ -265,12 +278,12 @@ class Explorer():
     def start_app(self, app):
         self.brick.start_program(app)
 
-    def send_message(self, message = '', typ = 'm', ident = 99):
-        if typ == 'm' and ident == 99:
+    def send_message(self, message = '', ident = 99):
+        if ident == 99:
             self.message_id += 1
             self.message_id %= 10
             ident = self.message_id
-        tstr = typ + ";" + str(ident) + ";" + message
+        tstr = str(ident) + ";" + message
         dbg_print(tstr, 6)
         self.brick.message_write(self.outbox, tstr)
 
@@ -289,51 +302,49 @@ class Explorer():
                 _, message = self.recv_message()
                 dbg_print("message: " + str(message), 9)
                 try:
-                    typ, t_id, payload = str(message).split(';')
+                    t_id, payload = str(message).split(';')
                     ident = int(t_id)
                 except:
                     dbg_print("message-parsing-error: falsches Format")
-                dbg_print("typ=" + str(typ) + " ident=" + str(t_id) + " msg=" + str(payload), 4)
-                if typ == 'm':
-                    self.send_message(typ = 'r', ident = ident, message = 'resp')
-                    # irgendetwas mit payload machen
-                    csv = payload.split(',') # payload = event, entfernung, sensor(optional)
-                    if int(csv[0]) == 1: #nach Zeitintervall 500ms update_position (Entfernung)
-                        dbg_print("Update: " + str(csv[1]) + " Einheiten gefahren")
-                        #print berechnePunkt(self.ausrichtung, csv[1], self.position)#TODO an MCC
-                    elif int(csv[0]) == 2: #kollision update_position (Entfernung)
-                        self.blockiert_lock.acquire()
-                        self.blockiert = False
-                        self.blockiert_lock.release()
-                        self.status_lock.acquire()
-                        self.status = 'hit'
-                        self.status_lock.release()
-                        dbg_print("Kollision: " + str(csv[1]) + " Einheiten gefahren")
-                        self.position_lock.acquire()
-                        self.position = berechnePunkt(self.ausrichtung, csv[1], self.position) #TODO an MCC
-                        self.position_lock.release()
-                        dbg_print(str(self.position))
-                    elif int(csv[0]) == 3: #strecke ohne vorkommnisse abgefahren
-                        self.blockiert_lock.acquire()
-                        self.blockiert = False
-                        self.blockiert_lock.release()
-                        self.status_lock.acquire()
-                        self.status = 'arrived'
-                        self.status_lock.release()
-                        self.position_lock.acquire()
-                        self.position = berechnePunkt(self.ausrichtung, int(csv[1]), self.position) #TODO an MCC
-                        self.position_lock.release()
-                        dbg_print(str(csv[1]) + " Einheiten gefahren")
-                    elif int(csv[0]) == 4: #beendet rueckwaerts und drehen
-                        self.blockiert_lock.acquire()
-                        self.blockiert = False
-                        self.blockiert_lock.release()
-                        dbg_print("Drehen oder Zurueck")
-                    elif int(csv[0]) == 9: #ziel gefunden gleich kommt t
-                        dbg_print("Ziel gefunden")
+                dbg_print("ident=" + str(t_id) + " msg=" + str(payload), 4)
 
+                csv = payload.split(',') #TODO: payload = event, entfernung, sensor(optional)
+                if int(csv[0]) == 1: #nach Zeitintervall 500ms update_position (Entfernung)
+                    dbg_print("Update: " + str(csv[1]) + " Einheiten gefahren",1)
+                    #print berechnePunkt(self.ausrichtung, csv[1], self.position)#TODO an MCC
+                elif int(csv[0]) == 2: #kollision update_position (Entfernung)
+                    self.status_lock.acquire()
+                    self.status = 1 # hit
+                    self.status_lock.release()
+                    dbg_print("Kollision: " + str(csv[1]) + " Einheiten gefahren",1)
+                    self.position_lock.acquire()
+                    self.position = berechnePunkt(self.ausrichtung, csv[1], self.position) #TODO an MCC
+                    self.position_lock.release()
+                    dbg_print(str(self.position),2)
+                    self.blockiert_lock.acquire()
+                    self.blockiert = False
+                    self.blockiert_lock.release()
+                elif int(csv[0]) == 3: #strecke ohne vorkommnisse abgefahren
+                    self.status_lock.acquire()
+                    self.status = 0 #arrived
+                    dbg_print("status: arrived(%d)" %self.status, 1)
+                    self.status_lock.release()
+                    dbg_print(str(csv[1]) + " Einheiten gefahren",1)
+                    self.position_lock.acquire()
+                    self.position = berechnePunkt(self.ausrichtung,int(str(csv[1]).strip("\x00")),self.position)
+                    self.position_lock.release()
+                    self.blockiert_lock.acquire()
+                    self.blockiert = False
+                    self.blockiert_lock.release()
+                elif int(csv[0]) == 4: #beendet rueckwaerts und drehen
+                    dbg_print("Drehen oder Zurueck",1)
+                    self.blockiert_lock.acquire()
+                    self.blockiert = False
+                    self.blockiert_lock.release()
+                elif int(csv[0]) == 9: #ziel gefunden gleich kommt 2
+                    dbg_print("Ziel gefunden")
                 else:
-                    dbg_print('Falscher Nachrichtentyp')
+                    dbg_print("csv konnt nicht geparst werden")
             except:
                 pass
             count += 1
@@ -343,7 +354,7 @@ class Explorer():
         t = threading.Thread(target = self.exploration_cancel, args = ())
         t.setDaemon(True)
         t.start()
-        while(True):
+        while(phase == 0):
             time.sleep(1.0)
             if self.handle == None:
                 continue
