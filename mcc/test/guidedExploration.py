@@ -1,4 +1,4 @@
-import math
+from mcc.utils import *
 
 class FindFreeSpace(object):
     """
@@ -169,3 +169,105 @@ class FindFreeSpace(object):
                 break
 
         return target_points
+
+
+class FindDestinations(object):
+    """
+
+    """
+
+    def __init__(self, free_space, nxt_positions):
+        """
+        :param free_space: List of points which are unexplored yet
+        :type free_space: list
+        :param nxt_positions: List of positions of the NXTs
+        :type nxt_positions: list
+        """
+
+        self.__free_space = free_space
+        x = y = 0
+        for point in self.__free_space:
+            x += point[0]
+            y += point[1]
+        self.__center = [x / len(self.__free_space), y / len(self.__free_space)]
+        self.__nxt_positions = nxt_positions
+        # Number of areas to be mapped to a NXT
+        self.__number_of_areas = len(self.__nxt_positions)
+        self.__areas = []
+        self.__areas_size = []
+        # Which area is mapped to which NXT: key: area, value: NXT
+        self.__mapping = []
+        for i in range(0, self.__number_of_areas):
+            self.__areas.append([])
+            if i == self.__number_of_areas - 1:
+                self.__areas_size.append(len(self.__free_space) - (len(self.__free_space) / self.__number_of_areas) * i)
+            else:
+                self.__areas_size.append(len(self.__free_space) / self.__number_of_areas)
+            self.__mapping.append([i, i])
+
+
+    def divide_free_space(self):
+        """
+
+        """
+
+        free_space = self.__free_space
+        for i in range(0, self.__number_of_areas):
+            free_space = sort_by_distance(free_space, self.__center)
+            bench_mark = free_space.pop()
+            self.__areas[i].append(bench_mark)
+            free_space = sort_by_distance(free_space, bench_mark, 1)
+            while len(self.__areas[i]) < self.__areas_size[i]:
+                self.__areas[i].append(free_space.pop())
+
+
+    def delegate_free_space(self):
+        """
+
+        """
+
+        x = y = 0
+        center = []
+        distances = []
+        nxt_order = []
+        for i in range(0, self.__number_of_areas):
+            center.append([])
+            for point in self.__areas[i]:
+                x += point[0]
+                y += point[1]
+
+            center[i] = [x / len(self.__free_space), y / len(self.__free_space)]
+            distances.append([])
+            nxt_order.append([])
+            for j in range(0, len(self.__nxt_positions)):
+                nxt_order[i].append(j)
+                distances[i].append(point_distance(self.__nxt_positions[j], center[i]))
+
+        for i in range(0, self.__number_of_areas):
+            for j in range(0, len(self.__nxt_positions) - 1):
+                for k in range(0, len(self.__nxt_positions) - 1):
+                    if distances[i][k + 1] < distances[i][k]:
+                        tmp1 = distances[i][k]
+                        tmp2 = nxt_order[i][k]
+                        distances[i][k] = distances[i][k + 1]
+                        nxt_order[i][k] = nxt_order[i][k + 1]
+                        distances[i][k + 1] = tmp1
+                        nxt_order[i][k + 1] = tmp2
+
+        for i in range(0, self.__number_of_areas):
+            self.__mapping[i] = nxt_order[i][0]
+            remove = nxt_order[i][0]
+            for j in range(i, self.__number_of_areas):
+                nxt_order[j] = self.remove_value(nxt_order[j], remove)
+
+        return self.__mapping
+
+    def remove_value(self, list, value):
+        """
+
+        """
+
+        for i in range(0, len(list)):
+            if list[i] == value:
+                list.pop(i)
+                return list

@@ -7,6 +7,7 @@ import pprint
 
 import Queue
 import threading
+import time
 
 from wx.glcanvas import GLCanvas
 from OpenGL.GLUT import *
@@ -35,7 +36,7 @@ class Gui(wx.Frame):
     def initUI(self):
 
         # --- Main ---
-        self.SetSize((1024, 1024))
+        self.SetSize((682, 527))
         self.SetTitle('MCC Monitor')
         font = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
         font.SetPointSize(9)
@@ -75,12 +76,13 @@ class Gui(wx.Frame):
         c_panel.SetSizer(c_vbox)
 
         #  -- opengl --
-        self.draw_mng = DrawMng()
-        self.canvas = WxGLCanvas(mm_panel, self.draw_mng)
-        self.draw_mng.canvas = self.canvas
+        self.canvas = WxGLCanvas(mm_panel)
+        self.draw_mng = DrawMng(self.canvas)
+        self.canvas.start()
+        self.draw_mng.start()
 
         # --- arrange Map Monitor Panel ---
-        mm_hbox.Add(c_panel, 0.3, wx.EXPAND | wx.LEFT, 20)
+        mm_hbox.Add(c_panel, 1, wx.EXPAND | wx.LEFT, 10)
         #mm_hbox.Add(self.canvas, 1, wx.ALL, 10)
         mm_hbox.Add(self.canvas)
         mm_panel.SetSizer(mm_hbox)
@@ -101,6 +103,8 @@ class Gui(wx.Frame):
                 self.map_active_list.remove(cd)
             except ValueError:
                 self.map_active_list.append(cd)
+            self.draw_mng.active_maps = self.get_active_maps()
+            self.draw_mng.flag_redraw = True
         else:
             cd = self.trace_list_box.GetClientData(sel)
             try:
@@ -108,8 +112,6 @@ class Gui(wx.Frame):
                 self.trace_active_list.remove(cd)
             except ValueError:
                 self.trace_active_list.append(cd)
-        self.draw_mng.active_maps = self.get_active_maps()
-        self.draw_mng.map_generate()
 
     def fake_register_map(self, title, client_data):
         self.map_list_box.Insert(title, 0, client_data)
@@ -134,18 +136,6 @@ class Gui(wx.Frame):
     def register_trace(self, new_trace, title):
         self.trace_list_box.Insert(title, new_trace)
 
-    def notify_map_change(self):
-        points = []
-        a_map = self.get_active_maps()
-        for m in a_map:
-            points.extend(m.latest_update)
-            m.latest_update = []
-        self.draw_mng.update_points(points)
-
-    def notify_trace_change(self, redraw=False):
-        if redraw:
-            pass
-
     def test(self):
         self.fake_register_map("BERLIN", 0)
         self.fake_register_map("NEW YORK", 1)
@@ -159,23 +149,10 @@ class Gui(wx.Frame):
         self.fake_register_trace("SEVILLE", 4)
 
 
-class DrawMng():
+class DrawColor():
 
     def __init__(self):
-        self._canvas = None
-        self._active_maps = []
-
-        self._map_draw = map.MapModel('drawable map')
-        self._map_draw.expand = [1, 1, 0, 0]
-        self._unit = 0.0125
-        self._map_correction = (0, 0)
-
-        self._zoom_factor = 0.5
-
-        self._thread_draw = threading.Thread()
-
-        self._to_draw_squares = Queue.Queue()
-        self.max_color = 0
+        self._max_value = 0
         self.map_color = [(0.0549, 0.3608, 0.0196),
                           (0.102, 0.4471, 0.0431),
                           (0.149, 0.5098, 0.0588),
@@ -189,54 +166,128 @@ class DrawMng():
                           (0.9490, 0.2863, 0.1333),
                           (0.9255, 0.2431, 0.1333),
                           (0.8824, 0.251, 0.1373)]
+
+    def calc_color(self, squares):
+        for square in squares:
+            if self._max_value < square[4]:
+                self._max_value = square[4]
+            square[4] = self.map_color[int((square[4] / self._max_value) * 11)]
+        return squares
+
+    def calc_simple_color(self, value):
+        if value >= 5:
+            return self.map_color[0]
+        if value >= 2:
+            return self.map_color[5]
+        else:
+            return self.map_color[11]
+
+
+class DrawMng(threading.Thread):
+
+    def __init__(self, canvas):
+        self._canvas = canvas
+
+        self._active_maps = []
+        self._map_draw = map.MapModel('drawable map')
+        self._map_draw.expand = [1, 1, 0, 0]
+        self._colors = DrawColor()
+
+        self._unit = 0.0125
+        self._map_correction = (0, 0)
+        self._zoom_factor = 0.5
+
+        self._exit_flag = False
+        self._lock = threading.Lock()
+        threading.Thread.__init__(self)
+
+        self._to_draw_squares = Queue.Queue()
+
         self.calc_draw_value()
 
-    #PROPERTY --- canvas
-    def fget_canvas(self):
-        """The canvas property getter"""
-        return self._canvas
+        self.flag_redraw = False
 
-    def fset_canvas(self, value):
-        """The canvas property setter"""
-        self._canvas = value
-        self._canvas.start()
-    canvas = property(fget_canvas, fset_canvas)
+    #PROPERTY --- exit_flag
+    def fget_exit_flag(self):
+        """The exit_flag property getter"""
+        with self._lock:
+            return self._exit_flag
+
+    def fset_exit_flag(self, value):
+        """The exit_flag property setter"""
+        with self._lock:
+            self._exit_flag = value
+            self._canvas.exit_flag = value
+    exit_flag = property(fget_exit_flag, fset_exit_flag)
 
     #PROPERTY --- active_maps
     def fget_active_maps(self):
         """The active_maps property getter"""
-        return self._active_maps
+        with self._lock:
+            return self._active_maps
 
     def fset_active_maps(self, value):
         """The active_maps property setter"""
-        self._active_maps = value
-        self.map_generate()
-        self.draw_map()
-        self._canvas.flush()
-        self.update_canvas()
+        with self._lock:
+            self._active_maps = value
+            self.flag_redraw = True
     active_maps = property(fget_active_maps, fset_active_maps)
 
     def update_canvas(self):
         while not self._to_draw_squares.empty():
             self._canvas.squares.put(self._to_draw_squares.get())
 
+    def run(self):
+        while not self._exit_flag:
+            if self.flag_redraw:
+                self._canvas.flush()
+                self.map_generate()
+                self.calc_draw_value()
+                self.calc_map()
+                self.update_canvas()
+                with self._lock:
+                    self.flag_redraw = False
+                continue
+            t, r, b, l = self._map_draw.expand
+            redraw = False
+            for m in self._active_maps:
+                if m.flag_redraw == True:
+                    tt, rr, bb, ll = m.expand
+                    if tt > t or rr > r or bb > b or ll > l:
+                        redraw = True
+                    m.flag_redraw = False
+            if redraw:
+                self._canvas.flush()
+                self.map_generate()
+                self.calc_draw_value()
+                self.calc_map()
+                self.update_canvas()
+                with self._lock:
+                    self.flag_redraw = False
+            update = False
+            for m in self._active_maps:
+                if m.flag_update == True:
+                    update = True
+                    m.flag_update = False
+            if update:
+                points = []
+                for m in self._active_maps:
+                    points.extend(m.latest_update)
+                    m.latest_update = []
+                self.update_points(points)
+            time.sleep(0.1)
+
     def update_points(self, points):
         self._map_draw.increase_points(points)
         self._map_draw.latest_update = []
-        if self._map_draw.need_redraw:
+        if self._map_draw.flag_redraw:
             self.calc_draw_value()
-            self.draw_map()
-            self._map_draw.need_redraw = False
+            self.calc_map()
+            self._map_draw.flag_redraw = False
         else:
             for p in points:
                 x, y = p
-                cx, cy = self._map_correction
-                dx = (x - cx) * self._unit - 1
-                dy = (y - cy) * self._unit - 1
-                ex = (x + 1 - cx) * self._unit - 1
-                ey = (y + 1 - cy) * self._unit - 1
-                new_ele = [dx, dy, ex, ey,
-                    self.calc_simple_color(self._map_draw.get_point(x, y))]
+                new_ele = self.calc_square(x, y, self._map_draw.get_point(x, y))
                 self._to_draw_squares.put(new_ele)
         self.update_canvas()
 
@@ -255,52 +306,45 @@ class DrawMng():
                 for m in self.active_maps:
                     v += m.get_point(x, y)
                 self._map_draw.set_point(x, y, v)
+        self.calc_draw_value()
 
-    def draw_map(self):
+    def calc_map(self):
         self._to_draw_squares = Queue.Queue()
         t, r, b, l = self._map_draw.expand
-        cx, cy = self._map_correction
-        cx *= 100
-        cy *= 100
         for x in range(l * -100, r * 100):
             for y in range(b * -100, t * 100):
                 value = self._map_draw.get_point(x, y)
                 if not value == 0:
-                    self._to_draw_squares.put([(x - cx) * self._unit - 1,
-                                               (y - cy) * self._unit - 1,
-                                               (x + 1 - cx) * self._unit - 1,
-                                               (y + 1 - cy) * self._unit - 1,
-                                               self.calc_simple_color(value)])
+                    new_ele = self.calc_square(x, y, value)
+                    self._to_draw_squares.put(new_ele)
+        self.update_canvas()
+
+    def calc_square(self, x, y, val):
+        cx, cy = self._map_correction
+        #cx, cy = (self._map_correction) * 100
+        x1 = (x - cx) * self._unit - 1
+        y1 = (y - cy) * self._unit - 1
+        x2 = (x + 1 - cx) * self._unit - 1
+        y2 = (y + 1 - cy) * self._unit - 1
+        c = self._colors.calc_simple_color(val)
+        return [x1, y1, x2, y2, c]
 
     def calc_draw_value(self):
         t, r, b, l = self._map_draw.expand
         if (r + l) > (t + b):
-            self.unit = 2.0 / ((r + l) * 100)
+            self._unit = 2.0 / ((r + l) * 100)
         else:
-            self.unit = 2.0 / ((t + b) * 100)
+            self._unit = 2.0 / ((t + b) * 100)
 
         cx = (((r + l) / 2) - l) * -1
         cy = (((t + b) / 2) - t) * -1
 
         self._map_correction = (cx, cy)
 
-    def calc_color(self, squares, max_value):
-        for square in squares:
-            square[4] = self.map_color[int((square[4] / max_value) * 11)]
-        self.draw_squares(squares)
-
-    def calc_simple_color(self, value):
-        if value > 4:
-            return self.map_color[0]
-        if value > 2:
-            return self.map_color[5]
-        else:
-            return self.map_color[11]
-
 
 class WxGLCanvas(GLCanvas, threading.Thread):
 
-    def __init__(self, parent, mng):
+    def __init__(self, parent):
         GLCanvas.__init__(self, parent, -1,
             attribList=(wx.glcanvas.WX_GL_RGBA,
                 wx.glcanvas.WX_GL_DOUBLEBUFFER,
@@ -315,6 +359,7 @@ class WxGLCanvas(GLCanvas, threading.Thread):
         self.triangles = Queue.Queue()
         self.circles = Queue.Queue()
         self.lines = Queue.Queue()
+
         self._redraw = False
 
         self.map_color = [(0.0549, 0.3608, 0.0196),
@@ -330,57 +375,62 @@ class WxGLCanvas(GLCanvas, threading.Thread):
                           (0.9490, 0.2863, 0.1333),
                           (0.9255, 0.2431, 0.1333),
                           (0.8824, 0.251, 0.1373)]
-        self._mng = mng
-
+        self._exit_flag = False
         self._lock = threading.Lock()
         threading.Thread.__init__(self)
 
-    #PROPERTY --- redraw
-    def fget_redraw(self):
-        """The redraw property getter"""
+    #PROPERTY --- exit_flag
+    def fget_exit_flag(self):
+        """The exit_flag property getter"""
         with self._lock:
-            return self._redraw
+            return self._exit_flag
 
-    def fset_redraw(self, value):
-        """The redraw property setter"""
+    def fset_exit_flag(self, value):
+        """The exit_flag property setter"""
         with self._lock:
-            self._redraw = value
-    redraw = property(fget_redraw, fset_redraw)
+            self._exit_flag = value
+    exit_flag = property(fget_exit_flag, fset_exit_flag)
 
     def run(self):
-        pass
-        self.SetCurrent()
-        if self._redraw:
-            self.clear_canvas()
-            self._mng.map_generate()
-            self._mng.draw_map()
-            self._mng.update_canvas()
-            self._redraw = False
-        glLoadIdentity()
-        sqa = []
-        while not self.squares.empty():
-            sqa.append(self.squares.get())
-        tri = []
-        while not self.triangles.empty():
-            tri.append(self.triangles.get())
-        cir = []
-        while not self.circles.empty():
-            cir.append(self.circles.get())
-        lin = []
-        while not self.v.empty():
-            lin.append(self.lines.get())
-        self._draw_squares(sqa)
-        self._draw_triangles(tri)
-        self._draw_circles(cir)
-        self._draw_lines(lin)
-
-        self.SwapBuffers()
+        while not self._exit_flag:
+            if self._redraw:
+                self._redraw = False
+            action = False
+            sqa = []
+            while not self.squares.empty():
+                sqa.append(self.squares.get())
+                action = True
+            tri = []
+            while not self.triangles.empty():
+                tri.append(self.triangles.get())
+                action = True
+            cir = []
+            while not self.circles.empty():
+                cir.append(self.circles.get())
+                action = True
+            lin = []
+            while not self.lines.empty():
+                lin.append(self.lines.get())
+                action = True
+            if action:
+                self.SetCurrent()
+                glLoadIdentity()
+                self._draw_squares(sqa)
+                self._draw_triangles(tri)
+                self._draw_circles(cir)
+                self._draw_lines(lin)
+                self.SwapBuffers()
+            time.sleep(0.1)
 
     def flush(self):
         self.squares = Queue.Queue()
         self.triangles = Queue.Queue()
         self.circles = Queue.Queue()
         self.lines = Queue.Queue()
+        self.SetCurrent()
+        glLoadIdentity()
+        self.clear_canvas()
+        self.SwapBuffers()
 
     def clear_canvas(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -441,32 +491,18 @@ class WxGLCanvas(GLCanvas, threading.Thread):
         glVertex3f(x2, y1, 0)
 
     def on_draw(self, event):
-        self.redraw = True
+        self._redraw = True
         self.SetCurrent()
         glLoadIdentity()
-        s = self.map_color_example()
-        self._draw_squares(s)
+        self.clear_canvas()
         self.SwapBuffers()
 
-        return
-
-    def map_color_example(self):
+    def example_map_color(self):
         squares = []
         length = 2.0 / 12
         y1, y2 = (-1, 1)
         for c in range(0, 12):
             squares.append([(c * length) - 1, y1, ((c + 1) * length) - 1, y2, self.map_color[c]])
-        return squares
-
-    def map_random_squares(self):
-        squares = []
-        steps = int(2.0 / self._unit)
-        for x in range(0, steps):
-            for y in range(0, steps):
-                c = random.randint(0, 11)
-                sx = (x * self._unit) - 1
-                sy = (y * self._unit) - 1
-                squares.append([sx, sy, sx + self._unit, sy + self._unit, self.map_color[c]])
         return squares
 
     def on_size(self, event):
@@ -488,7 +524,6 @@ class ViewMng():
         t = threading.Thread(target=self.app.MainLoop)
         #t.setDaemon(1)
         t.start()
-        #print 'x'
 
 if __name__ == '__main__':
     vm = ViewMng()

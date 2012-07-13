@@ -11,13 +11,13 @@ class FakeMap():
     #boundary by array limit
     #obstacle by blocked
 
-    def __init__(self, obstacle_posibility, target=(120, 80), size=350):
+    def __init__(self, obstacle_possibility, target=(120, 80), size=350):
         self.size = size
         self.target = target
         self.fake_map = [[0 for x in xrange(size)] for y in xrange(size)]
         for x in range(0, size):
             for y in range(0, size):
-                if random.randint(0, 100) < obstacle_posibility:
+                if random.randint(0, 100) < obstacle_possibility:
                     self.fake_map[x][y] = 1
                     if self.on_map(x - 1, y):
                         self.fake_map[x - 1][y] = 1

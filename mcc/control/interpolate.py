@@ -1,4 +1,4 @@
-import math
+from mcc.utils import *
 
 
 class Interpolate(object):
@@ -22,7 +22,7 @@ class Interpolate(object):
 
         # Compute complete distance along the path
         for i in range(0, len(self.__points) - 1):
-            self.__distance += self.point_distance(self.__points[i], self.__points[i + 1])
+            self.__distance += point_distance(self.__points[i], self.__points[i + 1])
 
     def run(self):
         self.__weights.append(0)
@@ -31,7 +31,7 @@ class Interpolate(object):
         distance = 0
 
         for i in range(0, len(self.__points) - 1):
-            distance += self.point_distance(self.__points[i], self.__points[i + 1])
+            distance += point_distance(self.__points[i], self.__points[i + 1])
             self.__weights.append(distance / self.__distance)
 
         # -- Adjust points
@@ -40,16 +40,7 @@ class Interpolate(object):
             self.__points[i].position.y_coord = int(self.__points[i].position.y_coord + (self.__y_deviation * self.__weights[i]))
 
         return self.__points
-
-    def point_distance(self, point_1, point_2):
-
-        x1 = point_1.position.x_coord
-        x2 = point_2.position.x_coord
-        y1 = point_1.position.y_coord
-        y2 = point_2.position.y_coord
-
-        distance = math.sqrt(math.pow(x2 - x1, 2) + math.pow(y2 - y1, 2))
-        return distance
+     
 
 if __name__ == '__main__':
     from mcc.utils import Point

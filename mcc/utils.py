@@ -2,6 +2,7 @@
 Module for utilities
 """
 
+import math
 
 class Point(object):
     """
@@ -133,3 +134,63 @@ class Color():
             return True
         else:
             return False
+
+
+
+def merge(left, right, bench_mark, order):
+    """
+
+    """
+
+    result = []
+    i, j = 0, 0
+    while i < len(left) and j < len(right):
+        if not order:
+            if point_distance(left[i], bench_mark) <= point_distance(right[j], bench_mark):
+                result.append(left[i])
+                i += 1
+            else:
+                result.append(right[j])
+                j += 1
+        else:
+            if point_distance(left[i], bench_mark) >= point_distance(right[j], bench_mark):
+                result.append(left[i])
+                i += 1
+            else:
+                result.append(right[j])
+                j += 1
+
+
+    result += left[i:]
+    result += right[j:]
+    return result
+
+
+def sort_by_distance(points, bench_mark, order = 0):
+    """
+    :param points: list of points to be sorted
+    :type points: list
+    :param bench_mark: bench mark
+    :type bench_mark: list
+    :param order: ascending order (0) or descending order (1)
+    """
+
+    if len(points) < 2:
+        return points
+    middle = len(points) / 2
+    left = sort_by_distance(points[:middle], bench_mark, order)
+    right = sort_by_distance(points[middle:], bench_mark, order)
+
+    return merge(left, right, bench_mark, order)
+
+
+def point_distance(point_1, point_2):
+
+    x1 = point_1[0]
+    x2 = point_2[0]
+    y1 = point_1[1]
+    y2 = point_2[1]
+
+    distance = math.sqrt(math.pow(x2 - x1, 2) + math.pow(y2 - y1, 2))
+    return distance
+

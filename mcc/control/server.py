@@ -55,6 +55,7 @@ class MCCProtocol(amp.AMP):
         for robo in self.factory.robots:
             if robo.handle == handle:
                 robo.active = True
+                self.factory._view.gui.register_map(robo.map_overlay)
                 print '#%d activated' % handle
                 self.update_position(robo, 0, 0, 0, True)
                 return {'ack': 'got activate'}
@@ -124,9 +125,8 @@ class MCCProtocol(amp.AMP):
             if robo.handle == handle:
                 robo.put(Point(x_axis, y_axis, yaw), point_tag)
                 #TODO: Respect dodges in update_map
-                test = self.factory.tmp_update_map.insert_position_data(x_axis, y_axis, yaw)
-                self.factory.maps[0].increase_points(test)
-                self.factory._view.gui.notify_map_change()
+                new_points = robo.calc_map.insert_position_data(x_axis, y_axis, yaw)
+                robo.map_overlay.increase_points(new_points)
                 print '#%d Send data %d: (%d, %d, %f)' % (handle, point_tag,
                                                           x_axis, y_axis, yaw)
                 return{'ack': 'got data'}
@@ -190,9 +190,8 @@ class MCCFactory(Factory):
         self.state_machine = state.StateMachine(state.STATE_INIT)
         self.robots = []
         self.maps = []
-        self.tmp_update_map = UpdateNXTData()
         self.maps.append(map.MapModel('Calibrated_Map'))
-        self.maps[0].get_point(0, 1)
+        #self.maps[0].get_point(0, 1)
         #TODO: start a thread for heavy calculation
         #TODO: start a thread for view
         self.initGUI()
