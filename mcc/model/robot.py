@@ -3,6 +3,7 @@
 robot provides a model of the robots and their functionality
 """
 from mcc.model import map
+from mcc.control.map_update import UpdateNXTData
 from datetime import datetime
 import threading
 import Queue
@@ -114,7 +115,8 @@ class RobotNXT(RobotBase):
         self.color = color
         self._trace = []
         self._data = []
-        self.map_overlay = map.MapModel('NXT #' + str(self.handle) + ' overlay')
+        self._calc_map = UpdateNXTData()
+        self._map_overlay = map.MapModel('NXT #' + str(self.handle) + ' overlay')
         self.last_calibration = None
 
     def put(self, position, data_type, time=None):
@@ -170,6 +172,16 @@ class RobotNXT(RobotBase):
         """The last_calibration property setter"""
         self._last_calibration = time
     last_calibration = property(fget_last_calibration, fset_last_calibration)
+
+    #PROPERTY --- calc_map
+    def fget_calc_map(self):
+        """The calc_map property getter"""
+        return self._calc_map
+    
+    def fset_calc_map(self, value):
+        """The calc_map property setter"""
+        self._calc_map = value
+    calc_map = property(fget_calc_map, fset_calc_map)
 
     #PROPERTY --- map_overlay
     def fget_map_overlay(self):
