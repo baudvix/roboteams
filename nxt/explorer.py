@@ -3,6 +3,12 @@
 OFFLINE = False
 phase = 0 # TODO phase von mcc
 
+#TODO: calibrating via ultrasonic distance and engine distance
+#TODO: dividing into logical explorer and physical explorer 
+#TODO: communication with MCC (callback functions)
+#TODO: commenting functions
+#TODO: exploration algorithms
+
 import random
 import sys
 import time
@@ -41,7 +47,7 @@ def berechneVektor(standort = {'x':0.0, 'y':0.0}, ziel = {'x': 0.0, 'y': 0.0}):
         winkel = math.atan(relativ_ziel['y'] / relativ_ziel['x']) * (180.0 / math.pi) + 180
     else:
         winkel = math.atan(relativ_ziel['y'] / relativ_ziel['x']) * (180.0 / math.pi) + 360
-    return {'winkel': winkel % 360, 'entfernung': entfernung * CM2GRAD}
+    return {'winkel': winkel % 360, 'entfernung': entfernung}
 
 class RobotProtocol(amp.AMP):
 
@@ -100,7 +106,8 @@ class Explorer():
     def __init__(self, mac, identitaet, color, outbox = 5, inbox = 1):
         self.brick = find_one_brick(host = mac, method = Method(usb = True, bluetooth = True))
         self.color = color# FIXME: potentiell unnoetig
-        self.ausrichtung = 90; # 0 - 359 Grad; 0 Osten, 90 Norden, 180 Westen, 270 Sueden 
+        self.ausrichtung = 90; # 0 - 359 Grad; 0 Osten, 90 Norden, 180 Westen, 270 Sueden
+        self.calibrationFactor = 1 
         self.identitaet = identitaet
         self.status = -1
         self.status_lock = threading.Lock()
@@ -152,12 +159,12 @@ class Explorer():
         self.blockiert_lock.release()
 
     def go_forward(self, distance):
-        self.send_message(message = '1,' + str(distance))
+        self.send_message(message = '1,' + str(int(round(distance*CM2GRAD*self.calibrationFactor))))
 
     def go_back(self, distance):
-        self.send_message(message = '2,' + str(distance))
+        self.send_message(message = '2,' + str(int(round(distance*CM2GRAD*self.calibrationFactor))))
         self.position_lock.acquire()
-        self.position = berechnePunkt(self.ausrichtung, -1 * distance * 360, self.position)
+        self.position = berechnePunkt(self.ausrichtung, -1 * distance, self.position)
         self.position_lock.release()
 
     def go_to_point(self, x, y):
@@ -187,7 +194,7 @@ class Explorer():
             self.blockiert = True
             self.blockiert_lock.release()
             break
-        self.go_forward(int(round(vektor['entfernung'])))
+        self.go_forward(vektor['entfernung'])
         while(True):
             self.blockiert_lock.acquire()
             if self.blockiert:
@@ -203,11 +210,13 @@ class Explorer():
         elif self.status == 1:
             self.status_lock.release()
             return False
-        else: # potentiell Exception, oder ziel gefunden
+        else: #TODO: potentiell Exception, oder ziel gefunden
             self.status_lock.release()
             dbg_print('brick.go_to_point(): else', 1)
             return False
 
+    def scan_ultrasonic(self):
+        return 255
 
     def exploration_simple(self):
         state = 0
@@ -221,7 +230,7 @@ class Explorer():
             if not self.blockiert:
                 self.blockiert = True
                 self.blockiert_lock.release()
-                print "exploration_simple - state=%d" % state
+                dbg_print("exploration_simple - state=%d" % state,1)
 
                 if state == 0:
                     self.go_forward(0)
@@ -240,24 +249,106 @@ class Explorer():
                 self.blockiert_lock.release()
 
     def exploration_circle(self):
+        step = 10
+        state = 0
+        first_mesurement = 0
+        second_mesurement = 0 
         while(True):
             self.abbruch_lock.acquire()
             if self.abbruch:
                 self.abbruch_lock.release()
                 break
             self.abbruch_lock.release()
-            print "exploration_circle"
-            time.sleep(1.0)
+            self.blockiert_lock.acquire()
+            if not self.blockiert:
+                self.blockiert = True
+                self.blockiert_lock.release()
+                dbg_print("exploration_circle - state=%d" % state, 1)
+
+                if state == 0:
+                    first_mesurement = self.scan_ultrasonic()
+                    if first_mesurement < 1.5*step:
+                        state = 2 #+1 am ende = 3 -> drehen
+                elif state == 1:
+                    self.go_forward(step)
+                elif state == 2:
+                    second_mesurement = self.scan_ultrasonic()
+                    if first_mesurement < 255 and second_mesurement < first_mesurement:
+                        self.calibrationFactor = float(step)/(first_mesurement - second_mesurement)
+                        dbg_print("calibrationFactor: %.2f" % self.calibrationFactor, 1)
+                    step += 10
+                elif state == 3:
+                    first_mesurement = 0
+                    second_mesurement = 0
+                    self.turnleft(90)
+                state += 1
+                state %= 4
+                step %= 200
+            else:
+                self.blockiert_lock.release()
 
     def exploration_radar(self):
+        step = 20
+        forward = 10
+        state = 1
+        direction = 1
+        first_mesurement = 0
+        second_mesurement = 0 
         while(True):
             self.abbruch_lock.acquire()
             if self.abbruch:
                 self.abbruch_lock.release()
                 break
             self.abbruch_lock.release()
-            print "exploration_radar"
-            time.sleep(1.0)
+            self.blockiert_lock.acquire()
+            if not self.blockiert:
+                self.blockiert = True
+                self.blockiert_lock.release()
+                dbg_print("exploration_radar - state=%d" % state, 1)
+                if state == 0:
+                    if direction < 2:
+                        self.turnright(90)
+                    else:
+                        self.turnleft(90)
+                    direction += 1
+                    direction %= 4
+                elif state == 1:
+                    first_mesurement = self.scan_ultrasonic()
+                    if first_mesurement < 1.5*forward:
+                        state = -1 #+1 am ende = 0 -> drehen
+                elif state == 2:
+                    self.go_forward(forward)
+                elif state == 3:
+                    second_mesurement = self.scan_ultrasonic()
+                    if first_mesurement < 255 and second_mesurement < first_mesurement:
+                        self.calibrationFactor = float(forward)/(first_mesurement - second_mesurement)
+                        dbg_print("calibrationFactor: %.2f" % self.calibrationFactor, 1)
+                elif state == 4:
+                    first_mesurement = 0
+                    second_mesurement = 0
+                    if direction < 2:
+                        self.turnright(90)
+                    else:
+                        self.turnleft(90)
+                    direction += 1
+                    direction %= 4
+                elif state == 5:
+                    first_mesurement = self.scan_ultrasonic()
+                    if first_mesurement < 1.5*step:
+                        state =  #+1 am ende = 3 -> drehen
+                elif state == 6:
+                    self.go_forward(step)
+                elif state == 7:
+                    second_mesurement = self.scan_ultrasonic()
+                    if first_mesurement < 255 and second_mesurement < first_mesurement:
+                        self.calibrationFactor = float(step)/(first_mesurement - second_mesurement)
+                        dbg_print("calibrationFactor: %.2f" % self.calibrationFactor, 1)
+                state += 1
+                state %= 8
+                step %= 200
+            else:
+                self.blockiert_lock.release()
+
 
     def exploration_cancel(self):
         while(phase == 0):
