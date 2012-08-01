@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 OFFLINE = False
-phase = 1 # TODO phase von mcc
+phase = 0 # TODO phase von mcc
 
 import random
 import sys
@@ -318,7 +318,7 @@ class Explorer():
                     self.status_lock.release()
                     dbg_print("Kollision: " + str(csv[1]) + " Einheiten gefahren",1)
                     self.position_lock.acquire()
-                    self.position = berechnePunkt(self.ausrichtung, csv[1], self.position) #TODO an MCC
+                    self.position = berechnePunkt(self.ausrichtung,int(str(csv[1]).strip("\x00")),self.position)
                     self.position_lock.release()
                     dbg_print(str(self.position),2)
                     self.blockiert_lock.acquire()
@@ -362,7 +362,7 @@ class Explorer():
             if self.abbruch:
                 self.abbruch = False
                 self.abbruch_lock.release()
-                if self.phase == 0:
+                if phase == 0:
                     algo = random.choice([0])
                     if algo == 0:
                         self.exploration_simple() #blockierender Aufruf

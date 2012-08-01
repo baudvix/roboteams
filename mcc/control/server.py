@@ -27,9 +27,7 @@ class MCCProtocol(amp.AMP):
             if robo.handle == handle:
                 robo.active = True
                 print '#%d activated' % handle
-                self.callRemote(command.GoToPoint, 
-                                x=0, 
-                                y=50)
+                #self.callRemote(command.GoToPoint, x=0, y=50)
                 return {'ACK': 'got activate'}
         raise command.CommandHandleError('No robot with handle')
     command.Activate.responder(activate)
