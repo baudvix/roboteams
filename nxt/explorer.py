@@ -335,7 +335,7 @@ class Explorer():
                 elif state == 5:
                     first_mesurement = self.scan_ultrasonic()
                     if first_mesurement < 1.5*step:
-                        state =  #+1 am ende = 3 -> drehen
+                        state = -1 #+1 am ende = 0 -> drehen
                 elif state == 6:
                     self.go_forward(step)
                 elif state == 7:
@@ -454,7 +454,7 @@ class Explorer():
                 self.abbruch = False
                 self.abbruch_lock.release()
                 if phase == 0:
-                    algo = random.choice([0])
+                    algo = random.choice([2])
                     if algo == 0:
                         self.exploration_simple() #blockierender Aufruf
                     elif algo == 1:
