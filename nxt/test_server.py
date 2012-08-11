@@ -1,6 +1,6 @@
 import sys
 sys.path.append("..")
-from mcc.control.server import main
+from mcc.run import main
 
 main()
 
