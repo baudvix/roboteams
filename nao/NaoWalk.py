@@ -162,6 +162,3 @@ class NaoWalk():
         self.motion.stiffnessInterpolation("Body", 1.0, 0.1)
         self.motion.walkInit()
         self.motion.walkTo(0,0,z)
-
-
-

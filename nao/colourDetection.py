@@ -7,6 +7,7 @@ import math
 
 # Python Image Library
 import Image
+import time
 
 from naoqi import ALProxy
 from naoqi import ALBroker
@@ -17,14 +18,14 @@ def getColour(IP, PORT, x, y):
     """
     First get an image from Nao, then show it on the screen with PIL.
     """
-
+    print "-----start:getColour-----"
+    time1 = time.clock()
+    t5 = time.clock()
     myBroker = ALBroker("myBroker",
         "0.0.0.0",   # listen to anyone
         0,           # find a free port and use it
         IP,         # parent broker IP
         PORT)       # parent broker port
-
-
 
     camProxy = ALProxy("ALVideoDevice", IP, PORT)
     resolution = 2    # VGA
@@ -33,29 +34,22 @@ def getColour(IP, PORT, x, y):
     xValue = x
     yValue = y
 
-
-
     #for b in range(0, 5):
     areas = [0,0,0,0]
-    colors = ['red', 'yellow', 'green', 'blue']
+    colors = ['red', 'green', 'blue', 'black']
 
     videoClient = camProxy.subscribe("python_client", resolution, colorSpace, 5)
+    t6 = time.clock()
 
-    t0 = time.time()
+    t0 = time.clock()
 
     # Get a camera image.
     # image[6] contains the image data passed as an array of ASCII chars.
     naoImage = camProxy.getImageRemote(videoClient)
 
-    t1 = time.time()
-
-    # Time the image transfer.
-    #print "Runde: ", b
-
     camProxy.unsubscribe(videoClient)
 
-
-    # Now we work with the image returned and save it as a PNG  using ImageDraw
+    # Now we work with the image returned and save it as a JPG  using ImageDraw
     # package.
 
     # Get the image size and pixel array.
@@ -67,12 +61,12 @@ def getColour(IP, PORT, x, y):
     im = Image.fromstring("RGB", (imageWidth, imageHeight), array)
 
     # Save the image.
-    im.save("camImage.png", "PNG")
+    im.save("camImage.jpg", "JPEG")
 
     #im.show()
 
     color = 'red'
-    img = cv.LoadImage('camImage.png')
+    img = cv.LoadImage('camImage.jpg')
     #  img = cv.QueryFrame( self.capture )
 
     #blur the source image to reduce color noise
@@ -82,24 +76,25 @@ def getColour(IP, PORT, x, y):
     #easier to determine the color to track(hue)
     hsv_img = cv.CreateImage(cv.GetSize(img), 8, 3)
     cv.CvtColor(img, hsv_img, cv.CV_BGR2HSV)
+    t1 = time.clock()
 
     #limit all pixels that don't match our criteria, in this case we are
     #looking for purple but if you want you can adjust the first value in
     #both turples which is the hue range(120,140).  OpenCV uses 0-180 as
     #a hue range for the HSV color model
+    t3 = time.clock()
     thresholded_img =  cv.CreateImage(cv.GetSize(hsv_img), 8, 1)
     for u in range(0, 1):
         for h in range(0, len(colors)):
             if (colors[h] == 'red' ):
-                cv.InRangeS(hsv_img, (140, 80, 80), (180, 130, 130), thresholded_img)
-                cv.InRangeS(hsv_img, (0, 90, 90), (10, 130, 140), thresholded_img)
-            if (colors[h] == 'yellow' ):
-                cv.InRangeS(hsv_img, (30, 90, 70), (60, 130, 90), thresholded_img)
+                #cv.InRangeS(hsv_img, (140, 80, 80), (180, 180, 180), thresholded_img)
+                cv.InRangeS(hsv_img, (0, 100, 100), (40, 255, 255), thresholded_img)
             if (colors[h] == 'green' ):
-                cv.InRangeS(hsv_img, (60, 90, 90), (100, 130, 130), thresholded_img)
+                cv.InRangeS(hsv_img, (50, 40, 40), (90, 180, 255), thresholded_img)
             if (colors[h] == 'blue' ):
-                cv.InRangeS(hsv_img,  (100, 100, 100), (140, 255, 255), thresholded_img)
-
+                cv.InRangeS(hsv_img, (100, 100, 110), (140, 255, 255), thresholded_img)
+            #if (colors[h] == 'black' ):
+            #    cv.InRangeS(hsv_img, (0, 0, 0), (180, 10, 100), thresholded_img)
             #determine the objects moments and check that the area is large
             #enough to be our object
             moments = cv.Moments(cv.GetMat(thresholded_img,1), 0)
@@ -137,6 +132,13 @@ def getColour(IP, PORT, x, y):
                 biggest = u+1
 
         print("WAHRSCHEINLICHSTE FARBE: " + colors[biggest])
+        time2 = time.clock()
+        t4 = time.clock()
+        print "Whole time needed: "+str(time2-time1)
+        print "time to get save Image: "+str(t1-t0)
+        print "Time for broker & co: ", str(t6-t5)
+        print "time for loop: "+str(t4-t3)
+        print "-----end:getColour-----"
         return biggest
                 #create an overlay to mark the center of the tracked object
             #overlay = cv.CreateImage(cv.GetSize(img), 8, 3)
