@@ -15,7 +15,7 @@ class Simulator(object):
         self.point_y = 50
         self.yaw = random.random() * math.pi * 2
         self.speed = 5
-        self.fake_map = fake.FakeMap(5, size=295)
+        self.fake_map = fake.FakeMap(5, size=350)
 
     def go_point(self, n):
 

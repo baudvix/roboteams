@@ -153,26 +153,9 @@ class DrawColor():
 
     def __init__(self):
         self._max_value = 0
-        self.map_color = [(0.0549, 0.3608, 0.0196),
-                          (0.102, 0.4471, 0.0431),
-                          (0.149, 0.5098, 0.0588),
-                          (0.1922, 0.5725, 0.0784),
-                          (0.4275, 0.6275, 0.1176),
-                          (0.6588, 0.6863, 0.1529),
-                          (0.8824, 0.7372, 0.1804),
-                          (0.9255, 0.6471, 0.1804),
-                          (0.9373, 0.5255, 0.1569),
-                          (0.9451, 0.4039, 0.1490),
-                          (0.9490, 0.2863, 0.1333),
-                          (0.9255, 0.2431, 0.1333),
-                          (0.8824, 0.251, 0.1373)]
-
-    def calc_color(self, squares):
-        for square in squares:
-            if self._max_value < square[4]:
-                self._max_value = square[4]
-            square[4] = self.map_color[int((square[4] / self._max_value) * 11)]
-        return squares
+        self.map_color = [(0.1843, 0.549, 0),
+                          (1, 0.549, 0),
+                          (0.5843, 0, 0)]
 
     def calc_simple_color(self, value):
         if value >= 5:
@@ -362,19 +345,7 @@ class WxGLCanvas(GLCanvas, threading.Thread):
 
         self._redraw = False
 
-        self.map_color = [(0.0549, 0.3608, 0.0196),
-                          (0.102, 0.4471, 0.0431),
-                          (0.149, 0.5098, 0.0588),
-                          (0.1922, 0.5725, 0.0784),
-                          (0.4275, 0.6275, 0.1176),
-                          (0.6588, 0.6863, 0.1529),
-                          (0.8824, 0.7372, 0.1804),
-                          (0.9255, 0.6471, 0.1804),
-                          (0.9373, 0.5255, 0.1569),
-                          (0.9451, 0.4039, 0.1490),
-                          (0.9490, 0.2863, 0.1333),
-                          (0.9255, 0.2431, 0.1333),
-                          (0.8824, 0.251, 0.1373)]
+        self._flag_flush = False
         self._exit_flag = False
         self._lock = threading.Lock()
         threading.Thread.__init__(self)
@@ -393,6 +364,14 @@ class WxGLCanvas(GLCanvas, threading.Thread):
 
     def run(self):
         while not self._exit_flag:
+            if self._flag_flush:
+                self.SetCurrent()
+                glLoadIdentity()
+                self.clear_canvas()
+                self.SwapBuffers()
+                with self._lock:
+                    self._flag_flush = False
+                continue
             if self._redraw:
                 self._redraw = False
             action = False
@@ -427,10 +406,8 @@ class WxGLCanvas(GLCanvas, threading.Thread):
         self.triangles = Queue.Queue()
         self.circles = Queue.Queue()
         self.lines = Queue.Queue()
-        self.SetCurrent()
-        glLoadIdentity()
-        self.clear_canvas()
-        self.SwapBuffers()
+        with self._lock:
+            self._flag_flush = True
 
     def clear_canvas(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -496,14 +473,6 @@ class WxGLCanvas(GLCanvas, threading.Thread):
         glLoadIdentity()
         self.clear_canvas()
         self.SwapBuffers()
-
-    def example_map_color(self):
-        squares = []
-        length = 2.0 / 12
-        y1, y2 = (-1, 1)
-        for c in range(0, 12):
-            squares.append([(c * length) - 1, y1, ((c + 1) * length) - 1, y2, self.map_color[c]])
-        return squares
 
     def on_size(self, event):
         pass
