@@ -7,7 +7,7 @@ phase = 0 # TODO phase von mcc
 #TODO: dividing into logical explorer and physical explorer 
 #TODO: communication with MCC (callback functions)
 #TODO: commenting functions
-#TODO: exploration algorithms
+#TODO: dodges in expl-algos...
 
 import random
 import sys
@@ -16,6 +16,7 @@ import threading
 import math
 sys.path.append('..')
 import pprint
+from mcc.model import map
 from twisted.internet import reactor, defer, task
 from twisted.internet.protocol import Factory, _InstanceFactory
 from twisted.protocols import amp
@@ -56,9 +57,9 @@ class RobotProtocol(amp.AMP):
         return {'ACK': 'got state'}
     command.UpdateState.responder(update_state)
 
-    def update_position(self, x, y, yaw):
-        print 'Updating position (%d, %d, %d)' % (x, y, yaw)
-        return {'ACK': 'got position'}
+    def update_position(self, handle, x_axis, y_axis, yaw):
+        print 'Updating position (%d, %d, %d)' % (x_axis, y_axis, yaw)
+        return {'ack': 'got position'}
     command.UpdatePosition.responder(update_position)
 
     def send_map(self, map):
@@ -79,11 +80,10 @@ class NXTProtocol(RobotProtocol):
             self.callRemote(command.ArrivedPoint,
                             handle = self.factory.robots[0].handle, 
                             x = self.factory.robots[0].position['x'],
-                            y = self.factory.robots[0].position['y'])
+                            y = self.factory.robots[0].position['y'])#FIXME: robots[rhandle]
             self.factory.robots[0].position_lock.release()
             return {'ACK': 'got point'}
         else:#FIXME: Exception 
-            #FIXME: roboter.go_to_point() returned false
             self.factory.robots[0].position_lock.acquire()
             self.callRemote(command.ArrivedPoint,
                             handle = self.factory.robots[0].handle,
@@ -92,6 +92,28 @@ class NXTProtocol(RobotProtocol):
             self.factory.robots[0].position_lock.release()
             return {'ACK': 'not'}
     command.GoToPoint.responder(go_to_point)
+
+    def update_state(self, state):
+        print 'Updating state to %d' % state
+        phase = state
+        return {'ACK': 'got state'}
+    command.UpdateState.responder(update_state)
+
+    def update_position(self, handle, x_axis, y_axis, yaw):
+        print 'Updating position (%d, %d, %d)' % (x_axis, y_axis, yaw)
+        self.factory.robots[0].position_lock.acquire()#FIXME: rhandle
+        self.factory.robots[0].position['x'] = x_axis
+        self.factory.robots[0].position['y'] = y_axis
+        self.factory.robots[0].ausrichtung = yaw
+        self.factory.robots[0].position_lock.release()
+        return {'ack': 'got position'}
+    command.UpdatePosition.responder(update_position)#FIXME: rhandle
+
+    def send_map(self, map):
+        print 'Updating map '
+        pprint.pprint(map)
+        return {'ACK': 'got map'}
+    command.SendMap.responder(send_map)
 
 class RobotFactory(_InstanceFactory):
     def __init__(self, reactor, instance, deferred, anzahl):
@@ -103,11 +125,12 @@ class RobotFactory(_InstanceFactory):
 class Explorer():
     '''Die Explorer-Klasse stellt die Verbindung zu einem durch seine MAC-Adresse identifizierten NXT her und stellt die Funktionalitaet zur Steuerung bereit.'''
     #FIXME: trennen von blosser Steuerung und Logik
-    def __init__(self, mac, identitaet, color, outbox = 5, inbox = 1):
+    def __init__(self, mac, protokoll, identitaet, color, outbox = 5, inbox = 1):
         self.brick = find_one_brick(host = mac, method = Method(usb = True, bluetooth = True))
         self.color = color# FIXME: potentiell unnoetig
         self.ausrichtung = 90; # 0 - 359 Grad; 0 Osten, 90 Norden, 180 Westen, 270 Sueden
         self.calibrationFactor = 1 
+        self.protokoll = protokoll
         self.identitaet = identitaet
         self.status = -1
         self.status_lock = threading.Lock()
@@ -140,16 +163,20 @@ class Explorer():
 
     def turnright(self, degrees):
         self.send_message(message = '4,' + str(degrees))
+        self.position_lock.acquire()
         self.ausrichtung += degrees
         self.ausrichtung %= 360
+        self.position_lock.release()
 
     def turnleft(self, degrees):
         self.send_message(message = '3,' + str(degrees))
+        self.position_lock.acquire()
         if self.ausrichtung < degrees:
             self.ausrichtung += 360
 
         self.ausrichtung -= degrees
         self.ausrichtung %= 360
+        self.position_lock.release()
 
     def stop(self):
         self.send_message(message = '0,0')
@@ -162,7 +189,7 @@ class Explorer():
         self.send_message(message = '1,' + str(int(round(distance*CM2GRAD*self.calibrationFactor))))
 
     def go_back(self, distance):
-        self.send_message(message = '2,' + str(int(round(distance*CM2GRAD*self.calibrationFactor))))
+        self.send_message(message = '2,' + str(int(round(distance*self.calibrationFactor))))#*CM2GRAD))))
         self.position_lock.acquire()
         self.position = berechnePunkt(self.ausrichtung, -1 * distance, self.position)
         self.position_lock.release()
@@ -216,6 +243,11 @@ class Explorer():
             return False
 
     def scan_ultrasonic(self):
+        #FIXME:
+        self.blockiert_lock.acquire()
+        if self.blockiert:
+            self.blockiert = False
+        self.blockiert_lock.release()
         return 255
 
     def exploration_simple(self):
@@ -235,6 +267,7 @@ class Explorer():
                 if state == 0:
                     self.go_forward(0)
                 elif state == 1:
+                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_DODGE_CENTER, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
                     self.go_back(1)
                 elif state == 2:
                     linksrechts = random.choice([0, 1]) #0=links || 1=rechts
@@ -267,11 +300,13 @@ class Explorer():
 
                 if state == 0:
                     first_mesurement = self.scan_ultrasonic()
-                    if first_mesurement < 1.5*step:
+                    if first_mesurement < 1.2*step:
                         state = 2 #+1 am ende = 3 -> drehen
+                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
                 elif state == 1:
                     self.go_forward(step)
                 elif state == 2:
+                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
                     second_mesurement = self.scan_ultrasonic()
                     if first_mesurement < 255 and second_mesurement < first_mesurement:
                         self.calibrationFactor = float(step)/(first_mesurement - second_mesurement)
@@ -338,6 +373,7 @@ class Explorer():
                         state = -1 #+1 am ende = 0 -> drehen
                 elif state == 6:
                     self.go_forward(step)
+                    step += 20
                 elif state == 7:
                     second_mesurement = self.scan_ultrasonic()
                     if first_mesurement < 255 and second_mesurement < first_mesurement:
@@ -352,7 +388,7 @@ class Explorer():
 
     def exploration_cancel(self):
         while(phase == 0):
-            intervall = random.choice([60.0])
+            intervall = random.choice([30.0, 60.0])
             time.sleep(intervall)
             if phase == 0:
                 self.abbruch_lock.acquire()
@@ -402,7 +438,9 @@ class Explorer():
                 csv = payload.split(',') #TODO: payload = event, entfernung, sensor(optional)
                 if int(csv[0]) == 1: #nach Zeitintervall 500ms update_position (Entfernung)
                     dbg_print("Update: " + str(csv[1]) + " Einheiten gefahren",1)
+                    self.position_lock.acquire()
                     #print berechnePunkt(self.ausrichtung, csv[1], self.position)#TODO an MCC
+                    self.position_lock.release()
                 elif int(csv[0]) == 2: #kollision update_position (Entfernung)
                     self.status_lock.acquire()
                     self.status = 1 # hit
@@ -454,7 +492,7 @@ class Explorer():
                 self.abbruch = False
                 self.abbruch_lock.release()
                 if phase == 0:
-                    algo = random.choice([2])
+                    algo = random.choice([0,1,2])
                     if algo == 0:
                         self.exploration_simple() #blockierender Aufruf
                     elif algo == 1:
@@ -497,7 +535,7 @@ class NXTClient():
         print 'connected to mcc'
         for bot in range(self.anzahl):
             try:
-                self.factory.robots[bot] = Explorer(MAC[bot], bot, bot + 1, 5 + bot, 1 + bot)
+                self.factory.robots[bot] = Explorer(MAC[bot], self.protocol, bot, bot + 1, 5 + bot, 1 + bot)
             except:
                 print "Bot %s nicht gefunden" % MAC[bot]
                 self.factory.robots[bot] = None

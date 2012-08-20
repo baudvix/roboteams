@@ -1,3 +1,5 @@
+import sys
+sys.path.append("..")
 from mcc.control import server
 
 
