@@ -1,0 +1,224 @@
+#include "explorer.h"
+#include "libmov.h"
+#include "libinfra.h"
+#include "libmov.nxc" //noetig da kein linking
+#include "libinfra.nxc" //noetig da kein linking
+
+task event()
+{
+ #if DEBUG == 1
+ Acquire(print_mutex);
+ lcd_print("sen_event gestartet");//DEBUGINFO
+ Release(print_mutex);
+ #endif
+ while(true)
+ {
+  #if DEBUG == 0
+  if(SensorRaw(S4) < 480)
+  {
+   if(!found)
+   {
+    Acquire(blue_mutex);
+    string fou;
+    fou=StrCat("m;",NumToStr(id++),";9,0"); // 9: found
+    id %= 10;
+    id += 10;
+    SendResponseString(OUTBOX,fou);
+    Release(blue_mutex);
+    weiter=0;
+    found = 1;
+   }
+  }
+  #endif
+  Wait(1000);
+  
+  #if DEBUG == 0
+  Acquire(blue_mutex);
+  string news;
+  news=StrCat("m;",NumToStr(id++),";1,",NumToStr(MotorTachoCount(OUT_A)));  // s: save_way
+  id %= 10;
+  id += 10;
+  SendResponseString(OUTBOX,news);
+  Release(blue_mutex);
+  #endif
+ }
+}
+ 
+task movement()
+{
+ #if DEBUG == 1
+ Acquire(print_mutex);
+ lcd_print("movement gestartet");//DEBUGINFO
+ Release(print_mutex);
+ #endif
+ payload dequeued;
+ string streckeninfo;
+ distance strecke;
+ while(true)
+ {
+  streckeninfo="";
+  if(!is_empty())
+  {
+   dequeued = dequeue(queue1, queue2);
+   #if DEBUG == 3
+   Acquire(print_mutex);
+     lcd_print(StrCat("dequeue=",NumToStr(dequeued.funktion)));
+     lcd_print(StrCat(" param=",NumToStr(dequeued.param)));
+   Release(print_mutex);
+   #endif
+   if(dequeued.funktion == 1)
+   {
+		weiter = 1; 
+	  vor(dequeued.param,strecke);
+	  
+    Acquire(print_mutex);    // ermöglicht das korrekte setzen von strecke
+    lcd_print(StrCat("grad:",NumToStr(strecke.rest)));
+    Release(print_mutex);
+	  
+	  Acquire(blue_mutex);
+	  string tmp = "";
+    if(strecke.k!=0) tmp=NumToStr(strecke.k);
+    if(hit)
+    {
+     streckeninfo=StrCat("m;",NumToStr(id++),";2,",tmp,NumToStr(strecke.rest));
+     hit = 0;
+    }
+    else
+    {
+     streckeninfo=StrCat("m;",NumToStr(id++),";3,",tmp,NumToStr(strecke.rest));
+    }
+    id %= 10;
+    id += 10;
+    SendResponseString(OUTBOX,streckeninfo);
+    Release(blue_mutex);
+	 }
+   else if(dequeued.funktion == 2)
+   {
+    zurueck(dequeued.param);
+    Acquire(blue_mutex);
+    streckeninfo=StrCat("m;",NumToStr(id++),";4,0");
+    id %= 10;
+    id += 10;
+    SendResponseString(OUTBOX,streckeninfo);
+    Release(blue_mutex);
+   }
+   else if(dequeued.funktion == 3)
+   {
+    drehen('l',dequeued.param);
+    Acquire(blue_mutex);
+    streckeninfo=StrCat("m;",NumToStr(id++),";4,0");
+    id %= 10;
+    id += 10;
+    SendResponseString(OUTBOX,streckeninfo);
+    Release(blue_mutex);
+   }
+   else if(dequeued.funktion == 4)
+   {
+    Acquire(blue_mutex);
+    drehen('r',dequeued.param);
+    streckeninfo=StrCat("m;",NumToStr(id++),";4,0");
+    id %= 10;
+    id += 10;
+    SendResponseString(OUTBOX,streckeninfo);
+    Release(blue_mutex);
+   }
+   else if(dequeued.funktion == 5){} // sendet ein wert vom ultraschall
+   //else if(dequeued.funktion == 0){} // abbruch --> weiter=0
+   else
+   {
+    Acquire(print_mutex);
+    lcd_print("M_PARSING-ERROR: ");
+    lcd_print(StrCat("dequeue=",NumToStr(dequeued.funktion)));
+    lcd_print(StrCat(" param=",NumToStr(dequeued.param)));
+    Release(print_mutex);
+   }
+  }
+  else
+  {
+   #if DEBUG == 2
+   Acquire(print_mutex);
+    lcd_print("queue is empty");//DEBUGINFO
+   Release(print_mutex);
+   #endif
+   Wait(500);
+  }
+ }
+}
+
+task dispatcher()
+{
+ #if DEBUG == 1
+ Acquire(print_mutex);
+ lcd_print("dispatcher gestartet");//DEBUGINFO
+ Release(print_mutex);
+ #endif
+ string in, tmp;
+ message m;
+ int test;
+ while(true)
+ {
+  in = "";
+  test = 1;
+  Acquire(blue_mutex);
+  test = ReceiveRemoteString(INBOX, true, in);//gibt 0 oder 64 zurueck
+  Release(blue_mutex);
+  if(in!="" && test==0)
+  {
+   #if DEBUG == 2
+   Acquire(print_mutex);
+    lcd_print("in != \"\" ");
+   Release(print_mutex);
+   #endif
+   m = splitMsg(in);
+   #if DEBUG == 2
+   Acquire(print_mutex);
+    lcd_print(StrCat("typ=",m.typ,";id=",NumToStr(m.id),";func=",NumToStr(m.msg.funktion)));
+   Release(print_mutex);
+   #endif
+   if(m.typ == "m")/*strncmp(m.typ,"m",1) funktioniert nicht*/
+   {
+    tmp = StrCat("r;", NumToStr(m.id),";response");
+    #if DEBUG == 2
+    Acquire(print_mutex);
+     lcd_print(tmp);
+    Release(print_mutex);
+    #endif
+    Acquire(blue_mutex);
+    SendResponseString(OUTBOX,tmp);
+    Release(blue_mutex);
+   
+    if(m.msg.funktion == 0) // queue sendback auch nullen
+    {
+     weiter = 0;
+     Acquire(print_mutex);
+     lcd_print("exp. abbruch");
+     Release(print_mutex);
+     clean_queue(queue1, queue2);
+    }
+    else
+    {
+     enqueue(queue1, queue2, m.msg);
+    }
+   }
+  }
+  Wait(500);
+ }
+}
+
+void undo_found()
+{
+    found=0;
+}
+
+task main()
+{
+ Precedes(dispatcher, movement, event);
+ queueInit(queue1, queue2);
+
+ //Init Sensoren:
+ SetSensorLowspeed(S1);
+ SetSensorTouch(S2);
+ SetSensorTouch(S3);
+ SetSensorLight(S4);
+
+}

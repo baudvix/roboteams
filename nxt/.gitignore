@@ -1,0 +1,14 @@
+# Kompilate
+*.pyc
+*.rxe
+
+# Zwischenergebnisse
+*.aux
+*.log
+*.gz
+*.*~
+*.toc
+
+#Projektdateien
+.project
+.pydevproject
