@@ -101,13 +101,13 @@ class NXTProtocol(RobotProtocol):
 
     def update_position(self, handle, x_axis, y_axis, yaw):
         print 'Updating position (%d, %d, %d)' % (x_axis, y_axis, yaw)
-        self.factory.robots[0].position_lock.acquire()#FIXME: rhandle
-        self.factory.robots[0].position['x'] = x_axis
-        self.factory.robots[0].position['y'] = y_axis
-        self.factory.robots[0].ausrichtung = yaw
-        self.factory.robots[0].position_lock.release()
+        self.factory.robots[handle].position_lock.acquire()
+        self.factory.robots[handle].position['x'] = x_axis
+        self.factory.robots[handle].position['y'] = y_axis
+        self.factory.robots[handle].ausrichtung = yaw
+        self.factory.robots[handle].position_lock.release()
         return {'ack': 'got position'}
-    command.UpdatePosition.responder(update_position)#FIXME: rhandle
+    command.UpdatePosition.responder(update_position)
 
     def send_map(self, map):
         print 'Updating map '
