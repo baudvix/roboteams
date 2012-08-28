@@ -161,9 +161,9 @@ class DrawColor():
         if value >= 5:
             return self.map_color[0]
         if value >= 2:
-            return self.map_color[5]
+            return self.map_color[1]
         else:
-            return self.map_color[11]
+            return self.map_color[2]
 
 
 class DrawMng(threading.Thread):
@@ -279,12 +279,12 @@ class DrawMng(threading.Thread):
         t_expand = [0, 0, 0, 0]
         for m in self.active_maps:
             m.latest_update = []
-            for i in range(0, 4):
+            for i in xrange(0, 4):
                 if t_expand[i] < m.expand[i]:
                     t_expand[i] = m.expand[i]
         t, r, b, l = t_expand
-        for x in range(l * -100, r * 100):
-            for y in range(b * -100, t * 100):
+        for x in xrange(l * -100, r * 100):
+            for y in xrange(b * -100, t * 100):
                 v = 0
                 for m in self.active_maps:
                     v += m.get_point(x, y)
@@ -294,8 +294,8 @@ class DrawMng(threading.Thread):
     def calc_map(self):
         self._to_draw_squares = Queue.Queue()
         t, r, b, l = self._map_draw.expand
-        for x in range(l * -100, r * 100):
-            for y in range(b * -100, t * 100):
+        for x in xrange(l * -100, r * 100):
+            for y in xrange(b * -100, t * 100):
                 value = self._map_draw.get_point(x, y)
                 if not value == 0:
                     new_ele = self.calc_square(x, y, value)
