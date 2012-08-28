@@ -73,23 +73,23 @@ class NXTProtocol(RobotProtocol):
     def __init__(self):
         self.factory = None
 
-    def go_to_point(self, x , y):
-        dbg_print('Going to Point (' + str(x) + ',' + str(y) + ')', 2)
-        if self.factory.robots[0].go_to_point(x, y):#TODO: rhandle von NXT benoetigt
-            self.factory.robots[0].position_lock.acquire()
+    def go_to_point(self, handle, x_axis , y_axis):
+        dbg_print('Going to Point (' + str(x_axis) + ',' + str(y_axis) + ')', 2)
+        if self.factory.robots[handle].go_to_point(x_axis, y_axis):
+            self.factory.robots[handle].position_lock.acquire()
             self.callRemote(command.ArrivedPoint,
-                            handle = self.factory.robots[0].handle, 
-                            x = self.factory.robots[0].position['x'],
-                            y = self.factory.robots[0].position['y'])#FIXME: robots[rhandle]
-            self.factory.robots[0].position_lock.release()
+                            handle = self.factory.robots[handle].handle, 
+                            x_axis = self.factory.robots[handle].position['x_axis'],
+                            y_axis = self.factory.robots[handle].position['y_axis'])
+            self.factory.robots[handle].position_lock.release()
             return {'ACK': 'got point'}
         else:#FIXME: Exception 
-            self.factory.robots[0].position_lock.acquire()
+            self.factory.robots[handle].position_lock.acquire()
             self.callRemote(command.ArrivedPoint,
-                            handle = self.factory.robots[0].handle,
-                            x = self.factory.robots[0].position['x'],
-                            y = self.factory.robots[0].position['y'])
-            self.factory.robots[0].position_lock.release()
+                            handle = self.factory.robots[handle].handle,
+                            x_axis = self.factory.robots[handle].position['x_axis'],
+                            y_axis = self.factory.robots[handle].position['y_axis'])
+            self.factory.robots[handle].position_lock.release()
             return {'ACK': 'not'}
     command.GoToPoint.responder(go_to_point)
 
