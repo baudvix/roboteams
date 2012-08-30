@@ -4,8 +4,11 @@ import math
 import motion
 from naoqi import ALBroker
 from naoqi import ALProxy
+from naoqi import ALModule
 
-class NaoWalk():
+NaoWalk = None
+
+class NaoWalkModule(ALModule):
 
     # INCOMPLETE AT: walkUpToBall(), include MCC-CALL and delete walkToPosition()
 
@@ -31,7 +34,7 @@ class NaoWalk():
     # Repeat this progress until NAO has reached
     # the target area.
 
-    def __init__(self):
+    def __init__(self, name):
         self.myBroker = ALBroker("myBroker","0.0.0.0",0,"germanopen3.local",9559)
         self.motion = ALProxy("ALMotion")
         self.tracker = ALProxy("ALRedBallTracker")
@@ -42,6 +45,7 @@ class NaoWalk():
         self.tracker.startTracker()
         self.ballPosition = []
         self.targetPosition = []
+        ALModule.__init__(self,name)
 
     def __del__(self):
         self.tracker.stopTracker()
@@ -163,5 +167,17 @@ class NaoWalk():
         self.motion.walkInit()
         self.motion.walkTo(0,0,z)
 
+def main():
+    global NaoWalk
+    NaoWalk = NaoWalkModule("NaoWalk")
 
+    try:
+        while True:
+            time.sleep(1)
+
+    except KeyboardInterrupt:
+        print "Interrupted"
+
+if __name__ == "__main__":
+    main()
 
