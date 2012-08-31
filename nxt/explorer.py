@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 
 OFFLINE = False
-phase = 0 # TODO phase von mcc
+phase = 0 #phase von mcc
 
-#TODO: calibrating via ultrasonic distance and engine distance
 #TODO: dividing into logical explorer and physical explorer 
-#TODO: communication with MCC (callback functions)
 #TODO: commenting functions
-#TODO: dodges in expl-algos...
 
 import random
 import sys
@@ -83,7 +80,7 @@ class NXTProtocol(RobotProtocol):
                             y_axis = self.factory.robots[handle].position['y_axis'])
             self.factory.robots[handle].position_lock.release()
             return {'ACK': 'got point'}
-        else:#FIXME: Exception 
+        else:
             self.factory.robots[handle].position_lock.acquire()
             self.callRemote(command.ArrivedPoint,
                             handle = self.factory.robots[handle].handle,
@@ -94,13 +91,11 @@ class NXTProtocol(RobotProtocol):
     command.GoToPoint.responder(go_to_point)
 
     def update_state(self, state):
-        print 'Updating state to %d' % state
         phase = state
         return {'ACK': 'got state'}
     command.UpdateState.responder(update_state)
 
     def update_position(self, handle, x_axis, y_axis, yaw):
-        print 'Updating position (%d, %d, %d)' % (x_axis, y_axis, yaw)
         self.factory.robots[handle].position_lock.acquire()
         self.factory.robots[handle].position['x'] = x_axis
         self.factory.robots[handle].position['y'] = y_axis
@@ -108,12 +103,6 @@ class NXTProtocol(RobotProtocol):
         self.factory.robots[handle].position_lock.release()
         return {'ack': 'got position'}
     command.UpdatePosition.responder(update_position)
-
-    def send_map(self, map):
-        print 'Updating map '
-        pprint.pprint(map)
-        return {'ACK': 'got map'}
-    command.SendMap.responder(send_map)
 
 class RobotFactory(_InstanceFactory):
     def __init__(self, reactor, instance, deferred, anzahl):
@@ -124,15 +113,14 @@ class RobotFactory(_InstanceFactory):
 
 class Explorer():
     '''Die Explorer-Klasse stellt die Verbindung zu einem durch seine MAC-Adresse identifizierten NXT her und stellt die Funktionalitaet zur Steuerung bereit.'''
-    #FIXME: trennen von blosser Steuerung und Logik
-    def __init__(self, mac, protokoll, identitaet, color, outbox = 5, inbox = 1):
+    def __init__(self, mac, protokoll, identitaet, outbox = 5, inbox = 1):
         self.brick = find_one_brick(host = mac, method = Method(usb = True, bluetooth = True))
-        self.color = color# FIXME: potentiell unnoetig
         self.ausrichtung = 90; # 0 - 359 Grad; 0 Osten, 90 Norden, 180 Westen, 270 Sueden
         self.calibrationFactor = 1 
         self.protokoll = protokoll
         self.identitaet = identitaet
         self.status = -1
+        self.sensor = -1
         self.status_lock = threading.Lock()
         self.handle = None
         self.active = False
@@ -239,7 +227,7 @@ class Explorer():
         elif self.status == 1:
             self.status_lock.release()
             return False
-        else: #TODO: potentiell Exception, oder ziel gefunden
+        else: #TODO: potentiell ziel gefunden
             self.status_lock.release()
             dbg_print('brick.go_to_point(): else', 1)
             return False
@@ -264,7 +252,17 @@ class Explorer():
                 if state == 0:
                     self.go_forward(0)
                 elif state == 1:
-                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_DODGE_CENTER, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
+                    self.status_lock.acquire()
+                    tmpTag = map.POINT_DODGE_CENTER
+                    if self.sensor == 1:
+                        tmpTag = map.POINT_DODGE_CENTER
+                    elif self.sensor == 2:
+                        tmpTag = map.POINT_DODGE_RIGHT
+                    elif self.sensor == 3:
+                        tmpTag = map.POINT_DODGE_LEFT
+
+                    self.status_lock.release()
+                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=tmpTag, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
                     self.go_back(1)
                 elif state == 2:
                     linksrechts = random.choice([0, 1]) #0=links || 1=rechts
@@ -310,7 +308,8 @@ class Explorer():
                     
                     if first_mesurement < 1.5*step:
                         first_mesurement = 0
-                        state = 2 #+1 am ende = 3 -> drehen
+                        state = 3 # -> drehen
+                        continue
                     self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
                 elif state == 1:
                     self.go_forward(step)
@@ -330,8 +329,10 @@ class Explorer():
                             time.sleep(0.5)
                             
                         if second_mesurement < first_mesurement:
-                            self.calibrationFactor = float(step)/(first_mesurement - second_mesurement)
-                            dbg_print("calibrationFactor: %.2f" % self.calibrationFactor, 1)
+                            tmpCal = (self.calibrationFactor+(float(step)/(first_mesurement - second_mesurement)))/2
+                            if tmpCal < 2.0 and tmpCal > 0.5:
+                                self.calibrationFactor = (self.calibrationFactor+(float(step)/(first_mesurement - second_mesurement)))/2
+                                dbg_print("calibrationFactor: %.2f" % self.calibrationFactor, 1)
                     else:
                         self.blockiert_lock.acquire()
                         self.blockiert = False
@@ -406,8 +407,10 @@ class Explorer():
                             time.sleep(0.5)
                         
                         if second_mesurement < first_mesurement:
-                            self.calibrationFactor = float(forward)/(first_mesurement - second_mesurement)
-                            dbg_print("calibrationFactor: %.2f" % self.calibrationFactor, 1)
+                            tmpCal = (self.calibrationFactor+(float(step)/(first_mesurement - second_mesurement)))/2
+                            if tmpCal < 2.0 and tmpCal > 0.5:
+                                self.calibrationFactor = (self.calibrationFactor+(float(step)/(first_mesurement - second_mesurement)))/2
+                                dbg_print("calibrationFactor: %.2f" % self.calibrationFactor, 1)
                     else:
                         self.blockiert_lock.acquire()
                         self.blockiert = False
@@ -455,8 +458,10 @@ class Explorer():
                             time.sleep(0.5)
                             
                         if second_mesurement < first_mesurement:
-                            self.calibrationFactor = float(step)/(first_mesurement - second_mesurement)
-                            dbg_print("calibrationFactor: %.2f" % self.calibrationFactor, 1)
+                            tmpCal = (self.calibrationFactor+(float(step)/(first_mesurement - second_mesurement)))/2
+                            if tmpCal < 2.0 and tmpCal > 0.5:
+                                self.calibrationFactor = (self.calibrationFactor+(float(step)/(first_mesurement - second_mesurement)))/2
+                                dbg_print("calibrationFactor: %.2f" % self.calibrationFactor, 1)
                     else:
                         self.blockiert_lock.acquire()
                         self.blockiert = False
@@ -512,23 +517,26 @@ class Explorer():
                 dbg_print("message: " + str(message), 9)
                 try:
                     t_id, payload = str(message).split(';')
+                    payload = payload.strip("\x00")
                     ident = int(t_id)
                 except:
                     dbg_print("message-parsing-error: falsches Format")
                 dbg_print("ident=" + str(t_id) + " msg=" + str(payload), 4)
-                csv = payload.split(',') #TODO: payload = event, entfernung, sensor(optional)
-                if int(csv[0]) == 1: #nach Zeitintervall 500ms update_position (Entfernung)
+                csv = payload.split(',') #payload = event, entfernung, sensor(optional)
+                if int(csv[0]) == 1: #nach Zeitintervall update_position (Entfernung)
                     dbg_print("Update: " + str(csv[1]) + " Einheiten gefahren",1)
                     self.position_lock.acquire()
-                    print berechnePunkt(self.ausrichtung, csv[1], self.position)#TODO an MCC
+                    tmpPosition = berechnePunkt(self.ausrichtung, int(csv[1]), self.position)
+                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=tmpPosition["x"], y_axis=tmpPosition["y"], yaw=self.ausrichtung)
                     self.position_lock.release()
                 elif int(csv[0]) == 2: #kollision update_position (Entfernung)
                     self.status_lock.acquire()
                     self.status = 1 # hit
+                    self.sensor = int(csv[2])
                     self.status_lock.release()
                     dbg_print("Kollision: " + str(csv[1]) + " Einheiten gefahren",1)
                     self.position_lock.acquire()
-                    self.position = berechnePunkt(self.ausrichtung,int(str(csv[1]).strip("\x00")),self.position)
+                    self.position = berechnePunkt(self.ausrichtung,int(csv[1]),self.position)
                     self.position_lock.release()
                     dbg_print(str(self.position),2)
                     self.blockiert_lock.acquire()
@@ -558,8 +566,18 @@ class Explorer():
                     self.blockiert_lock.acquire()
                     self.blockiert = False
                     self.blockiert_lock.release()
-                elif int(csv[0]) == 9: #ziel gefunden gleich kommt 2
+                elif int(csv[0]) == 9:
                     dbg_print("Ziel gefunden")
+                    self.status_lock.acquire()
+                    self.status = 3 #Target found
+                    dbg_print("status: target found(%d)" %self.status, 1)
+                    self.status_lock.release()
+                    
+                    self.position_lock.acquire()
+                    tmpPosition = berechnePunkt(self.ausrichtung, int(csv[1]), self.position)
+                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_TARGET, x_axis=tmpPosition["x"], y_axis=tmpPosition["y"], yaw=self.ausrichtung)
+                    self.position_lock.release()
+                    
                 else:
                     dbg_print("csv konnt nicht geparst werden")
             except:
@@ -580,7 +598,7 @@ class Explorer():
                 self.abbruch = False
                 self.abbruch_lock.release()
                 if phase == 0:
-                    algo = random.choice([2])
+                    algo = random.choice([0])
                     if algo == 0:
                         self.exploration_simple() #blockierender Aufruf
                     elif algo == 1:
@@ -623,14 +641,14 @@ class NXTClient():
         print 'connected to mcc'
         for bot in range(self.anzahl):
             try:
-                self.factory.robots[bot] = Explorer(MAC[bot], self.protocol, bot, bot + 1, 5 + bot, 1 + bot)
+                self.factory.robots[bot] = Explorer(MAC[bot], self.protocol, bot, 5 + bot, 1 + bot)
             except:
                 print "Bot %s nicht gefunden" % MAC[bot]
                 self.factory.robots[bot] = None
             if self.factory.robots[bot] != None:
                 deffered = protocol.callRemote(command.Register,
                                                robot_type = self.factory.robots[bot].robot_type,
-                                               color = self.factory.robots[bot].color, rhandle = bot)
+                                               color = bot + 1, rhandle = bot)
                 deffered.addCallback(self.activate)
                 deffered.addErrback(self.failure)
 
@@ -650,5 +668,5 @@ class NXTClient():
 
 if __name__ == '__main__' and DEBUGLEVEL > 0:
     dbg_print("__main__ start")
-    test = NXTClient(1)
+    test = NXTClient(3)
     dbg_print("__main__ fertig")
