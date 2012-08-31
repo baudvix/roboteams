@@ -1,11 +1,12 @@
 #include "libmov.h"
 
-void vor(int strecke, distance& d)
+int vor(int strecke, distance& d)
 {
 //umdrehungen in cm = 17,6 +-0,1
 // SensorUS(S1)~14, ungefähr 10cm
  Off(OUT_AB);
  int k_strecke = 0;
+ int sen = 0;
  if(strecke == 0)
  {
   while(weiter)
@@ -16,6 +17,9 @@ void vor(int strecke, distance& d)
    {
     weiter = 0;
     hit=1;
+    if(SensorUS(S1) < 15){sen = 1;}
+    if(SENSOR_2 > 0){sen = 2;}
+    if(SENSOR_3 > 0){sen = 3;}
    }
    if(weiter)
    {
@@ -29,10 +33,18 @@ void vor(int strecke, distance& d)
  {
    SetOutput(OUT_AB,Power, MOTOR_POWER,TachoLimit, strecke,RegMode, OUT_REGMODE_SYNC,RunState, OUT_RUNSTATE_RUNNING,OutputMode, 7,UpdateFlags, 7); 
    while((MotorRunState(OUT_B) == OUT_RUNSTATE_RUNNING) && (SensorUS(S1) > 15) && (SENSOR_2 < 1) && (SENSOR_3 < 1) && weiter != 0);
+   if(!((SensorUS(S1) > 15) && (SENSOR_2 < 1) && (SENSOR_3 < 1)))
+   {
+    hit=1;
+    if(SensorUS(S1) < 15){sen = 1;}
+    if(SENSOR_2 > 0){sen = 2;}
+    if(SENSOR_3 > 0){sen = 3;}
+   }
  }
  d.k = k_strecke;
  d.rest = MotorTachoCount(OUT_A);
  Off(OUT_AB);
+ return sen;
 }
 
 void drehen(char richtung, int winkel){
@@ -59,5 +71,20 @@ void zurueck(int umdrehungen){
  RotateMotorEx(OUT_AB, MOTOR_POWER, -360*umdrehungen, 0, true/*=sync*/, true/*=bremsen*/);
  Wait(300);
  Off(OUT_AB);
+}
+
+int echo()
+{
+ int l=0;
+ int r=0;
+
+ while(l<5)
+ {
+  r += SensorUS(S1);
+  l++;
+  Wait(100);
+ }
+ r = r/5;
+ return r;
 }
 
