@@ -33,7 +33,7 @@ task event()
   Wait(1000);
   
 
-  #if DEBUG == 3
+  #if DEBUG == 0
   Acquire(blue_mutex);
   string news;
   news=StrCat(NumToStr(id++),";1,",NumToStr(MotorTachoCount(OUT_A)));  // s: save_way
@@ -73,7 +73,6 @@ task movement()
 		weiter = 1; 
 	  int sen = vor(dequeued.param,strecke);
 	  
-	  Acquire(blue_mutex);
 	  string tmp = "";
     if(strecke.k!=0) tmp=NumToStr(strecke.k);
     if(hit)
@@ -85,6 +84,7 @@ task movement()
     {
      streckeninfo=StrCat(NumToStr(id++),";3,",tmp,NumToStr(strecke.rest));
     }
+    Acquire(blue_mutex);
     id %= 10;
     id += 10;
     SendResponseString(OUTBOX,streckeninfo);
@@ -149,7 +149,7 @@ task movement()
    
    Wait(500);
   }
-  #if DEBUG == 3
+  #if DEBUG == 0
   Acquire(print_mutex);
     lcd_print(streckeninfo);
   Release(print_mutex);
