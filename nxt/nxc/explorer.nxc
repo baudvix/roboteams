@@ -140,6 +140,11 @@ task movement()
     Acquire(blue_mutex);
     SendResponseString(OUTBOX,streckeninfo);
     Release(blue_mutex);
+    #if DEBUG == 2
+     Acquire(print_mutex);
+     lcd_print(streckeninfo);//DEBUGINFO
+     Release(print_mutex);
+    #endif
    }
    else
    {
@@ -160,11 +165,6 @@ task movement()
    
    Wait(500);
   }
-  #if DEBUG == 0
-  Acquire(print_mutex);
-    lcd_print(streckeninfo);
-  Release(print_mutex);
-  #endif
  }
 }
 
