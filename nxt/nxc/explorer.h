@@ -2,8 +2,8 @@
 #define EXPLORER_H
 
  #define BT_CONN 3
- #define INBOX 6
- #define OUTBOX 2
+ #define INBOX 7
+ #define OUTBOX 3
  
  #define DEBUG 3
  int found = 0;

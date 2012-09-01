@@ -4,45 +4,56 @@
 #include "libmov.nxc" //noetig da kein linking
 #include "libinfra.nxc" //noetig da kein linking
 
-task event()
+task target()
 {
  #if DEBUG == 1
  Acquire(print_mutex);
- lcd_print("sen_event gestartet");//DEBUGINFO
+ lcd_print("zielsuche");//DEBUGINFO
  Release(print_mutex);
  #endif
  while(true)
  {
-  #if DEBUG == 0
+  #if DEBUG == 3
   if(!found)
   {
-   if(SensorRaw(S4) < 480)      // noch was überlegen. blockiert sonst das ziel
+   if(SensorRaw(S4) < 480)
    {
-    Acquire(blue_mutex);
     string fou;
     fou=StrCat(NumToStr(id++),";9,",NumToStr(MotorTachoCount(OUT_A))); // 9: found
     id %= 10;
     id += 10;
+    Acquire(blue_mutex);
     SendResponseString(OUTBOX,fou);
     Release(blue_mutex);
+    
     weiter=0;
     found = 1;
    }
   }
+  else
+  {
+   Wait(5000);
+   found = 0;
+  }
   #endif
-  Wait(1000);
-  
+  Wait(100);
+ }
+}
 
-  #if DEBUG == 0
-  Acquire(blue_mutex);
+task event()
+{
+ while(true)
+ {
+  Wait(5000);
+  #if DEBUG == 3
   string news;
   news=StrCat(NumToStr(id++),";1,",NumToStr(MotorTachoCount(OUT_A)));  // s: save_way
   id %= 10;
   id += 10;
+  Acquire(blue_mutex);
   SendResponseString(OUTBOX,news);
   Release(blue_mutex);
   #endif
-
  }
 }
  
@@ -84,49 +95,49 @@ task movement()
     {
      streckeninfo=StrCat(NumToStr(id++),";3,",tmp,NumToStr(strecke.rest));
     }
-    Acquire(blue_mutex);
     id %= 10;
     id += 10;
+    Acquire(blue_mutex);
     SendResponseString(OUTBOX,streckeninfo);
     Release(blue_mutex);
 	 }
    else if(dequeued.funktion == 2)
    {
     zurueck(dequeued.param);
-    Acquire(blue_mutex);
     streckeninfo=StrCat(NumToStr(id++),";4,0");
     id %= 10;
     id += 10;
+    Acquire(blue_mutex);
     SendResponseString(OUTBOX,streckeninfo);
     Release(blue_mutex);
    }
    else if(dequeued.funktion == 3)
    {
     drehen('l',dequeued.param);
-    Acquire(blue_mutex);
     streckeninfo=StrCat(NumToStr(id++),";4,0");
     id %= 10;
     id += 10;
+    Acquire(blue_mutex);
     SendResponseString(OUTBOX,streckeninfo);
     Release(blue_mutex);
    }
    else if(dequeued.funktion == 4)
    {
-    Acquire(blue_mutex);
     drehen('r',dequeued.param);
     streckeninfo=StrCat(NumToStr(id++),";4,0");
     id %= 10;
     id += 10;
+    Acquire(blue_mutex);
     SendResponseString(OUTBOX,streckeninfo);
     Release(blue_mutex);
    }
    else if(dequeued.funktion == 5)
    {
-    Acquire(blue_mutex);
     int free = echo();
     streckeninfo=StrCat(NumToStr(id++),";5,",NumToStr(free));
     id %= 10;
     id += 10;
+    Acquire(blue_mutex);
     SendResponseString(OUTBOX,streckeninfo);
     Release(blue_mutex);
    }
@@ -214,7 +225,7 @@ void undo_found()
 
 task main()
 {
- Precedes(dispatcher, movement, event);
+ Precedes(dispatcher, movement, event, target);
  queueInit(queue1, queue2);
 
  //Init Sensoren:
