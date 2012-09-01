@@ -598,7 +598,7 @@ class Explorer():
                 self.abbruch = False
                 self.abbruch_lock.release()
                 if phase == 0:
-                    algo = random.choice([0])
+                    algo = random.choice([0,1,2])
                     if algo == 0:
                         self.exploration_simple() #blockierender Aufruf
                     elif algo == 1:
