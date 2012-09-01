@@ -14,8 +14,9 @@ struct distance{
  #define MOTOR_POWER 50
  #define TEPPICH_ABWEICHUNG_L = 1.035
  #define TEPPICH_ABWEICHUNG_R = 0.881
- void vor(int strecke);
- void zurueck(int umdrehungen, distance& d);
+ int vor(int strecke, distance& d);
+ void zurueck(int umdrehungen);
  void drehen(char richtung, int winkel);
+ int echo(void);
 
 #endif
