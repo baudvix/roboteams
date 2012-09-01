@@ -8,7 +8,7 @@ import pprint
 import Queue
 import threading
 import time
-
+from wx.lib.newevent import NewEvent
 from wx.glcanvas import GLCanvas
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
@@ -19,6 +19,8 @@ from mcc.model import map
 APP_EXIT = 1
 MAP_CHECKLIST = wx.NewId()
 TRACE_CHECKLIST = wx.NewId()
+# --- Add evt ---
+RobNewEvent, EVT_NEW_ROB = NewEvent()
 
 
 class Gui(wx.Frame):
@@ -31,9 +33,11 @@ class Gui(wx.Frame):
         self.trace_id = 0
         self._maps = []
         self._traces = []
+        self._new_maps = Queue.Queue()
         self.initUI()
 
     def initUI(self):
+        self.Bind(EVT_NEW_ROB, self.add_map)
 
         # --- Main ---
         self.SetSize((682, 527))
@@ -88,6 +92,7 @@ class Gui(wx.Frame):
         mm_panel.SetSizer(mm_hbox)
 
         self.Show(True)
+        self.test()
 
     def on_quit(self, e):
         self.Close()
@@ -120,6 +125,13 @@ class Gui(wx.Frame):
         self.trace_list_box.Insert(title, 0, client_data)
 
     def register_map(self, new_map):
+        self._new_maps.put(new_map)
+        wx.PostEvent(self, RobNewEvent())
+
+    def add_map(self, evt):
+        if self._new_maps.empty():
+            return
+        new_map = self._new_maps.get()
         id = self.map_id
         self.map_id += 1
         self.map_list_box.Insert(new_map.name, 0, id)
