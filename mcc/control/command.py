@@ -124,7 +124,7 @@ class NXTFollowed(Command):
     response = [('ack', String())]
     error = [(CommandMissionCompleteError, 'COMMAND_MISSION_COMPLETE_ERROR'),
              (CommandHandleError, 'COMMAND_HANDLE_ERROR'),
-             (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR'),]
+             (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR')]
 
 
 #Commands from NXT to MCC

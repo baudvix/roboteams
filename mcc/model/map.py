@@ -37,7 +37,8 @@ class MapModel(object):
         self.__max_dodge_count = 0
         # self._expand [top,right,bottom,left]
         self._expand = [1, 1, 0, 0]
-        self._need_redraw = False
+        self._flag_redraw = False
+        self._flag_update = False
         self._latest_update = []
 
     def get_next_latest_update(self):
@@ -54,17 +55,29 @@ class MapModel(object):
         self._latest_update = value
     latest_update = property(fget_latest_update, fset_latest_update)
 
-    #PROPERTY --- need_redraw
-    def fget_need_redraw(self):
-        """The need_redraw property getter"""
+    #PROPERTY --- flag_redraw
+    def fget_flag_redraw(self):
+        """The flag_redraw property getter"""
         with self._lock:
-            return self._need_redraw
+            return self._flag_redraw
 
-    def fset_need_redraw(self, value):
-        """The need_redraw property setter"""
+    def fset_flag_redraw(self, value):
+        """The flag_redraw property setter"""
         with self._lock:
-            self._need_redraw = value
-    need_redraw = property(fget_need_redraw, fset_need_redraw)
+            self._flag_redraw = value
+    flag_redraw = property(fget_flag_redraw, fset_flag_redraw)
+
+    #PROPERTY --- flag_update
+    def fget_flag_update(self):
+        """The flag_update property getter"""
+        with self._lock:
+            return self._flag_update
+
+    def fset_flag_update(self, value):
+        """The flag_update property setter"""
+        with self._lock:
+            self._flag_update = value
+    flag_update = property(fget_flag_update, fset_flag_update)
 
     #PROPERTY --- expand
     def fget_expand(self):
@@ -185,7 +198,7 @@ class MapModel(object):
                 if tmp_map_section.right_grid is None:
                     if offset_x >= self._expand[1]:
                         self._expand[1] += 1
-                        self._need_redraw = True
+                        self._flag_redraw = True
                     tmp_map_section.right_grid = MapSection()
                 tmp_map_section = tmp_map_section.right_grid
         elif offset_x < 0:
@@ -193,7 +206,7 @@ class MapModel(object):
                 if tmp_map_section.left_grid is None:
                     if offset_x * -1 >= self._expand[3]:
                         self._expand[3] += 1
-                        self._need_redraw = True
+                        self._flag_redraw = True
                     tmp_map_section.left_grid = MapSection()
                 tmp_map_section = tmp_map_section.left_grid
         if offset_y > 0:
@@ -201,7 +214,7 @@ class MapModel(object):
                 if tmp_map_section.top_grid is None:
                     if offset_y >= self._expand[0]:
                         self._expand[0] += 1
-                        self._need_redraw = True
+                        self._flag_redraw = True
                     tmp_map_section.top_grid = MapSection()
                 tmp_map_section = tmp_map_section.top_grid
         elif offset_y < 0:
@@ -209,7 +222,7 @@ class MapModel(object):
                 if tmp_map_section.bottom_grid is None:
                     if offset_y * -1 >= self._expand[2]:
                         self._expand[2] += 1
-                        self._need_redraw = True
+                        self._flag_redraw = True
                     tmp_map_section.bottom_grid = MapSection()
                 tmp_map_section = tmp_map_section.bottom_grid
 
@@ -362,6 +375,8 @@ class MapModel(object):
             with self._lock:
                 self._set_point(p[0], p[1])
                 self._latest_update.append([p[0], p[1]])
+        with self._lock:
+            self._flag_update = True
 
 
 class MapSection(object):
