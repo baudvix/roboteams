@@ -16,9 +16,9 @@ def synchronized(lock):
     return wrap
 
 @synchronized(print_lock)
-def dbg_print(element, dbglevel=0):
+def dbg_print(element, dbglevel=0, id=99):
     if dbglevel == 0:
         print(element)
         return
     if dbglevel < DEBUGLEVEL:
-        print('---DEBUG.level '+str(dbglevel)+': '+str(element))
+        print('#'+str(id)+'---DEBUG.level '+str(dbglevel)+': '+str(element))
