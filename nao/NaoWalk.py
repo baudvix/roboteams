@@ -166,6 +166,7 @@ class NaoWalkModule(ALModule):
         self.motion.stiffnessInterpolation("Body", 1.0, 0.1)
         self.motion.walkInit()
         self.motion.walkTo(0,0,z)
+<<<<<<< HEAD
 
 def main():
     global NaoWalk
@@ -181,3 +182,5 @@ def main():
 if __name__ == "__main__":
     main()
 
+=======
+>>>>>>> c6b48380956bc2d453ecb2de71f312cd28c31d16

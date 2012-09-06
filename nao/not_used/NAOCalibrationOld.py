@@ -124,7 +124,7 @@ def detectMarkerAndCalcDist(IP, PORT, numberOfMeasurements):
 # this method makes the NAO look for a certain nxt (has certain color and marker numbers)
 def findNXT(NXTColor):
     # set the initial head position for NAO
-    motion_poseInit.setMotion(0, 0)
+    motion_poseInit.setHeadMotion(0, 0)
 
     # this are the current intervals in degree in which the NAO looks for the nxt
     pitchIntervals = [10, 20, 0]
@@ -136,7 +136,7 @@ def findNXT(NXTColor):
         # move
         for h in range(0, len(yawIntervals)):
             # set the head position to the current yaw and pitch interval
-            motion_poseInit.setMotion(yawIntervals[h], pitchIntervals[g])
+            motion_poseInit.setHeadMotion(yawIntervals[h], pitchIntervals[g])
 
             allDetectedMarker = [[[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []]]
 
@@ -191,7 +191,7 @@ def findNXT(NXTColor):
                             avgAlpha = calculateAVG(allDetectedMarker[i][0]) #avgAlphaArray
                             avgBeta = calculateAVG(allDetectedMarker[i][1]) #avgBetaArray
 
-                            motion_poseInit.setMotion(toDEG(getHead()[0]+avgAlpha), toDEG(getHead()[1]+avgBeta))
+                            motion_poseInit.setHeadMotion(toDEG(getHead()[0]+avgAlpha), toDEG(getHead()[1]+avgBeta))
 
                             tts = ALProxy("ALTextToSpeech")
                             tts.say('NXT with color ' + str(NXTColor) + ' found!')
@@ -215,25 +215,25 @@ def moveHead():
     betaDEG  = toDEG(getHead()[1])
 
     if(alphaDEG < 4 and alphaDEG > -4):
-        motion_poseInit.setMotion(30, betaDEG)
+        motion_poseInit.setHeadMotion(30, betaDEG)
 
     #left
     elif(alphaDEG > 0):
         if(alphaDEG <= 90):
-            motion_poseInit.setMotion(alphaDEG+30, betaDEG)
+            motion_poseInit.setHeadMotion(alphaDEG+30, betaDEG)
             return False
         else:
-            motion_poseInit.setMotion(-30, betaDEG)
+            motion_poseInit.setHeadMotion(-30, betaDEG)
             return False
 
     #right
     elif(alphaDEG < 0):
 
         if(alphaDEG >= -90):
-            motion_poseInit.setMotion(alphaDEG-30, betaDEG)
+            motion_poseInit.setHeadMotion(alphaDEG-30, betaDEG)
             return False
         else:
-            motion_poseInit.setMotion(0, betaDEG)
+            motion_poseInit.setHeadMotion(0, betaDEG)
             return False
 
 def calculateAVG(array):
@@ -270,7 +270,7 @@ def toDEG(number):
 def performCalibration(color):
 
     config.StiffnessOn(motionProxy)
-    config.PoseInit(motionProxy)
+    config.calibrationPoseInit(motionProxy)
 
     found = findNXT(color)
     tts = ALProxy("ALTextToSpeech")
