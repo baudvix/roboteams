@@ -2,23 +2,11 @@ import motion
 import math
 from naoqi import ALProxy
 
-
 IP = "localhost"
 PORT = 9559
 
-if (IP == ""):
-  print "IP address not defined, aborting"
-  print "Please define it in " + __file__
-  exit(1)
-
 def loadProxy(pName):
-  #print "---------------------"
-  #print "Loading proxy"
-  #print "---------------------"
   proxy = ALProxy(pName, IP, PORT)
-  #print "---------------------"
-  #print "Starting " + pName + " Tests"
-  #print "---------------------"
   return proxy
 
 def StiffnessOn(proxy, partOfBody):
@@ -44,6 +32,11 @@ def setStiffness(proxy, partOfBody, pStiffnessLists):
 def setHeadMotion(motionProxy, headYawAngle, headPitchAngle):
     motionProxy.angleInterpolation("HeadPitch", math.pi*headPitchAngle/180,0.3,True)
     motionProxy.angleInterpolation("HeadYaw", math.pi*headYawAngle/180,0.3,True)
+
+def naoWalkTo(x, y, theta):
+    motionProxy = loadProxy("ALMotion")
+    walkPoseInit(motionProxy)
+    motionProxy.walkTo(x, y, theta)
 
 def calibrationPoseInit(motionProxy, pMaxSpeedFraction = 0.2):
     StiffnessOn(motionProxy, "Body")
@@ -128,11 +121,8 @@ def calibrationPoseInit(motionProxy, pMaxSpeedFraction = 0.2):
     # Ask motion to do this with a blocking call
     motionProxy.angleInterpolationWithSpeed(pNames, pTargetAngles, pMaxSpeedFraction)
 
-
-    #StiffnessOff(motionProxy, "Body")
     motionProxy.stiffnessInterpolation("Body", 0.1, 1.0)
     StiffnessOn(motionProxy, "Head")
-    #StiffnessOn(motionProxy, "HipPitch")
 
 def walkPoseInit(motionProxy, pMaxSpeedFraction = 0.2):
     StiffnessOn(motionProxy, "Body")
