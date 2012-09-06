@@ -4,11 +4,11 @@ import math
 import motion
 from naoqi import ALBroker
 from naoqi import ALProxy
-from naoqi import ALModule
+# from naoqi import ALModule
 
-NaoWalk = None
+# NaoWalk = None
 
-class NaoWalkModule(ALModule):
+class NaoWalkModule():
 
     # INCOMPLETE AT: walkUpToBall(), include MCC-CALL and delete walkToPosition()
 
@@ -45,7 +45,7 @@ class NaoWalkModule(ALModule):
         self.tracker.startTracker()
         self.ballPosition = []
         self.targetPosition = []
-        ALModule.__init__(self,name)
+        # ALModule.__init__(self,name)
 
     def __del__(self):
         self.tracker.stopTracker()
@@ -166,21 +166,17 @@ class NaoWalkModule(ALModule):
         self.motion.stiffnessInterpolation("Body", 1.0, 0.1)
         self.motion.walkInit()
         self.motion.walkTo(0,0,z)
-<<<<<<< HEAD
 
-def main():
-    global NaoWalk
-    NaoWalk = NaoWalkModule("NaoWalk")
+# def main():
+#     global NaoWalk
+#     NaoWalk = NaoWalkModule("NaoWalk")
 
-    try:
-        while True:
-            time.sleep(1)
+#     try:
+#         while True:
+#             time.sleep(1)
 
-    except KeyboardInterrupt:
-        print "Interrupted"
+#     except KeyboardInterrupt:
+#         print "Interrupted"
 
-if __name__ == "__main__":
-    main()
-
-=======
->>>>>>> c6b48380956bc2d453ecb2de71f312cd28c31d16
+# if __name__ == "__main__":
+#     main()
