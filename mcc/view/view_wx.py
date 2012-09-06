@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import pprint
+
 import wx
 import math
 import time
@@ -88,7 +90,7 @@ class Gui(wx.Frame):
 
         self.Show(True)
         self.test()
-        wx.CallAfter(self.timer.Start(100))
+        self.timer.Start(100)
 
     def on_quit(self, e):
         self.Close()
@@ -181,7 +183,7 @@ class DrawMng(threading.Thread):
     def __init__(self):
         self._active_maps = []
         self._map_draw = map.MapModel('drawable map')
-        self._map_draw.expand = [1, 1, 0, 0]
+        self._map_draw.expand = [3, 3, 0, 0]
         self._colors = DrawColor()
 
         self._unit = 0.0125
@@ -197,6 +199,8 @@ class DrawMng(threading.Thread):
         self.calc_draw_value()
 
         self.flag_redraw = False
+        self.max_new = True
+        self.max_ex = 3
         self._flag_flush = False
 
     #PROPERTY --- exit_flag
@@ -246,22 +250,30 @@ class DrawMng(threading.Thread):
                 with self._lock:
                     self.flag_redraw = False
                 continue
-            t, r, b, l = self._map_draw.expand
-            redraw = False
             for m in self._active_maps:
                 if m.flag_redraw == True:
                     tt, rr, bb, ll = m.expand
-                    max_ex = max(t, r, b, l)
-                    if tt > max_ex or rr > max_ex or bb > max_ex or ll > max_ex:
-                        redraw = True
+                    self.max_new = False
+                    if tt > self.max_ex:
+                        self.max_ex = tt
+                        self.max_new = True
+                    if rr > self.max_ex:
+                        self.max_ex = rr
+                        self.max_new = True
+                    if  bb > self.max_ex:
+                        self.max_ex = bb
+                        self.max_new = True
+                    if ll > self.max_ex:
+                        self.max_ex = ll
+                        self.max_new = True
                     m.flag_redraw = False
-            if redraw:
-                self.map_generate()
-                self.calc_draw_value()
-                self.calc_map()
-                with self._lock:
-                    self.flag_redraw = False
-                    self._flag_flush = True
+            # if redraw:
+                # self.map_generate()
+                # self.calc_draw_value()
+                # self.calc_map()
+                # with self._lock:
+                #     self.flag_redraw = False
+                #     self._flag_flush = True
             update_map = False
             for m in self._active_maps:
                 if m.flag_update == True:
@@ -325,6 +337,7 @@ class DrawMng(threading.Thread):
         return [x1, y1, x2, y2, c]
 
     def calc_draw_value(self):
+        return
         t, r, b, l = self._map_draw.expand
         if (r + l) > (t + b):
             self._unit = 2.0 / ((r + l) * 100)
@@ -348,6 +361,7 @@ class WxGLCanvas(GLCanvas):
         wx.EVT_PAINT(self, self.on_draw)
         wx.EVT_SIZE(self, self.on_size)
         wx.EVT_WINDOW_DESTROY(self, self.on_destroy)
+        wx.EVT_LEFT_UP(self, self.on_mouse)
 
         self.SetSize((500, 500))
         self.drwmng = drwmng
@@ -357,6 +371,12 @@ class WxGLCanvas(GLCanvas):
         self._flag_flush = False
         self._exit_flag = False
         self._lock = threading.Lock()
+
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        gluOrtho2D(-1, 1, -1, 1)
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
 
     #PROPERTY --- exit_flag
     def fget_exit_flag(self):
@@ -372,6 +392,13 @@ class WxGLCanvas(GLCanvas):
 
     def update(self):
         if not self._exit_flag:
+            if self.drwmng.max_new:
+                glMatrixMode(GL_PROJECTION)
+                glLoadIdentity()
+                ex = self.drwmng.max_ex
+                gluOrtho2D(-ex, ex, -ex, ex)
+                glMatrixMode(GL_MODELVIEW)
+                glLoadIdentity()
             if self._flag_flush or self.drwmng.flag_flush:
                 self.SetCurrent()
                 glLoadIdentity()
@@ -467,8 +494,12 @@ class WxGLCanvas(GLCanvas):
     def on_draw(self, event):
         self._redraw = True
         self.SetCurrent()
-        glLoadIdentity()
         self.clear_canvas()
+        if self.drwmng.max_new:
+            glMatrixMode(GL_PROJECTION)
+            ex = self.drwmng.max_ex
+            gluOrtho2D(-ex, ex, -ex, ex)
+            glMatrixMode(GL_MODELVIEW)
         self.SwapBuffers()
 
     def on_size(self, event):
@@ -476,6 +507,16 @@ class WxGLCanvas(GLCanvas):
 
     def on_destroy(self, event):
         print "Destroying Window"
+
+    def on_mouse(self, event):
+        self.SetCurrent()
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        gluOrtho2D(-2, 2, -2, 2)
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+        self.SwapBuffers()
+        print "click"
 
 
 class ViewMng():
