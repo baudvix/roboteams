@@ -256,7 +256,7 @@ class NAOCalibration():
         self.textToSpeechProxy.say('NXT ' + str(NXTColor) + ' not found!')
         return False
 
-    # called by findNXT
+    # called by findColouredMarker
     # centers the head to the marker with the color NXTColor which was found first
     def centerHeadToMarkerToDetectColor(self, NXTColor):
         currentHeadPosition = self.getHead()
