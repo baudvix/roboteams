@@ -55,7 +55,7 @@ class MCCProtocol(amp.AMP):
         for robo in self.factory.robots:
             if robo.handle == handle:
                 robo.active = True
-                self.factory._view.gui.register_map(robo.map_overlay)
+                self.factory._view.gui.dummy_register_map(robo.map_overlay)
                 print '#%d activated' % handle
                 self.update_position(robo, 0, 0, 0, True)
                 return {'ack': 'got activate'}
@@ -199,7 +199,7 @@ class MCCFactory(Factory):
     def initGUI(self):
         self._view = view_wx.ViewMng()
         self._view.run()
-        self._view.gui.register_map(self.maps[0])
+        self._view.gui.dummy_register_map(self.maps[0])
         #self._viewThread = view.View(self.maps[0])
         #self._viewThread.daemon = True
         #self._viewThread.start()
