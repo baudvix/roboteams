@@ -1,0 +1,83 @@
+#include "libinfra.h"
+#include "explorer.h"
+
+void BTCheck(int conn)
+{
+ if(!BluetoothStatus(conn)==NO_ERR)
+ {
+  TextOut(5,LCD_LINE2,"Error");
+  Wait(1000);
+  Stop(true);
+ }
+}
+
+message splitMsg(string in)
+{
+ message tmp;
+ int in_len = strlen(in);
+ tmp.typ = SubStr(in,0,1);
+ tmp.id = StrToNum(SubStr(in,2,2));
+ int f_p_trenner = Pos(",",in);
+ tmp.msg.funktion = StrToNum(SubStr(in,f_p_trenner-1,1));
+ tmp.msg.param = StrToNum(SubStr(in,f_p_trenner+1,in_len-f_p_trenner+1));
+ 
+ #if DEBUG == 4
+ Acquire(print_mutex);
+ lcd_print(StrCat("typ=",tmp.typ,";id=",NumToStr(tmp.id),";",NumToStr(tmp.msg.funktion),",",NumToStr(tmp.msg.param)));
+ Release(print_mutex);
+ #endif
+ 
+ return tmp;
+}
+
+void lcd_print(string msg){
+  if(lcd<0){lcd = 7; TextOut(0,0,"\0",DRAW_OPT_CLEAR_WHOLE_SCREEN);}
+  TextOut(0,lcd--*8,msg);
+}
+
+void queueInit(int &queue1[], int &queue2[]){
+	ArrayInit(queue1,0,10);
+  ArrayInit(queue2,0,10);
+}
+
+payload dequeue(int &queue1[], int &queue2[]){
+ payload tmp;
+ Acquire(queue_mutex);
+  --msg_count;
+  tmp.funktion = queue1[aus_index];
+  tmp.param = queue2[aus_index];
+  aus_index++;
+  aus_index %= 10;
+ Release(queue_mutex);
+ return tmp;
+}
+
+void clean_queue(int &queue1[], int &queue2[])
+{
+ Acquire(queue_mutex);
+ int t = 0;
+ while(t<10)
+ {
+  queue1[t] = 0;
+  queue2[t] = 0;
+  t++;
+ }
+ ein_index = 0;
+ aus_index = 0;
+ msg_count = 0;
+ Release(queue_mutex);
+}
+
+void enqueue(int &queue1[], int &queue2[], payload elem){
+ Acquire(queue_mutex);
+  ++msg_count;
+  queue1[ein_index] = elem.funktion;
+  queue2[ein_index] = elem.param;
+  ein_index++;
+  ein_index %= 10;
+ Release(queue_mutex);
+}
+
+bool is_empty(){
+ return msg_count <= 0;
+}
