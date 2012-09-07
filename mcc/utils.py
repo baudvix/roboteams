@@ -1,13 +1,13 @@
 """
 Module for utilities
-
 """
+
+import math
 
 class Point(object):
     """
     Class for special points in the map
     (e. g. target position or position of a NAO)
-
     """
 
     def __init__(self, x_coord, y_coord, yaw=0):
@@ -27,7 +27,6 @@ class Point(object):
         """
         if (type(x_coord) == type(1)) and (type(y_coord) == type(1)) \
             and (type(yaw) == type(1.0) or type(yaw) == type(1)):
-            print "created"
             self.__x_coord = x_coord
             self.__y_coord = y_coord
             self.__yaw = yaw
@@ -35,7 +34,6 @@ class Point(object):
             raise TypeError("Type \"integer / float\" excepted, but",
                             type(x_coord), " ", type(y_coord), " ",
                             type(y_coord), "given.")
-
 
     def get_x_coord(self):
         """
@@ -129,3 +127,70 @@ class Color():
     COLOR_BLUE = 2
     COLOR_YELLOW = 3
     COLOR_BLACK = 4
+
+    @staticmethod
+    def is_color(color):
+        if Color.COLOR_NONE <= color and color <= Color.COLOR_BLACK:
+            return True
+        else:
+            return False
+
+
+
+def merge(left, right, bench_mark, order):
+    """
+
+    """
+
+    result = []
+    i, j = 0, 0
+    while i < len(left) and j < len(right):
+        if not order:
+            if point_distance(left[i], bench_mark) <= point_distance(right[j], bench_mark):
+                result.append(left[i])
+                i += 1
+            else:
+                result.append(right[j])
+                j += 1
+        else:
+            if point_distance(left[i], bench_mark) >= point_distance(right[j], bench_mark):
+                result.append(left[i])
+                i += 1
+            else:
+                result.append(right[j])
+                j += 1
+
+
+    result += left[i:]
+    result += right[j:]
+    return result
+
+
+def sort_by_distance(points, bench_mark, order = 0):
+    """
+    :param points: list of points to be sorted
+    :type points: list
+    :param bench_mark: bench mark
+    :type bench_mark: list
+    :param order: ascending order (0) or descending order (1)
+    """
+
+    if len(points) < 2:
+        return points
+    middle = len(points) / 2
+    left = sort_by_distance(points[:middle], bench_mark, order)
+    right = sort_by_distance(points[middle:], bench_mark, order)
+
+    return merge(left, right, bench_mark, order)
+
+
+def point_distance(point_1, point_2):
+
+    x1 = point_1[0]
+    x2 = point_2[0]
+    y1 = point_1[1]
+    y2 = point_2[1]
+
+    distance = math.sqrt(math.pow(x2 - x1, 2) + math.pow(y2 - y1, 2))
+    return distance
+
