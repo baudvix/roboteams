@@ -122,6 +122,7 @@ class NAOClient():
         try:
             mybroker = ALBroker("mybroker", "0.0.0.0", 0, config.NAO_IP, config.NAO_PORT)
             self.NAOControl = ALProxy("NAOControl")
+            print "Successfully connected to NAO"
         except Exception, e:
             print "Connection to NAO not established" + e
             print "Please check NAO. Automatic retry in 30 seconds."

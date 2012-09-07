@@ -8,8 +8,7 @@ from naoqi import ALProxy
 
 # NaoWalk = None
 
-class NaoWalkModule():
-
+class NaoWalk():
     # INCOMPLETE AT: walkUpToBall(), include MCC-CALL and delete walkToPosition()
 
     # Usage description:
