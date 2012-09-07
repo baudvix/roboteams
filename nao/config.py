@@ -34,7 +34,9 @@ def setHeadMotion(motionProxy, headYawAngle, headPitchAngle):
     motionProxy.angleInterpolation("HeadYaw", math.pi*headYawAngle/180,0.3,True)
 
 def naoWalkTo(x, y, theta):
+    print "naoWalkTo"
     motionProxy = loadProxy("ALMotion")
+    #motionProxy.walkInit()
     walkPoseInit(motionProxy)
     motionProxy.walkTo(x, y, theta)
 
@@ -206,6 +208,9 @@ def walkPoseInit(motionProxy, pMaxSpeedFraction = 0.2):
     pNames = "Body"
     # Ask motion to do this with a blocking call
     motionProxy.angleInterpolationWithSpeed(pNames, pTargetAngles, pMaxSpeedFraction)
+
+    motionProxy.stiffnessInterpolation("Body", 1.0, 0.1)
+    StiffnessOn(motionProxy, "Head")
 
 def poseZero(proxy):
   # We use the "Body" name to signify the collection of all joints and actuators
