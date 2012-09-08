@@ -3,9 +3,14 @@
 #arrayOfMarker = memoryProxy.getData("LandmarkDetected")
 #print arrayOfMarker
 
-imageWidth = 640
-imageHeight = 460
-topLeftCropCorner = [1000,0]
+import time
+from naoqi import ALProxy
 
-if(topLeftCropCorner < [0,0] or topLeftCropCorner > [imageWidth,imageHeight]):
-    print "no!"
+IP = "194.95.174.188"
+PORT = 9559
+aup = ALProxy("ALAudioPlayer", IP, PORT)
+
+#Loads a file and launchs the playing 5 seconds later
+fileId = aup.loadFile("/home/nao/what shall we do with the drunken sailor2.0_5min.wav")
+time.sleep(1)
+aup.play(fileId)

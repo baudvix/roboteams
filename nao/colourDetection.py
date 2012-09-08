@@ -7,8 +7,7 @@ from naoqi import ALProxy
 from naoqi import ALBroker
 
 def getColour(IP, PORT, markerSize):
-    #path = "/home/nao/images/"
-    path = "/Users/Lorenz/images/"
+    path = "/home/nao/images/"
 
     # myBroker = ALBroker(listen to anyone, find a free port and use it, parent broker IP, parent broker port)
     myBroker = ALBroker("myBroker", "0.0.0.0", 0, IP, PORT)
@@ -50,13 +49,13 @@ def getColour(IP, PORT, markerSize):
     centerX = imageWidth/2
     centerY = imageHeight/2
 
-    ratio = markerSize/0.6
+    ratio = math.ceil(markerSize/0.6)
     topLeftCropCorner = [centerX-ratio * imageWidth * 0.5, centerY-ratio * imageWidth * 0.5]
     bottomRightCropCorner = topLeftCropCorner + [ratio*imageWidth, ratio*imageHeight]
 
     # crop the image if possible
     if(not(topLeftCropCorner < [0,0] or bottomRightCropCorner > [imageWidth,imageHeight])):
-        cv.SetImageROI(img, cv.CvRect(topLeftCropCorner[0], topLeftCropCorner[1], ratio*imageWidth, ratio*imageHeight))
+        cv.SetImageROI(img, (topLeftCropCorner[0], topLeftCropCorner[1], ratio*imageWidth, ratio*imageHeight))
         cv.SaveImage(path+"/croppedImage"+str(t0)+".jpg", img)
 
     #blur the source image to reduce color noise
