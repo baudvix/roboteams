@@ -6,6 +6,7 @@ from mcc.control import command
 from nao.NAOCalibration import *
 from naoqi import ALProxy
 from naoqi import ALBroker
+import time
 
 NAOControl = None
 
@@ -16,7 +17,7 @@ class RobotProtocol(amp.AMP):
         return {'ack': 'got state'}
     command.UpdateState.responder(update_state)
 
-    def update_position(self, x_axis, y_axis, yaw):
+    def update_position(self, handle, x_axis, y_axis, yaw):
         print 'Updating position (%d, %d, %d)' % (x_axis, y_axis, yaw)
         return {'ack': 'got position'}
     command.UpdatePosition.responder(update_position)
@@ -69,7 +70,7 @@ class NAOClient():
 
     def __init__(self):
         self.protocol = None
-        self.host = '194.95.174.187'
+        self.host = '194.95.174.178'
         self.port = 5000
         self.color = 0
         self.handle = None
@@ -97,7 +98,7 @@ class NAOClient():
     def connected(self, protocol):
         self.protocol = protocol
         print 'connected to mcc'
-        deffered = protocol.callRemote(command.Register, robot_type=self.robot_type, color=self.color)
+        deffered = protocol.callRemote(command.Register, robot_type=self.robot_type, rhandle=0, color=self.color)
         deffered.addCallback(self.activate)
         deffered.addErrback(self.failure)
 
@@ -119,14 +120,19 @@ class NAOClient():
         print 'Error: %s:%s::%s' % (self.host, self.port, error)
 
     def connectToNao(self):
-        try:
-            mybroker = ALBroker("mybroker", "0.0.0.0", 0, config.NAO_IP, config.NAO_PORT)
-            self.NAOControl = ALProxy("NAOControl")
-            print "Successfully connected to NAO"
-        except Exception, e:
-            print "Connection to NAO not established" + e
-            print "Please check NAO. Automatic retry in 30 seconds."
-            wait(30)
+        i=0
+        while i<5:
+            try:
+                naoclientbroker = ALBroker("naoclientbroker", "0.0.0.0", 0, config.NAO_IP, config.NAO_PORT)
+                self.NAOControl = ALProxy("Control")
+                print "Successfully connected to NAO"
+                i=5
+            except Exception, e:
+                print "Connection to NAO not established"
+                print e
+                print "Please check NAO. Automatic retry in 30 seconds."
+                time.sleep(30)
+                i+=1
 
 
 if __name__ == '__main__':

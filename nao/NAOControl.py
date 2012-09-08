@@ -5,13 +5,15 @@ from naoqi import ALModule
 from nao.NaoWalk import *
 from nao.NAOCalibration import *
 
+import time
+
 NAO_IP="germanopen3.local"
 
 
-control = None
+Control = None
 
 class NAOControlModule(ALModule):
-    """ needed to transform to bound methods"""
+    """ conrols behaviour of nao """
 
     def __init__(self, name):
         ALModule.__init__(self, name)
@@ -49,7 +51,7 @@ def main():
 
     myBroker = ALBroker("myBroker",
        "0.0.0.0",   # listen to anyone
-       0,           # find a free port and use it
+       9560,           # find a free port and use it
        pip,         # parent broker IP
        pport)       # parent broker port
 
@@ -58,9 +60,11 @@ def main():
 
     try:
         while True:
-            sleep(1)
-    except:
-        pass
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print "Stopped"
+        myBroker.shutdown()
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()

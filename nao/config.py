@@ -2,8 +2,9 @@ import motion
 import math
 from naoqi import ALProxy
 
+NAO_IP="194.95.174.172"
 IP = "localhost"
-PORT = 9559
+NAO_PORT = 9560
 
 def loadProxy(pName):
   proxy = ALProxy(pName, IP, PORT)
