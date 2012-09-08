@@ -17,14 +17,13 @@ def getColour(IP, PORT, x, y):
     """
     First get an image from Nao, then show it on the screen with PIL.
     """
+    path = "/home/nao/images"
 
     myBroker = ALBroker("myBroker",
         "0.0.0.0",   # listen to anyone
         0,           # find a free port and use it
         IP,         # parent broker IP
         PORT)       # parent broker port
-
-
 
     camProxy = ALProxy("ALVideoDevice", IP, PORT)
     resolution = 2    # VGA
@@ -36,7 +35,7 @@ def getColour(IP, PORT, x, y):
 
 
     #for b in range(0, 5):
-    areas = [0,0,0,0]
+    areas = [0,0,0]
     colors = ['red', 'green', 'blue']
 
     videoClient = camProxy.subscribe("python_client", resolution, colorSpace, 5)
@@ -67,12 +66,12 @@ def getColour(IP, PORT, x, y):
     im = Image.fromstring("RGB", (imageWidth, imageHeight), array)
 
     # Save the image.
-    im.save("/home/nao/images/camImage" + str(t0) + ".jpg", "JPEG")
+    im.save(path+ "/camImage" + str(t0) + ".jpg", "JPEG")
 
     #im.show()
 
     color = 'red'
-    img = cv.LoadImage("/home/nao/images/camImage" + str(t0) + ".jpg")
+    img = cv.LoadImage(path+"camImage" + str(t0) + ".jpg")
     #  img = cv.QueryFrame( self.capture )
 
     #blur the source image to reduce color noise
@@ -91,23 +90,33 @@ def getColour(IP, PORT, x, y):
     for u in range(0, 1):
         for h in range(0, len(colors)):
             if (colors[h] == 'red' ):
-                # changes worked in room with good light
-                cv.InRangeS(hsv_img, (150, 80, 80), (180, 255, 255), thresholded_img)
-                cv.InRangeS(hsv_img, (0, 80, 80), (40, 255, 255), thresholded_img)
+                #cv.InRangeS(hsv_img, (150, 130, 175), (180, 255, 255), thresholded_img)
+                #cv.Merge(thresholded_img, None, None, None, img)
+                #cv.SaveImage("/home/nao/images/red1"+str(t0)+".jpg", img)
+                cv.InRangeS(hsv_img, (0, 130, 175), (20, 255, 255), thresholded_img)
+                cv.Merge(thresholded_img, None, None, None, img)
+                cv.ShowImage("gray",img)
+                cv.ShowImage("dst",thresholded_img)
+                cv.WaitKey(0)
+
+                cv.SaveImage(path+"/red2"+str(t0)+".jpg",img)
+
             if (colors[h] == 'green' ):
-                cv.InRangeS(hsv_img, (50, 50, 50), (90, 180, 255), thresholded_img)
+                cv.InRangeS(hsv_img, (40, 130, 130), (75, 255, 255), thresholded_img)
+                cv.Merge(thresholded_img, None, None, None, img)
+                cv.SaveImage(path+"/green"+str(t0)+".jpg",img)
+
             if (colors[h] == 'blue' ):
-                cv.InRangeS(hsv_img,  (100, 100, 110), (140, 255, 255), thresholded_img)
-          #  if (colors[h] == 'black' ):
-           #     cv.InRangeS(hsv_img,  (0, 0, 0), (180, 10, 100), thresholded_img)
+                cv.InRangeS(hsv_img,  (95, 130, 130), (135, 255, 255), thresholded_img)
+                cv.Merge(thresholded_img, None, None, None, img)
+                cv.SaveImage(path+"/blue"+str(t0)+".jpg",img)
 
             #determine the objects moments and check that the area is large
             #enough to be our object
             moments = cv.Moments(cv.GetMat(thresholded_img,1), 0)
             area = cv.GetCentralMoment(moments, 0, 0)
+
             #there can be noise in the video so ignore objects with small areas
-
-
             if(area > 1):
                 #determine the x and y coordinates of the center of the object
                     #we are tracking by dividing the 1, 0 and 0, 1 moments by the area
@@ -134,8 +143,8 @@ def getColour(IP, PORT, x, y):
         biggest = 0
 
         for u in range(0, len(colors)):
-            if (areas[biggest] > areas[u+1]):
-                biggest = u+1
+            if (areas[biggest] > areas[u]):
+                biggest = u
 
         print("WAHRSCHEINLICHSTE FARBE: " + colors[biggest])
         return biggest
@@ -151,11 +160,9 @@ def getColour(IP, PORT, x, y):
             #display the image
         #cv.ShowImage(color_tracker_window, img)
 
-
-
+getColour("194.95.174.188", 9559, 320, 240)
 
 if __name__ == '__main__':
-    IP = "194.95.174.172"
+    IP = "194.95.174.188"
     PORT = 9559
-
     naoImage = getColour(IP, PORT, 320, 240)

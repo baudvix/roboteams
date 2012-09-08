@@ -9,11 +9,5 @@ def printMessage(message):
 
 #printMessage(("abasflkj", str(1), "asdf"))
 
-a = 3
-b = 2
-c = 1
-print "interval: ", str(c),"/",str(a*b)
-
-u = 0
-for u in range(0, 1):
-    print u
+for u in range(0, 3):
+    print "a"

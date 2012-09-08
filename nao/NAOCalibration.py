@@ -372,9 +372,9 @@ def main():
     n.changeBodyOrientation("init")
 
     print "-------look for blue NXT--------"
-    n.performCalibration(2) # blue
+    #n.performCalibration(2) # blue
     print "-------look for green NXT-------"
-    n.performCalibration(1) # green
+    #n.performCalibration(1) # green
     print "-------look for red NXT---------"
     n.performCalibration(0) # red
 
