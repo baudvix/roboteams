@@ -198,8 +198,8 @@ class NAOCalibration():
                 self.textToSpeechProxy.say("Centre head to marker ", str(self.allDetectedMarkerAVG[i][3]), " to get the color")
                 config.setHeadMotion(self.motionProxy, self.toDEG(self.getHead()[0]+avgAlpha), self.toDEG(self.getHead()[1]+avgBeta))
 
-                time.sleep(0.5)
-                if(colourDetection.getColour(self.IP, self.PORT, 320, 240) == NXTColor):
+                self.calcAvgOfAllDetectedMarker()
+                if(colourDetection.getColour(self.IP, self.PORT, self.allDetectedMarkerAVG[i][2]) == NXTColor):
                     # head is centered to the right marker with the color of nxt
                     return i
         return -1
