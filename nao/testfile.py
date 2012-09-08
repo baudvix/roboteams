@@ -1,13 +1,4 @@
-def calculateAVG(array):
-    avg = 0
-    if(array != []):
-        for elem in array:
-            avg+=elem
-        return avg/len(array)
-
-
-def mostFrequent(lst):
-    return max(set(lst), key=lst.count)
-
-print calculateAVG([2, 1])
-print mostFrequent(["a", "b", "a"])
+from naoqi import ALProxy
+memoryProxy = ALProxy("ALMemory", "194.95.174.172", 9559)
+arrayOfMarker = memoryProxy.getData("LandmarkDetected")
+print arrayOfMarker

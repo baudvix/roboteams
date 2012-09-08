@@ -17,7 +17,7 @@ class NAOCalibration():
         #will be set when the NAO when changeBodyOrientation is called
         #if nao stands it is 50cm if nao is in knee position it is 41 cm
         self.naoCameraHeight = 0
-        self.markerHeight = 18
+        self.markerHeight = 18 #7 if on the ground
         self.angelDeviation = 8 * math.pi/180   #abweichung 8 grad
         self.numberOfMeasurements = 5
         self.bodyOrientation = ""
@@ -55,7 +55,7 @@ class NAOCalibration():
             print "Error when creating landmark detection proxy: "
             print str(e)
             exit(1)
-        period = 1500
+        period = 500 #changed from 1500! change back
         landMarkProxy.subscribe("Test_LandMark", period, 0.0 )
         return landMarkProxy
 
@@ -289,6 +289,7 @@ class NAOCalibration():
     def performCalibration(self, color):
 
         print "#01 Try to find NXT with color: ", str(self.colors[color])
+        self.textToSpeechProxy.say("Trying to find "+ str(self.colors[color])+ " NXT")
         found = self.findColouredMarker(color)
 
         if(found):
@@ -360,19 +361,27 @@ def main():
 
     n = NAOCalibration()
     n.changeBodyOrientation("init")
-    #n.changeBodyOrientation("knee")
 
     print "-------look for red NXT---------"
+
     n.performCalibration(0) # red
     print "-------look for green NXT---------"
-    n.performCalibration(1) # green
+    #n.performCalibration(1) # green
     print "-------look for blue NXT---------"
-    n.performCalibration(2) # blue
+    #n.performCalibration(2) # blue
 
     config.setHeadMotion(n.motionProxy, 0, 0)
+
+    n.changeBodyOrientation("knee")
 
     print "-----end:NAOCalibration-----"
     sys.exit(1)
 
 if __name__ == '__main__':
     main()
+
+class NXTNotFoundException(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)

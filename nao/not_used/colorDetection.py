@@ -3,25 +3,38 @@ __author__ = 'Lorenz'
 import cv
 
 #path = "/Users/Lorenz/Dropbox/Semesterprojekt/roboteams/nao/camImage.png"
-
+path = "/Users/Lorenz/Documents/Studium/Semesterprojekt/NAO/ColoredMarkers/2naoAllColorsInVision2.png"
+image = cv.LoadImageM(path)
+height = image.height
+width = image.width
+step = image.step
+channels = image.channels
 
 #blueMin = [115, 0, 255]
-blueMin = [160,100,100]
+#blueMin = [160,100,100] # works best
+blueMin = [180,100,150] # verified by colorConverter.dmg
 #blueMax = [0, 210, 255]
-blueMax = [190,255,255]
+#blueMax = [190,255,255] # works best
+blueMax = [261,255,255] # verified by colorConverter.dmg
 
 #greenMin = [0, 255, 234]
-greenMin = [200,80,80]
+#greenMin = [200,80,80] # works best
+greenMin = [80,50,90] # verified by colorConverter.dmg
 #greenMax = [84, 255, 0]
-greenMax = [280,255,255]
+#greenMax = [280,255,255] # works best
+greenMax = [143,100,100] # verified by colorConverter.dmg
 
 #yellowMin = [210, 255, 0]
+#yellowMin = [20,100,100] # works best
 yellowMin = [20,100,100]
-#yellowMax = [255, 216, 0]
+#yellowMax = [255, 216, 0] # works best
 yellowMax = [30,255,255]
 
-thresholdMin = [blueMin, greenMin, yellowMin]
-thresholdMax = [blueMax, greenMax, yellowMax]
+redMin = [50,100,100]
+redMax = [90,255,255]
+
+thresholdMin = [blueMin, greenMin, yellowMin, redMin]
+thresholdMax = [blueMax, greenMax, yellowMax, redMax]
 
 # 0 for blue, 1 for green, 2 for yellow
 def filterColor(color, image):
@@ -113,20 +126,11 @@ def zeroOneRatio(arrayOfPixels, fieldCentrePixel, fieldSizeXY):
     pixelOfHoleField = fieldSizeXY * fieldSizeXY * percentage
     return numberOfPixelInside/pixelOfHoleField
 
-def colorDetection(color):
-    path = "/Users/Lorenz/Documents/Studium/Semesterprojekt/NAO/ColoredMarkers/#1bc543_.png"
-
-    image = cv.LoadImageM(path)
-    height = image.height
-    width = image.width
-    step = image.step
-    channels = image.channels
-
 ########
 
 hsv = cv.CreateImage(cv.GetSize(image), 8, 3)
 thr = cv.CreateImage(cv.GetSize(image), 8, 1)
 
-xColoredPixel = filterColor(1, image)[1]
+xColoredPixel = filterColor(0, image)[1]
 print xColoredPixel
 print zeroOneRatio(xColoredPixel, [35, 29], 20)
