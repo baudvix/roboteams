@@ -1,13 +1,11 @@
 #from naoqi import ALProxy
-#memoryProxy = ALProxy("ALMemory", "194.95.174.172", 9559)
+#memoryProxy = ALProxy("ALMemory", "194.95.174.188", 9559)
 #arrayOfMarker = memoryProxy.getData("LandmarkDetected")
 #print arrayOfMarker
 
-def printMessage(message):
-    print message
+imageWidth = 640
+imageHeight = 460
+topLeftCropCorner = [1000,0]
 
-
-#printMessage(("abasflkj", str(1), "asdf"))
-
-for u in range(0, 3):
-    print "a"
+if(topLeftCropCorner < [0,0] or topLeftCropCorner > [imageWidth,imageHeight]):
+    print "no!"

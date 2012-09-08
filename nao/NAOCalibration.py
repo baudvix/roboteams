@@ -199,7 +199,7 @@ class NAOCalibration():
                 config.setHeadMotion(self.motionProxy, self.toDEG(self.getHead()[0]+avgAlpha), self.toDEG(self.getHead()[1]+avgBeta))
 
                 time.sleep(0.5)
-                if(colourDetection.getColour(self.IP, self.PORT, 320, 240) == NXTColor):
+                if(colourDetection.getColour(self.IP, self.PORT) == NXTColor):
                     # head is centered to the right marker with the color of nxt
                     return i
         return -1
