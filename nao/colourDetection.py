@@ -67,7 +67,7 @@ def getColour(IP, PORT, x, y):
     im = Image.fromstring("RGB", (imageWidth, imageHeight), array)
 
     # Save the image.
-    im.save("camImage.jpg", "JPEG")
+    im.save("/home/nao/images/camImage" + str(t0) + ".jpg", "JPEG")
 
     #im.show()
 
