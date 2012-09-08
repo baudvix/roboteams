@@ -6,7 +6,6 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nao/NAOCalibration.py" afterPath="$PROJECT_DIR$/nao/NAOCalibration.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nao/colourDetection.py" afterPath="$PROJECT_DIR$/nao/colourDetection.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nao/config.py" afterPath="$PROJECT_DIR$/nao/config.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nao/not_used/colorDetection.py" afterPath="$PROJECT_DIR$/nao/not_used/colorDetection.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nao/testfile.py" afterPath="$PROJECT_DIR$/nao/testfile.py" />
     </list>
     <ignored path="roboteams.iws" />
@@ -32,22 +31,22 @@
       <file leaf-file-name="config.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nao/config.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="38" column="27" selection-start="1237" selection-end="1237" vertical-scroll-proportion="-14.12">
-              <folding>
-                <element signature="e#0#13#0" expanded="true" />
-                <element signature="e#1372#4408#0" expanded="false" />
-                <element signature="e#7477#7915#0" expanded="false" />
-              </folding>
+            <state line="33" column="48" selection-start="1029" selection-end="1029" vertical-scroll-proportion="-3.6078432">
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="NAOCalibration.py" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="NAOCalibration.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nao/NAOCalibration.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="204" column="28" selection-start="8523" selection-end="8524" vertical-scroll-proportion="0.9076577">
+            <state line="377" column="35" selection-start="16404" selection-end="16404" vertical-scroll-proportion="-4.4313726">
               <folding>
                 <element signature="e#23#33#0" expanded="true" />
+                <element signature="e#2004#2421#0" expanded="false" />
+                <element signature="e#2463#2726#0" expanded="false" />
+                <element signature="e#2768#3029#0" expanded="false" />
+                <element signature="e#3068#3297#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -56,7 +55,7 @@
       <file leaf-file-name="testfile.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nao/testfile.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1" column="49" selection-start="72" selection-end="75" vertical-scroll-proportion="-0.6">
+            <state line="16" column="5" selection-start="321" selection-end="321" vertical-scroll-proportion="-9.6">
               <folding />
             </state>
           </provider>
@@ -74,16 +73,16 @@
       <file leaf-file-name="almotion_getangles.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nao/not_used/almotion_getangles.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="8" column="21" selection-start="179" selection-end="179" vertical-scroll-proportion="-3.64">
+            <state line="8" column="21" selection-start="179" selection-end="179" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="colourDetection.py" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="colourDetection.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/nao/colourDetection.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="93" column="56" selection-start="2462" selection-end="2462" vertical-scroll-proportion="-9.0">
+            <state line="39" column="36" selection-start="778" selection-end="778" vertical-scroll-proportion="0.24859813">
               <folding>
                 <element signature="e#60#70#0" expanded="true" />
               </folding>
@@ -94,7 +93,7 @@
       <file leaf-file-name="colorDetection.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nao/not_used/colorDetection.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="14" column="0" selection-start="390" selection-end="390" vertical-scroll-proportion="-4.117647">
+            <state line="14" column="0" selection-start="390" selection-end="390" vertical-scroll-proportion="-8.4">
               <folding />
             </state>
           </provider>
@@ -104,9 +103,7 @@
         <entry file="file://$USER_HOME$/Documents/Studium/Semesterprojekt/NAO/python_examples/Vision/Retrieving images/vision_getandsaveimage.py">
           <provider selected="true" editor-type-id="text-editor">
             <state line="26" column="36" selection-start="591" selection-end="591" vertical-scroll-proportion="0.0">
-              <folding>
-                <element signature="e#60#70#0" expanded="true" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
@@ -114,7 +111,7 @@
       <file leaf-file-name="NaoWalk.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nao/NaoWalk.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="73" column="16" selection-start="2294" selection-end="2294" vertical-scroll-proportion="0.0">
+            <state line="77" column="16" selection-start="2470" selection-end="2470" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -157,12 +154,12 @@
         <option value="$PROJECT_DIR$/nao/motion_poseInit.py" />
         <option value="$PROJECT_DIR$/nao/NaoWalk.py" />
         <option value="$PROJECT_DIR$/nao/not_used/sensors_getInertialValues.py" />
-        <option value="$PROJECT_DIR$/nao/config.py" />
-        <option value="$PROJECT_DIR$/nao/testfile.py" />
         <option value="$USER_HOME$/Documents/Studium/Semesterprojekt/NAO/python_examples/Vision/Retrieving images/vision_getandsaveimage.py" />
         <option value="$PROJECT_DIR$/nao/not_used/colorDetection.py" />
-        <option value="$PROJECT_DIR$/nao/colourDetection.py" />
+        <option value="$PROJECT_DIR$/nao/config.py" />
         <option value="$PROJECT_DIR$/nao/NAOCalibration.py" />
+        <option value="$PROJECT_DIR$/nao/testfile.py" />
+        <option value="$PROJECT_DIR$/nao/colourDetection.py" />
       </list>
     </option>
   </component>
@@ -307,10 +304,10 @@
   <component name="PropertiesComponent">
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="options.lastSelected" value="com.jetbrains.python.configuration.PythonSdkConfigurable" />
     <property name="recentsLimit" value="5" />
-    <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.lastSelected" value="com.jetbrains.python.configuration.PythonSdkConfigurable" />
     <property name="options.searchVisible" value="true" />
+    <property name="options.splitter.details.proportions" value="0.2" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
@@ -322,25 +319,7 @@
       <PyConsoleSettings />
     </option>
   </component>
-  <component name="RunManager" selected="Python.colorDetection">
-    <configuration default="false" name="NAOCalibration" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/nao" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <module name="roboteams" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/nao/NAOCalibration.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="MULTIPROCESS" value="false" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method />
-    </configuration>
+  <component name="RunManager" selected="Python.testfile">
     <configuration default="false" name="colourDetection" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -413,6 +392,24 @@
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method />
     </configuration>
+    <configuration default="false" name="testfile" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/nao" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <module name="roboteams" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/nao/testfile.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="MULTIPROCESS" value="false" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -467,11 +464,11 @@
       <method />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python.NAOCalibration" />
-      <item index="1" class="java.lang.String" itemvalue="Python.colourDetection" />
-      <item index="2" class="java.lang.String" itemvalue="Python.sensors_getInertialValues" />
-      <item index="3" class="java.lang.String" itemvalue="Python.vision_getandsaveimage" />
-      <item index="4" class="java.lang.String" itemvalue="Python.colorDetection" />
+      <item index="0" class="java.lang.String" itemvalue="Python.colourDetection" />
+      <item index="1" class="java.lang.String" itemvalue="Python.sensors_getInertialValues" />
+      <item index="2" class="java.lang.String" itemvalue="Python.vision_getandsaveimage" />
+      <item index="3" class="java.lang.String" itemvalue="Python.colorDetection" />
+      <item index="4" class="java.lang.String" itemvalue="Python.testfile" />
     </list>
   </component>
   <component name="ShelveChangesManager" show_recycled="false" />
@@ -529,11 +526,11 @@
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32893" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.17569353" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.20653789" sideWeight="0.7357992" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2102526" sideWeight="0.8044914" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3989432" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2642008" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.19550858" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32893" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -611,14 +608,26 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/nao/not_used/sensors_getInertialValues.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="20" selection-start="33" selection-end="47" vertical-scroll-proportion="0.0">
+        <state line="2" column="20" selection-start="33" selection-end="47" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nao/not_used/almotion_getangles.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="8" column="21" selection-start="179" selection-end="179" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
+    <entry file="file://$USER_HOME$/Documents/Studium/Semesterprojekt/NAO/python_examples/Vision/Retrieving images/vision_getandsaveimage.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="26" column="36" selection-start="591" selection-end="591" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/nao/NaoWalk.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="73" column="16" selection-start="2294" selection-end="2294" vertical-scroll-proportion="0.0" />
+        <state line="77" column="16" selection-start="2470" selection-end="2470" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/nao/motion_poseInit.py">
@@ -626,61 +635,45 @@
         <state line="7" column="0" selection-start="142" selection-end="142" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/nao/not_used/colorDetection.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="14" column="0" selection-start="390" selection-end="390" vertical-scroll-proportion="-8.4">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/nao/config.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="38" column="27" selection-start="1237" selection-end="1237" vertical-scroll-proportion="-14.12">
+        <state line="33" column="48" selection-start="1029" selection-end="1029" vertical-scroll-proportion="-3.6078432">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nao/NAOCalibration.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="377" column="35" selection-start="16404" selection-end="16404" vertical-scroll-proportion="-4.4313726">
           <folding>
-            <element signature="e#0#13#0" expanded="true" />
-            <element signature="e#1372#4408#0" expanded="false" />
-            <element signature="e#7477#7915#0" expanded="false" />
+            <element signature="e#23#33#0" expanded="true" />
+            <element signature="e#2004#2421#0" expanded="false" />
+            <element signature="e#2463#2726#0" expanded="false" />
+            <element signature="e#2768#3029#0" expanded="false" />
+            <element signature="e#3068#3297#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/nao/testfile.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="1" column="49" selection-start="72" selection-end="75" vertical-scroll-proportion="-0.6">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/nao/not_used/almotion_getangles.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="21" selection-start="179" selection-end="179" vertical-scroll-proportion="-3.64">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Documents/Studium/Semesterprojekt/NAO/python_examples/Vision/Retrieving images/vision_getandsaveimage.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="26" column="36" selection-start="591" selection-end="591" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#60#70#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/nao/not_used/colorDetection.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="0" selection-start="390" selection-end="390" vertical-scroll-proportion="-4.117647">
+        <state line="16" column="5" selection-start="321" selection-end="321" vertical-scroll-proportion="-9.6">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/nao/colourDetection.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="93" column="56" selection-start="2462" selection-end="2462" vertical-scroll-proportion="-9.0">
+        <state line="39" column="36" selection-start="778" selection-end="778" vertical-scroll-proportion="0.24859813">
           <folding>
             <element signature="e#60#70#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/nao/NAOCalibration.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="204" column="28" selection-start="8523" selection-end="8524" vertical-scroll-proportion="0.9076577">
-          <folding>
-            <element signature="e#23#33#0" expanded="true" />
           </folding>
         </state>
       </provider>

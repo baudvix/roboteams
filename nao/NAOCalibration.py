@@ -14,18 +14,17 @@ class NAOCalibration():
     def __init__(self):
         self.IP = "localhost"
         self.PORT = 9559
-        #will be set when the NAO when changeBodyOrientation is called
-        #if nao stands it is 50cm if nao is in knee position it is 41 cm
+        #will be set when the NAO when self.changeBodyOrientation(self, orientation) is called
         self.naoCameraHeight = 0
-        self.markerHeight = 18 #7 if on the ground
-        self.angelDeviation = 8 * math.pi/180   #abweichung 8 grad
+        self.markerHeight = 18 #7cm if Marker is on the ground
+        self.angelDeviation = 8 * math.pi/180   #variance of 8 degree
         self.numberOfMeasurements = 5
-        self.bodyOrientation = ""
+        self.bodyOrientation = "empty"
 
-        # NEU MACHEN: !!['back', 'front', 'front left', 'front right', 'back left', 'back right']
-        # 0 bzw. 360 (front), 60 (rechts vorn), 120 (rechts hinten), 180 (hinten), 240 (links hinten), 300 (links vorn)
+        # 0:"front", 60:"right front", 120:"right back", 180:"back", 240:"left back", 300:"left front"
+        # self.markerPosition = [markerIDsArray, arrayOfDegrees]
         self.markerPosition = [[119, 84, 80, 68, 64, 114], [0, 180, 120, 240, 60, 300]]
-        self.colors = ['red', 'green', 'blue', 'black']
+        self.colors = ['red', 'green', 'blue']  #TODO: right reference to nxts
 
         # this are the current intervals in degree in which the NAO looks for the nxt
         self.pitchIntervals = [25, 5]
@@ -34,7 +33,7 @@ class NAOCalibration():
         self.resolutionHeight = 400
         self.resolutionWidth = 680
 
-        # allDetectedMarker = [ Marker1, Marker2, Marker3, Marker4, Marker5, Marker6]
+        # allDetectedMarker = [ Marker1, .. , MarkerN]
         # MarkerX = [alphaArray, betaArray, heightArray, idArray, [distancesToMarker] (-> calculated at last)]
         # distancesToMarker = [c, a, b] with c as the direct distance, a as the y-distance, b as the x-distance
         self.allDetectedMarker = []
@@ -90,8 +89,8 @@ class NAOCalibration():
         return tts
 
     def resetAllDetectedMarker(self):
-        self.allDetectedMarker = [] #[[[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []]]
-        self.allDetectedMarkerAVG = [] #[[[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []], [[],[],[],[], []]]
+        self.allDetectedMarker = []
+        self.allDetectedMarkerAVG = []
 
     def calcAvgOfAllDetectedMarker(self):
         # calculate the distances for all possible markers
@@ -153,11 +152,6 @@ class NAOCalibration():
     def toDEG(self, number):
         return number*180/math.pi
 
-        # This is a method for finding any NAOMarker with a certain Color (NXTColor) - at least this finds the NXTs
-
-
-        # called by findColouredMarker
-
     #to get the current head position of the nao
     def getHead(self):
         HeadYawAngle = self.memoryProxy.getData("Device/SubDeviceList/HeadYaw/Position/Actuator/Value")
@@ -181,15 +175,17 @@ class NAOCalibration():
                     self.allDetectedMarkerAVG[i][4] = distancesToMarker
         else:
             print "MarkerNotFoundError: Could not find marker again!"
+            #self.printAndSayMessage("Could not find marker again!")
             return False
 
         return True
 
-    # centers the head to the marker with the color NXTColor which was found first
+    # centers the head to the marker with the color (NXTColor) which was found first
     def centerHeadToMarkerWithColor(self, NXTColor):
         currentHeadPosition = self.getHead()
 
         for i in range(0, len(self.allDetectedMarker)):
+
             config.setHeadMotion(self.motionProxy, self.toDEG(currentHeadPosition[0]), self.toDEG(currentHeadPosition[1]))
 
             # only calculate if there is one marker
@@ -197,14 +193,18 @@ class NAOCalibration():
                 print str(i) + " "
                 avgAlpha = self.allDetectedMarkerAVG[i][0]
                 avgBeta = self.allDetectedMarkerAVG[i][1]
-                print "head centred to one detected marker to get the color"
+
+                print "Centre head to marker ", str(self.allDetectedMarkerAVG[i][3]), " to get the color"
+                self.textToSpeechProxy.say("Centre head to marker ", str(self.allDetectedMarkerAVG[i][3]), " to get the color")
                 config.setHeadMotion(self.motionProxy, self.toDEG(self.getHead()[0]+avgAlpha), self.toDEG(self.getHead()[1]+avgBeta))
 
+                time.sleep(0.5)
                 if(colourDetection.getColour(self.IP, self.PORT, 320, 240) == NXTColor):
                     # head is centered to the right marker with the color of nxt
                     return i
         return -1
 
+    # called by findColouredMarker
     def detectMarker(self, numberOfMeasurements):
         self.resetAllDetectedMarker()
 
@@ -231,7 +231,7 @@ class NAOCalibration():
                 if(numberOfMarker > 6):
                     print "numberOfMarker = ", numberOfMarker
 
-                # There can be up to X markers (more than 6 markers possible!)
+                # There can be up to X markers (more than 6 markers possible)
                 for j in range(0, numberOfMarker):
                     self.allDetectedMarker.append([[],[],[],[],[]])
                     self.allDetectedMarkerAVG.append([[],[],[],[],[]])
@@ -255,17 +255,20 @@ class NAOCalibration():
                 # this should not happen because before method starts nao enshures that the head centres the right marker
                 print str(i) + "No landmark detected!"
 
+    # This is a method for finding any NAOMarker with a certain Color (NXTColor) - at least this finds the NXTs
     def findColouredMarker(self, NXTColor):
 
         # set the initial head position for NAO
         config.setHeadMotion(self.motionProxy, 0, 0)
 
         # move head vertical
+        i = 1
         for g in range(0, len(self.pitchIntervals)):
-            print "g: ", str(g)
+            print "interval: ", str(i),"/",str(len(self.pitchIntervals) * len(self.yawIntervals))
+            #print "g: ", str(g)
             # move head horizontal
             for h in range(0, len(self.yawIntervals)):
-                print "h: ", str(h)
+                #print "h: ", str(h)
                 # set the head position to the current yaw and pitch interval
                 config.setHeadMotion(self.motionProxy, self.yawIntervals[h], self.pitchIntervals[g])
 
@@ -276,25 +279,27 @@ class NAOCalibration():
                 self.calcAvgOfAllDetectedMarker()
 
                 # now we prove for every found maker if it has the right color
-                found = self.centerHeadToMarkerWithColor(NXTColor)
-                if(found != -1):
+                colorIndex = self.centerHeadToMarkerWithColor(NXTColor)
+                if(colorIndex != -1):
                     print 'NXT with color ' + str(self.colors[NXTColor]) + ' found!'
                     self.textToSpeechProxy.say('NXT with color ' + str(self.colors[NXTColor]) + ' found!')
-                    return True
+                    return i
+                i=i+1
 
         print 'NXT with color ' + str(self.colors[NXTColor]) + ' not found!'
         self.textToSpeechProxy.say('NXT with color ' + str(self.colors[NXTColor]) + ' not found!')
-        return False
+        return -1
 
     def performCalibration(self, color):
 
         print "#01 Try to find NXT with color: ", str(self.colors[color])
         self.textToSpeechProxy.say("Trying to find "+ str(self.colors[color])+ " NXT")
+        # found = the index of the marker in the array self.allDetectedMarkerAVG witch has the right color
         found = self.findColouredMarker(color)
 
-        if(found):
+        if(found != -1):
             # now the head of the nao should be centred to the right colored marker
-            # then calc again to get better data
+            # then we measure and then calc again to get better data
             print "#02 Colored NXT found! Measure again to get accurate Distance."
             markerFoundAgain = self.measureAgainAndCalcDist()
 
@@ -321,7 +326,7 @@ class NAOCalibration():
                             #self.textToSpeechProxy.say('The position of the NXT is ' + str(orientation))
                             return x, y, orientation
                         else:
-                            print "#Error2 Marker doesn't match to NXT!"
+                            print "#Error2 Unknown marker found! Make shure that the right marker are on the NXT!"
                             return -1
                             #raise NXTNotFoundException("Unknown ID found!")
                 else:
@@ -335,6 +340,10 @@ class NAOCalibration():
             #raise NXTNotFoundException("NXT not found.")
 
         self.myBroker.shutdown()
+
+    def printAndSayMessage(self, message):
+        print message
+        self.textToSpeechProxy.say(message)
 
     def changeBodyOrientation(self, orientation):
         if(orientation == "init"):
@@ -357,24 +366,23 @@ class NXTNotFoundException(Exception):
         return repr(self.parameter)
 
 def main():
-    print "-----begin:NAOCalibration-----"
+    print "-----begin:NAOCalibration-------"
 
     n = NAOCalibration()
     n.changeBodyOrientation("init")
 
+    print "-------look for blue NXT--------"
+    n.performCalibration(2) # blue
+    print "-------look for green NXT-------"
+    n.performCalibration(1) # green
     print "-------look for red NXT---------"
-
     n.performCalibration(0) # red
-    print "-------look for green NXT---------"
-    #n.performCalibration(1) # green
-    print "-------look for blue NXT---------"
-    #n.performCalibration(2) # blue
 
     config.setHeadMotion(n.motionProxy, 0, 0)
 
     n.changeBodyOrientation("knee")
 
-    print "-----end:NAOCalibration-----"
+    print "-----end:NAOCalibration---------"
     sys.exit(1)
 
 if __name__ == '__main__':

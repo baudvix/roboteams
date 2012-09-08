@@ -31,8 +31,8 @@ def setStiffness(proxy, partOfBody, pStiffnessLists):
     proxy.stiffnessInterpolation(pNames, pStiffnessLists, pTimeLists)
 
 def setHeadMotion(motionProxy, headYawAngle, headPitchAngle):
-    motionProxy.angleInterpolation("HeadPitch", math.pi*headPitchAngle/180,0.3,True)
-    motionProxy.angleInterpolation("HeadYaw", math.pi*headYawAngle/180,0.3,True)
+    motionProxy.angleInterpolation("HeadPitch", math.pi*headPitchAngle/180,1.0,True)
+    motionProxy.angleInterpolation("HeadYaw", math.pi*headYawAngle/180,1.0,True)
 
 def naoWalkTo(x, y, theta):
     print "naoWalkTo"

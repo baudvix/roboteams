@@ -37,7 +37,7 @@ def getColour(IP, PORT, x, y):
 
     #for b in range(0, 5):
     areas = [0,0,0,0]
-    colors = ['red', 'green', 'blue', 'black']
+    colors = ['red', 'green', 'blue']
 
     videoClient = camProxy.subscribe("python_client", resolution, colorSpace, 5)
 
@@ -133,12 +133,12 @@ def getColour(IP, PORT, x, y):
 
         biggest = 0
 
-        for u in range(0, len(colors)-1):
+        for u in range(0, len(colors)):
             if (areas[biggest] > areas[u+1]):
                 biggest = u+1
 
         print("WAHRSCHEINLICHSTE FARBE: " + colors[biggest])
-        return colors[biggest]
+        return biggest
                 #create an overlay to mark the center of the tracked object
             #overlay = cv.CreateImage(cv.GetSize(img), 8, 3)
 
