@@ -67,12 +67,12 @@ def getColour(IP, PORT, x, y):
     im = Image.fromstring("RGB", (imageWidth, imageHeight), array)
 
     # Save the image.
-    im.save("camImage.jpg", "JPEG")
+    im.save("/home/nao/images/camImage" + str(t0) + ".jpg", "JPEG")
 
     #im.show()
 
     color = 'red'
-    img = cv.LoadImage('camImage.jpg')
+    img = cv.LoadImage("/home/nao/images/camImage" + str(t0) + ".jpg")
     #  img = cv.QueryFrame( self.capture )
 
     #blur the source image to reduce color noise
