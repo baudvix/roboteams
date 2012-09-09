@@ -1,6 +1,7 @@
 __author__ = 'Lorenz'
 
-import NAOCalibration
+import NAOCalibrationOld
+from optparse import OptionParser
 
 class queue():
     def __init__(self):
@@ -38,6 +39,6 @@ def main():
 
     for i in range(0, q.len()):
         element = q.dequeue()
-        NAOCalibration.performCalibration(element[0], element[1])
+        NAOCalibrationOld.performCalibration(element[0], element[1])
 
 main()

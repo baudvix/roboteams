@@ -205,7 +205,19 @@ class RobotNAO(RobotBase):
         Constructor for a new NAO
         """
         RobotBase.__init__(self, handle, connection, NAO_TYPE)
+        self._map_overlay = map.MapModel('NAO #' + str(self.handle) + ' overlay')
 
+
+    def fget_map_overlay(self):
+        """The map_overlay property getter"""
+        with self._lock:
+            return self._map_overlay
+
+    def fset_map_overlay(self, value):
+        """The map_overlay property setter"""
+        with self._lock:
+            self._map_overlay = value
+    map_overlay = property(fget_map_overlay, fset_map_overlay)
 
 class TraceNXT(object):
     """
