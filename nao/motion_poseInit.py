@@ -1,12 +1,12 @@
 #-*- coding: iso-8859-15 -*-
 
-''' PoseInit: Small example to make Nao go to an initial position. '''
+''' calibrationPoseInit: Small example to make Nao go to an initial position. '''
 
 import config
 import motion
 
-
-def setMotion(HeadYawAngle, HeadPitchAngle):
+# not used any more!
+def setHeadMotion(HeadYawAngle, HeadPitchAngle):
     proxy = config.loadProxy("ALMotion")
 
     # Define The Initial Position

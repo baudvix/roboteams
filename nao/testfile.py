@@ -1,57 +1,16 @@
-__author__ = 'Lorenz'
+#from naoqi import ALProxy
+#memoryProxy = ALProxy("ALMemory", "194.95.174.188", 9559)
+#arrayOfMarker = memoryProxy.getData("LandmarkDetected")
+#print arrayOfMarker
 
-import config
-from config import IP
-from config import PORT
 import time
-import motion_poseInit
-import math
 from naoqi import ALProxy
 
-import Queue
+IP = "194.95.174.188"
+PORT = 9559
+aup = ALProxy("ALAudioPlayer", IP, PORT)
 
-class queue():
-    def __init__(self):
-        self.arr = []
-
-    def enqueue(self, element):
-        self.arr.append(element)
-
-    def dequeue(self):
-        if(len(self.arr)>0):
-            element = self.arr[0]
-            self.arr = self.arr[1:len(self.arr)]
-            return element
-        return -1
-
-    def first(self):
-        if(len(self.arr)>0):
-            return self.arr[0]
-        return -1
-
-    def last(self):
-        if(len(self.arr)>0):
-            return self.arr[len(self.arr)-1]
-        return -1
-
-def main():
-    q = queue()
-    q.enqueue(1)
-    q.enqueue(2)
-    q.enqueue(3)
-    print q.dequeue()
-    print q.dequeue()
-    print q.dequeue()
-    print q.dequeue()
-    print q.first()
-
-    p = Queue()
-    print p
-
-main()
-
-
-
-
-
-
+#Loads a file and launchs the playing 5 seconds later
+fileId = aup.loadFile("/home/nao/what shall we do with the drunken sailor2.0_5min.wav")
+time.sleep(1)
+aup.play(fileId)
