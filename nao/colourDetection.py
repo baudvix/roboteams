@@ -7,6 +7,8 @@ from naoqi import ALProxy
 from naoqi import ALBroker
 
 def getColour(IP, PORT, markerSize):
+    print "-----begin:colourDetection-------"
+
     path = "/home/nao/images/"
 
     # myBroker = ALBroker(listen to anyone, find a free port and use it, parent broker IP, parent broker port)
@@ -26,8 +28,6 @@ def getColour(IP, PORT, markerSize):
 
     # Get a camera image.
     naoImage = camProxy.getImageRemote(videoClient)
-
-    t1 = time.time()
 
     camProxy.unsubscribe(videoClient)
 
@@ -107,6 +107,7 @@ def getColour(IP, PORT, markerSize):
             distances[i] = math.sqrt(math.pow(distX[i] - cv.GetSize(img)[0],2) + math.pow(distY[i] - cv.GetSize(img)[1],2))
 
         print "Most likely color: ", colors[distances.index(min(distances))]
+        t1 = time.time()
         return distances.index(min(distances))
 
 if __name__ == '__main__':
