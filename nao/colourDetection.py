@@ -2,6 +2,7 @@ import time
 import cv
 import math
 import Image
+import datetime
 
 from naoqi import ALProxy
 from naoqi import ALBroker
@@ -22,12 +23,12 @@ def getColour(IP, PORT, markerSize):
 
     videoClient = camProxy.subscribe("python_client", resolution, colorSpace, 5)
 
-    t0 = time.time()
+    
 
     # Get a camera image.
     naoImage = camProxy.getImageRemote(videoClient)
 
-    t1 = time.time()
+    t0 = datetime.datetime.isoformat(datetime.datetime.now())
 
     camProxy.unsubscribe(videoClient)
 
@@ -39,24 +40,26 @@ def getColour(IP, PORT, markerSize):
     xValue = imageWidth/2
     yValue = imageHeight/2
 
+    print "marker size: ", markerSize
+
     # Create a PIL Image from our pixel array.
     im = Image.fromstring("RGB", (imageWidth, imageHeight), array)
     # Save the image.
-    im.save(path+ "/camImage" + str(t0) + ".jpg", "JPEG")
+    im.save(path+ "camImage" + str(t0) + ".jpg", "JPEG")
 
     img = cv.LoadImage(path+"camImage" + str(t0) + ".jpg")
 
     centerX = imageWidth/2
     centerY = imageHeight/2
 
-    ratio = math.ceil(markerSize/0.6)
-    topLeftCropCorner = [centerX-ratio * imageWidth * 0.5, centerY-ratio * imageWidth * 0.5]
-    bottomRightCropCorner = topLeftCropCorner + [ratio*imageWidth, ratio*imageHeight]
+    ratio = markerSize/0.6
+    topLeftCropCorner = [centerX-math.ceil(ratio * imageWidth * 0.5), centerY-math.ceil(ratio * imageWidth * 0.5)]
+    bottomRightCropCorner = topLeftCropCorner + [math.ceil(ratio*imageWidth), math.ceil(ratio*imageWidth)]
 
     # crop the image if possible
     if(not(topLeftCropCorner < [0,0] or bottomRightCropCorner > [imageWidth,imageHeight])):
-        cv.SetImageROI(img, (topLeftCropCorner[0], topLeftCropCorner[1], ratio*imageWidth, ratio*imageHeight))
-        cv.SaveImage(path+"/croppedImage"+str(t0)+".jpg", img)
+        cv.SetImageROI(img, (topLeftCropCorner[0], topLeftCropCorner[1], math.ceil(ratio*imageWidth), math.ceil(ratio*imageWidth)))
+        cv.SaveImage(path+"croppedImage"+str(t0)+".jpg", img)
 
     #blur the source image to reduce color noise
     cv.Smooth(img, img, cv.CV_BLUR, 3);
@@ -69,24 +72,29 @@ def getColour(IP, PORT, markerSize):
     #looking for purple but if you want you can adjust the first value in
     #both turples which is the hue range(120,140).  OpenCV uses 0-180 as
     #a hue range for the HSV color model
+
+    distX = [0]*len(colors)
+    distY = [0]*len(colors)
+
     thresholded_img =  cv.CreateImage(cv.GetSize(hsv_img), 8, 1)
     for h in range(0, len(colors)):
         if (colors[h] == 'red' ):
             cv.InRangeS(hsv_img, (0, 70, 80), (20, 255, 255), thresholded_img)
 
         if (colors[h] == 'green' ):
-            cv.InRangeS(hsv_img, (40, 85, 80), (75, 255, 255), thresholded_img)
+            cv.InRangeS(hsv_img, (40, 70, 75), (94, 255, 255), thresholded_img)
 
         if (colors[h] == 'blue' ):
-            cv.InRangeS(hsv_img,  (95, 90, 80), (135, 255, 255), thresholded_img)
+            cv.InRangeS(hsv_img,  (95, 95, 85), (135, 255, 255), thresholded_img)
 
-        cv.WaitKey(0)
+        # cv.WaitKey(0)
         #determine the objects moments and check that the area is large enough to be our object
         moments = cv.Moments(cv.GetMat(thresholded_img,1), 0)
         area = cv.GetCentralMoment(moments, 0, 0)
 
+
         #there can be noise in the video so ignore objects with small areas
-        if(area > 20000):
+        if(area > 10000):
             #determine the x and y coordinates of the center of the object
             #we are tracking by dividing the 1, 0 and 0, 1 moments by the area
             x_new = cv.GetSpatialMoment(moments, 1, 0)/area
@@ -95,19 +103,35 @@ def getColour(IP, PORT, markerSize):
 
             distX[h] = abs(x_new - xValue)
             distY[h] = abs(y_new - yValue)
-            print 'Distance X: ', distX, ' Y: ', distY
-            areas[h] = int(math.sqrt(distX * distX + distY * distY))
+            print 'Distance X: ', distX[h], ' Y: ', distY[h]
+            areas[h] = int(math.sqrt(distX[h] * distX[h] + distY[h] * distY[h]))
 
         else:
+            distX[h] = -1
+            distY[h] = -1
             print colors[h] + ' area ' + str(area)
+            print 'Distance X: ', distX[h], ' Y: ', distY[h]
 
-        nearestColor = 0
-        distances = []
-        for i in range(0, len(colors)-1):
-            distances[i] = math.sqrt(math.pow(distX[i] - cv.GetSize(img)[0],2) + math.pow(distY[i] - cv.GetSize(img)[1],2))
+    mlColor = -1
+    distances = [0]*(len(colors))
+    for i in range(0, len(colors)):
+        if distX==-1:
+            distances[i] = -1
+        else:
+            distances[i] = math.sqrt((distX[i] - cv.GetSize(img)[0]/2)**2 + (distY[i]- cv.GetSize(img)[1]/2)**2)
+            if mlColor == -1:
+                mlColor = i
+            else:
+                if distances[i] < distances[mlColor]:
+                    mlColor = i
+        print "Distance to center :", distances[i]
 
-        print "Most likely color: ", colors[distances.index(min(distances))]
-        return distances.index(min(distances))
+    if mlColor == -1:
+        print "No matching color found"
+        return -1
+
+    print "Most likely color: ", colors[mlColor]
+    return distances.index(mlColor)
 
 if __name__ == '__main__':
     IP = "NAOsIP"
