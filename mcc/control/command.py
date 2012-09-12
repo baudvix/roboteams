@@ -236,3 +236,4 @@ class GoToPoint(Command):
                  ('x_axis', Integer()),
                  ('y_axis', Integer())]
     response = [('ack', String())]
+

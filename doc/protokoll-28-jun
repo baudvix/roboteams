@@ -2,11 +2,83 @@
 120 min, (10-12 h/ 12-14 h)
 60' Vorträge
 -20' Servicerobotik
+-20' Projektmanagement & SW-Technik //Modelle, Kommunikation
 -20' Aufgabe+Lösung //Requirements
--20' SW-Technik //Modelle, Kommunikation
 
 30' Demo
 30' F&a // Individaulgruppen
 
 naechste woche:
 - präsentation nao folgt nxt ein pfad entlang
+
+
+Protokoll 12.07.2012
+---------------------------------------------------------------------------------
+Vortreffen aller Gruppen: 11.08. von 9Uhr-openEnd
+Backupmaterial & Dokumentation (vorläufig) & Vorträage bis zum 01.09.:
+(zuständige:)
+- NAO: Joseph
+- NXT: Sven
+- MCC: Cord
+
+Generalprobe: 13.09.2012 von 9-15 Uhr (Email mit Raum & Bestätigung von Denis)
+- Video hier machen: Lorenz & Denis
+
+Aufgabenverteilung
+Nicht Anwesend (Ausarbeitung)
+Cord - Aufgabe+Lösung - Requirements
+Jonathan - Aufgabe+Lösung - Requirements
+Jens - Projektmanagement & SW-Technik
+
+Anwesend während der Präsentation (Ausarbeitung & Vortrag)
+Denis - Servcerobotik > Ausarbeitung & Vortrag
+Lorenz - Servicerobotok > Ausarbeitung & Vortrag
+Joseph - Projektmanagement & SW-Technik > Ausarbeitung & Vortrag
+Robert - Aufgabe + Lösung > Vortrag
+Sebastian - SW-Technik > Vortrag
+Sven - Backupvorträger, Raumaufbau & Helfer vom Dienst 
+
+Dokumentation
+-------------
+1. Style & Raw-Dokument Vorlage: Jonathan
+2. Zwischenübergänge & Fülltexte: 
+  jede Gruppe Themen für: Einleitung, Teamvorstellung, Aufgabe allgemein, Fazit, Zusammenfassung
+  Merge dieser Themen von: 
+3. Korrekturlesen & Rechtschreibung: 
+4. Ausdruck: 
+
+
+
+
+
+Protokoll 11. August 2012:
+==========================
+
+Was noch zu machen ist:
+NAO - MCC (Lorenz, Sebastian) :
+  -Kommunikation: 
+    - Red Ball detection
+    - Kalibration
+    - kann die kalibration verarbeitet werden?
+NAO - NXT (Jens, Lorenz, Joschka) :
+  - Befestigung der Marker an den NXT, endgültige konstruktion
+
+NAO ( Robert ) : 
+  - Befestigung roter Ball
+
+MCC - NXT (Denis, Cord, Jonathan) :
+  - Kommunikation un Aufbau der Karte
+
+MCC (Denis, Cord, Jonathan) :
+  - Verarbeitung der Karte
+
+NAO - MCC - NXT ( alle ) ( 1. September ) :
+  - Themen und Struktur für die Doku
+  - länger zeit nehmen
+  - Treffpunkt: 10 Uhr vor dem FIRST gebäude
+
+
+
+
+
+    
