@@ -18,7 +18,8 @@ def getColour(IP, PORT, x, y):
     First get an image from Nao, then show it on the screen with PIL.
     """
     #path = "/home/nao/images/"
-    path = "/home/guenthse/uni/semesterprojekt/nao_images/"
+    #path = "/home/guenthse/uni/semesterprojekt/nao_images/"
+    path = "/Users/Lorenz/images/"
 
     myBroker = ALBroker("myBroker",
         "0.0.0.0",   # listen to anyone
@@ -89,20 +90,15 @@ def getColour(IP, PORT, x, y):
     for u in range(0, 1):
         for h in range(0, len(colors)):
             if (colors[h] == 'red' ):
-                cv.InRangeS(hsv_img, (150, 130, 175), (180, 255, 255), thresholded_img)
-                cv.Merge(thresholded_img, None, None, None, img)
-                cv.ShowImage("gray",img)
-                cv.ShowImage("dst",thresholded_img)
-                cv.SaveImage(path+"/red1"+str(t0)+".jpg", img)
-
-                cv.InRangeS(hsv_img, (0, 70, 80), (20, 255, 255), thresholded_img)
+                cv.InRangeS(hsv_img, (0, 70, 80), (15, 255, 255), thresholded_img)
                 cv.Merge(thresholded_img, None, None, None, img)
                 cv.ShowImage("gray",img)
                 cv.ShowImage("dst",thresholded_img)
                 cv.SaveImage(path+"/red2"+str(t0)+".jpg",img)
 
             if (colors[h] == 'green' ):
-                cv.InRangeS(hsv_img, (40, 70, 75), (94, 255, 255), thresholded_img)
+                #cv.InRangeS(hsv_img, (40, 70, 75), (94, 255, 255), thresholded_img)
+                cv.InRangeS(hsv_img, (30, 50, 50), (94, 255, 255), thresholded_img)
                 cv.Merge(thresholded_img, None, None, None, img)
                 cv.ShowImage("gray",img)
                 cv.ShowImage("dst",thresholded_img)
@@ -115,8 +111,10 @@ def getColour(IP, PORT, x, y):
                 cv.ShowImage("dst",thresholded_img)
                 cv.SaveImage(path+"/blue"+str(t0)+".jpg",img)
 
-            while cv.WaitKey(0)!=10:
-                pass
+            #while cv.WaitKey(0)!=10:
+            #    pass
+            print cv.WaitKey(0)
+
             #determine the objects moments and check that the area is large
             #enough to be our object
             moments = cv.Moments(cv.GetMat(thresholded_img,1), 0)
@@ -167,6 +165,6 @@ def getColour(IP, PORT, x, y):
         #cv.ShowImage(color_tracker_window, img)
 
 if __name__ == '__main__':
-    IP = "194.95.174.169"
+    IP = "194.95.174.180"
     PORT = 9559
     naoImage = getColour(IP, PORT, 320, 240)

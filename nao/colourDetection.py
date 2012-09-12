@@ -79,10 +79,10 @@ def getColour(IP, PORT, markerSize):
     thresholded_img =  cv.CreateImage(cv.GetSize(hsv_img), 8, 1)
     for h in range(0, len(colors)):
         if (colors[h] == 'red' ):
-            cv.InRangeS(hsv_img, (0, 70, 80), (20, 255, 255), thresholded_img)
+            cv.InRangeS(hsv_img, (0, 70, 80), (15, 255, 255), thresholded_img)
 
         if (colors[h] == 'green' ):
-            cv.InRangeS(hsv_img, (40, 70, 75), (94, 255, 255), thresholded_img)
+            cv.InRangeS(hsv_img, (30, 50, 50), (94, 255, 255), thresholded_img)
 
         if (colors[h] == 'blue' ):
             cv.InRangeS(hsv_img,  (95, 95, 85), (135, 255, 255), thresholded_img)
@@ -115,7 +115,7 @@ def getColour(IP, PORT, markerSize):
     mlColor = -1
     distances = [0]*(len(colors))
     for i in range(0, len(colors)):
-        if distX==-1:
+        if distX[i]==-1:
             distances[i] = -1
         else:
             distances[i] = math.sqrt((distX[i] - cv.GetSize(img)[0]/2)**2 + (distY[i]- cv.GetSize(img)[1]/2)**2)
@@ -131,7 +131,7 @@ def getColour(IP, PORT, markerSize):
         return -1
 
     print "Most likely color: ", colors[mlColor]
-    return distances.index(mlColor)
+    return mlColor
 
 if __name__ == '__main__':
     IP = "NAOsIP"
