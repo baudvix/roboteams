@@ -4,6 +4,7 @@ from naoqi import ALProxy
 
 IP = "localhost"
 NAO_PORT = 9560
+NAO_IP = '194.95.174.180'
 
 def loadProxy(pName):
     proxy = ALProxy(pName, IP, PORT)
