@@ -130,8 +130,8 @@ class NAOClient():
             except Exception, e:
                 print "Connection to NAO not established: ", str(e)
                 print "Please check NAO. Automatic retry in 30 seconds."
-                wait(30)
-        wait(10)
+                time.sleep(30)
+        time.sleep(10)
         print "Send NXTSpotted to MCC"
         deffered = self.protocol.callRemote(command.NXTSpotted(handle = self.handle, nxt_handle = 0)
 
