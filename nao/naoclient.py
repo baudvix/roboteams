@@ -124,7 +124,7 @@ class NAOClient():
     def connectToNao(self):
         for i in range(0,5):
             try:
-                mybroker = ALBroker("mybroker", "0.0.0.0", 0, config.NAO_IP, config.NAO_PORT)
+                controlbroker = ALBroker("controlbroker", "0.0.0.0", 0, config.NAO_IP, config.NAO_PORT)
                 self.NAOControl = ALProxy("NAOControl")
                 break
             except Exception, e:
