@@ -133,7 +133,7 @@ class NAOClient():
                 time.sleep(30)
         time.sleep(10)
         print "Send NXTSpotted to MCC"
-        deffered = self.protocol.callRemote(command.NXTSpotted(handle = self.handle, nxt_handle = 0)
+        deffered = self.protocol.callRemote(command.NXTSpotted, handle = self.handle, nxt_handle = 0)
 
 if __name__ == "__main__":
     nao_client = NAOClient()
