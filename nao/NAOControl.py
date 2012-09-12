@@ -10,37 +10,53 @@ import time
 NAO_IP="germanopen3.local"
 
 
-Control = None
+NAOControl = None
 
 class NAOControlModule(ALModule):
     """ controls behaviour of nao """
 
     def __init__(self, name):
         ALModule.__init__(self, name)
+        calibration = NAOCalibration()
+        walk = NaoWalk()
         # No need for IP and port here because
         # we have our Python broker connected to NAOqi broker
 
     def calibrate(self, color):
         try:
-            calibration = NAOCalibration()
             # calibration.changeBodyOrientation("init")
-            return calibration.performCalibration(color)
+            return self.calibration.performCalibration(color)
         except NXTNotFoundException, e:
             raise e
         
 
-    def walk(self):
-        try:
-            w = NaoWalk()
-            w.motion.walkInit()
-            w.retrieveBall()
-            w.walkUpToBall()
-            #send message to naoclient, that the nxt has to move, wait until nxt moved
-            self.walkToPosition()
-            self.__setTopCamera()
-        except RedBallLostException, e:
-            # w.retrieveBall()
-            pass
+    def followRedBall(self, state):
+        print 'follow red ball'
+        if state == 'first':
+            print 'entered first state'
+            while True:
+                try:
+                    print 'walkInit'
+                    self.walk.motion.walkInit()
+                    print 'retrieveBall'
+                    self.walk.retrieveBall()
+                    print 'walkUpToBall'
+                    self.walk.walkUpToBall()
+                    return
+                except RedBallLostException, e:
+                    print e, ' retrieveBall'
+                    self.walk.retrieveBall()
+        else:
+            print 'entered second state'
+            while True:
+                try:
+                    print 'walkToPosition'
+                    self.walk.walkToPosition()
+                    self.walk.__setTopCamera()
+                    return
+                except RedBallLostException, e:
+                    print e, ' retrieveBall'
+                    self.walk.retrieveBall()
 
 
 
@@ -56,7 +72,7 @@ def main():
        pport)       # parent broker port
 
     global Control
-    Control = NAOControlModule("Control")
+    NAOControl = NAOControlModule("NAOControl")
 
     try:
         while True:

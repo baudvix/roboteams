@@ -48,13 +48,18 @@ class NAOProtocol(RobotProtocol):
             calibrationResult = NAOControl.calibrate(color)
             return {'handle': nao_handle,'nxt_handle': nxt_handle,'x_axis':calibrationResult[0],'y_axis':calibrationResult[1],'yaw': calibrationResult[2]}
         except NXTNotFoundException, e:
-            deffered = protocol.callRemote(command.Register, robot_type=self.robot_type, color=self.color)
+            print e
     command.PerformCalibration.responder(perform_calibration)
 
-    def send_path(self, path):
-        print 'Follow path'
+    def send_path(self, nxt_handle, path):
+        print 'Following red ball on path'
         pprint.pprint(path)
-        return {'ack': 'follow path'}
+        for way in path:
+            NAOControl.followRedBall('first')
+            deffered = protocol.callRemote(command.NXTFollowed, handle = protocol.self.handle, nxt_handle = nxt_handle, x_axis = path[0], y_axis = path[1])
+            deffered.addCallback(NAOControl.followRedBall('second'))
+            NAOControl.followRedBall('second')
+        return {'ack': 'followed path'}
     command.SendPath.responder(send_path)
 
 
@@ -125,7 +130,10 @@ class NAOClient():
             except Exception, e:
                 print "Connection to NAO not established: ", str(e)
                 print "Please check NAO. Automatic retry in 30 seconds."
-                wait(30)
+                time.sleep(30)
+        time.sleep(10)
+        print "Send NXTSpotted to MCC"
+        deffered = self.protocol.callRemote(command.NXTSpotted(handle = self.handle, nxt_handle = 0)
 
 if __name__ == '__main__':
     nao_client = NAOClient()
