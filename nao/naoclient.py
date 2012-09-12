@@ -4,7 +4,10 @@ from twisted.internet.protocol import _InstanceFactory
 from twisted.protocols import amp
 from mcc.control import command
 from nao.NAOCalibration import *
+from naoqi import ALProxy
+from naoqi import ALBroker
 
+NAOControl = None
 
 class RobotProtocol(amp.AMP):
 
@@ -42,10 +45,10 @@ class NAOProtocol(RobotProtocol):
     def perform_calibration(self, nao_handle, nxt_handle, color):
         print 'Performing calibration on NXT #%d, color=%d' % (nxt_handle, color)
         try:
-            calibrationResult = performCalibration(color)
+            calibrationResult = NAOControl.calibrate(color)
             return {'handle': nao_handle,'nxt_handle': nxt_handle,'x_axis':calibrationResult[0],'y_axis':calibrationResult[1],'yaw': calibrationResult[2]}
         except NXTNotFoundException, e:
-            raise e
+            deffered = protocol.callRemote(command.Register, robot_type=self.robot_type, color=self.color)
     command.PerformCalibration.responder(perform_calibration)
 
     def send_path(self, path):
@@ -71,6 +74,7 @@ class NAOClient():
         self.active = False
         self.robot_type = 1
         self.connect()
+        self.connectToNao()
         loop = task.LoopingCall(self.run)
         loop.start(1.0)
         reactor.run()
@@ -111,6 +115,17 @@ class NAOClient():
 
     def failure(self, error):
         print 'Error: %s:%s::%s' % (self.host, self.port, error)
+
+    def connectToNao(self):
+        for i in range(0,5):
+            try:
+                mybroker = ALBroker("mybroker", "0.0.0.0", 0, config.NAO_IP, config.NAO_PORT)
+                self.NAOControl = ALProxy("NAOControl")
+                break
+            except Exception, e:
+                print "Connection to NAO not established: ", str(e)
+                print "Please check NAO. Automatic retry in 30 seconds."
+                wait(30)
 
 if __name__ == '__main__':
     nao_client = NAOClient()

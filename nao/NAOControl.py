@@ -13,7 +13,7 @@ NAO_IP="germanopen3.local"
 Control = None
 
 class NAOControlModule(ALModule):
-    """ conrols behaviour of nao """
+    """ controls behaviour of nao """
 
     def __init__(self, name):
         ALModule.__init__(self, name)
@@ -23,8 +23,8 @@ class NAOControlModule(ALModule):
     def calibrate(self, color):
         try:
             calibration = NAOCalibration()
-            calibration.changeBodyOrientation("init")
-            calibration.performCalibration(color)
+            # calibration.changeBodyOrientation("init")
+            return calibration.performCalibration(color)
         except NXTNotFoundException, e:
             raise e
         
