@@ -10,7 +10,7 @@ import time
 NAO_IP="germanopen3.local"
 
 
-Control = None
+NAOControl = None
 
 class NAOControlModule(ALModule):
     """ controls behaviour of nao """
@@ -32,7 +32,7 @@ class NAOControlModule(ALModule):
 
     def followRedBall(self, state):
         print 'follow red ball'
-        if state = 'first':
+        if state == 'first':
             print 'entered first state'
             while True:
                 try:
@@ -72,7 +72,7 @@ def main():
        pport)       # parent broker port
 
     global Control
-    Control = NAOControlModule("Control")
+    NAOControl = NAOControlModule("NAOControl")
 
     try:
         while True:
