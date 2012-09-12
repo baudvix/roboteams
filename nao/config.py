@@ -2,27 +2,30 @@ import motion
 import math
 from naoqi import ALProxy
 
-NAO_IP="194.95.174.172"
 IP = "localhost"
 NAO_PORT = 9560
 
 def loadProxy(pName):
-  proxy = ALProxy(pName, IP, PORT)
-  return proxy
+    proxy = ALProxy(pName, IP, PORT)
+    return proxy
+
+def standUp():
+    #TODO:
+    pass
 
 def StiffnessOn(proxy, partOfBody):
-  #We use the "Body" name to signify the collection of all joints
-  pNames = partOfBody #"Body"
-  pStiffnessLists = 1.0
-  pTimeLists = 1.0
-  proxy.stiffnessInterpolation(pNames, pStiffnessLists, pTimeLists)
+    #We use the "Body" name to signify the collection of all joints
+    pNames = partOfBody #"Body"
+    pStiffnessLists = 1.0
+    pTimeLists = 1.0
+    proxy.stiffnessInterpolation(pNames, pStiffnessLists, pTimeLists)
 
 def StiffnessOff(proxy, partOfBody):
-  #We use the "Body" name to signify the collection of all joints
-  pNames = partOfBody #"Body"
-  pStiffnessLists = 0.0
-  pTimeLists = 1.0
-  proxy.stiffnessInterpolation(pNames, pStiffnessLists, pTimeLists)
+    #We use the "Body" name to signify the collection of all joints
+    pNames = partOfBody #"Body"
+    pStiffnessLists = 0.0
+    pTimeLists = 1.0
+    proxy.stiffnessInterpolation(pNames, pStiffnessLists, pTimeLists)
 
 def setStiffness(proxy, partOfBody, pStiffnessLists):
     #We use the "Body" name to signify the collection of all joints
@@ -31,8 +34,8 @@ def setStiffness(proxy, partOfBody, pStiffnessLists):
     proxy.stiffnessInterpolation(pNames, pStiffnessLists, pTimeLists)
 
 def setHeadMotion(motionProxy, headYawAngle, headPitchAngle):
-    motionProxy.angleInterpolation("HeadPitch", math.pi*headPitchAngle/180,0.3,True)
-    motionProxy.angleInterpolation("HeadYaw", math.pi*headYawAngle/180,0.3,True)
+    motionProxy.angleInterpolation("HeadPitch", math.pi*headPitchAngle/180,1,True)
+    motionProxy.angleInterpolation("HeadYaw", math.pi*headYawAngle/180,1,True)
 
 def naoWalkTo(x, y, theta):
     print "naoWalkTo"
@@ -214,17 +217,17 @@ def walkPoseInit(motionProxy, pMaxSpeedFraction = 0.2):
     StiffnessOn(motionProxy, "Head")
 
 def poseZero(proxy):
-  # We use the "Body" name to signify the collection of all joints and actuators
-  pNames = "Body"
+    # We use the "Body" name to signify the collection of all joints and actuators
+    pNames = "Body"
 
-  # Get the Number of Joints
-  numBodies = len(proxy.getJointNames(pNames))
+    # Get the Number of Joints
+    numBodies = len(proxy.getJointNames(pNames))
 
-  # We prepare a collection of floats
-  pTargetAngles = [0.0] * numBodies
+    # We prepare a collection of floats
+    pTargetAngles = [0.0] * numBodies
 
-  # We set the fraction of max speed
-  pMaxSpeedFraction = 0.3
+    # We set the fraction of max speed
+    pMaxSpeedFraction = 0.3
 
-  # Ask motion to do this with a blocking call
-  proxy.angleInterpolationWithSpeed(pNames, pTargetAngles, pMaxSpeedFraction)
+    # Ask motion to do this with a blocking call
+    proxy.angleInterpolationWithSpeed(pNames, pTargetAngles, pMaxSpeedFraction)
