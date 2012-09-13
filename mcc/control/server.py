@@ -105,8 +105,8 @@ class MCCProtocol(amp.AMP):
                 print '#%d Roboter spotted NXT #%d' % (handle, nxt_handle)
                 self.go_to_position(robo, robo.x_axis, robo.y_axis)
                 #TODO: calibrate nxt
-                deffered = protocol.callRemote(command.PerformCalibration, handle = handle, nxt_handle = nxt_handle, color = robo.color)
-                deffered.addCallBack(print_out)
+                deffered = self.protocol.callRemote(command.PerformCalibration, handle = handle, nxt_handle = nxt_handle, color = robo.color)
+                deffered.addCallBack(self.print_out)
                 return {'ack': 'got spotted'}
         raise command.CommandNXTHandleError("No NXT robot with handle")
     command.NXTSpotted.responder(nxt_spotted)
@@ -116,7 +116,12 @@ class MCCProtocol(amp.AMP):
         move the nxt to the next position of the path
         """
         print "moving nxt to next point of the path"
-        return {'ack': 'got followed'}
+        for robo in self.factory.robots:
+            if robo.handle = nxt_handle:
+                self.go_to_position(robo, x_axis, y_axis)
+                return {'ack': 'got followed'}
+        raise command.CommandHandleError("No NXT robot with handle")
+    command.SendData.responder(send_data)
     command.NXTFollowed.responder(nxt_followed)
 
     def nxt_lost(self, handle, nxt_handle):
@@ -147,7 +152,9 @@ class MCCProtocol(amp.AMP):
         recognize and fire action
         """
         #TODO: calculate new go_to_position
+        
         print '#%d Arrived at (%d. %d)' % (handle, x_axis, y_axis)
+        deffered = self.protocol.callRemote(command.NXTMoved, handle = handle)
         return {'ack': 'got arrival'}
     command.ArrivedPoint.responder(arrived_point)
 

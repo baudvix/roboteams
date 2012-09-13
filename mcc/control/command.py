@@ -125,12 +125,26 @@ class NXTFollowed(Command):
     error = [(CommandMissionCompleteError, 'COMMAND_MISSION_COMPLETE_ERROR'),
              (CommandHandleError, 'COMMAND_HANDLE_ERROR'),
              (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR')]
+    
+class NXTMoved(Command):
+    """
+    The MCC notifies the NAO that the NXT has moved
+    """
+    arguments = [('handle', Integer()),
+                 ('nxt_handle', Integer())]
+    response = [('ack', String())]
+    error = [(CommandHandleError, 'COMMAND_HANDLE_ERROR'),
+             (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR')]
 
 class NXTLost(Command):
     """
     The NAO informs the MCC that he lost the red ball
     """
-    arguments = [()]
+    arguments = [('handle', Integer()),
+                 ('nxt_handle', Integer())]
+    response = [('ack', String())]
+    error = [(CommandHandleError, 'COMMAND_HANDLE_ERROR'),
+             (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR')]
 
 
 #Commands from NXT to MCC

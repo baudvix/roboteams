@@ -59,11 +59,15 @@ class NAOProtocol(RobotProtocol):
                 deffered = protocol.callRemote(command.NXTLost, handle = protocol.self.handle, nxt_handle = nxt_handle)
                 deffered.addCallback(pass)
             deffered = protocol.callRemote(command.NXTFollowed, handle = protocol.self.handle, nxt_handle = nxt_handle, x_axis = path[0], y_axis = path[1])
-            deffered.addCallback(NAOControl.followRedBall('second'))
+            
 
         return {'ack': 'followed path'}
     command.SendPath.responder(send_path)
-
+    
+    def nxt_moved(self, nxt_handle):
+        print 'NXT moved - go to point'
+        NAOControl.followRedBall('second')
+    command.NXTMoved.responder(nxt_moved)
 
 class RobotFactory(_InstanceFactory):
     def __init__(self, reactor, instance, deferred):
