@@ -27,6 +27,9 @@ class MCCProtocol(amp.AMP):
     def __init__(self):
         amp.AMP.__init__(self)
         self.factory = None
+        self.rcount = 0
+        #self.positions = [(100,100,90),(-40,0,90),(40,0,90)]
+        self.positions = [(0,0,0),(0,0,0),(0,0,0)]
 
     def register(self, robot_type, rhandle, color=None):
         """
@@ -51,13 +54,17 @@ class MCCProtocol(amp.AMP):
         error if the handle doesn't exist. Else it will activate the robot in
         the pool of robots
         """
+
         print "got activate %d " % handle
         for robo in self.factory.robots:
             if robo.handle == handle:
                 robo.active = True
                 self.factory._view.gui.dummy_register_map(robo.map_overlay)
                 print '#%d activated' % handle
-                self.update_position(robo, 0, 0, 0, True)
+
+                if robo._robot_type == 0:
+                    self.update_position(robo, self.positions[self.rcount][0], self.positions[self.rcount][1],self.positions[self.rcount][2], True)
+                    self.rcount += 1
                 return {'ack': 'got activate'}
         raise command.CommandHandleError('No robot with handle')
     command.Activate.responder(activate)
