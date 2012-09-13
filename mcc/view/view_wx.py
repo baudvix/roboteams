@@ -183,7 +183,7 @@ class DrawMng(threading.Thread):
     def __init__(self):
         self._active_maps = []
         self._map_draw = map.MapModel('drawable map')
-        self._map_draw.expand = [3, 3, 0, 0]
+        self._map_draw.expand = [3, 3, 3, 3]
         self._colors = DrawColor()
 
         self._unit = 0.0125
