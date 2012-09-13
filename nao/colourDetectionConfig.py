@@ -165,6 +165,6 @@ def getColour(IP, PORT, x, y):
         #cv.ShowImage(color_tracker_window, img)
 
 if __name__ == '__main__':
-    IP = "194.95.174.180"
+    IP = "194.95.174.165"
     PORT = 9559
     naoImage = getColour(IP, PORT, 320, 240)
