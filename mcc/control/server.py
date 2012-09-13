@@ -119,6 +119,13 @@ class MCCProtocol(amp.AMP):
         return {'ack': 'got followed'}
     command.NXTFollowed.responder(nxt_followed)
 
+    def nxt_lost(self, handle, nxt_handle):
+        """
+        move nxt a few units back
+        """
+        print "moving nxt back"
+        return {'ack': 'nxt moved'}
+
     def send_data(self, handle, point_tag, x_axis, y_axis, yaw):
         """
         saves incoming data from the NXT

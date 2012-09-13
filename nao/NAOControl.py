@@ -42,10 +42,10 @@ class NAOControlModule(ALModule):
                     self.walk.retrieveBall()
                     print 'walkUpToBall'
                     self.walk.walkUpToBall()
-                    return
+                    return True
                 except RedBallLostException, e:
-                    print e, ' retrieveBall'
-                    self.walk.retrieveBall()
+                    print e
+                    return False
         else:
             print 'entered second state'
             while True:

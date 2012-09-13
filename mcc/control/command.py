@@ -126,6 +126,12 @@ class NXTFollowed(Command):
              (CommandHandleError, 'COMMAND_HANDLE_ERROR'),
              (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR')]
 
+class NXTLost(Command):
+    """
+    The NAO informs the MCC that he lost the red ball
+    """
+    arguments = [()]
+
 
 #Commands from NXT to MCC
 class SendData(Command):

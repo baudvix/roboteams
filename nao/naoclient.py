@@ -55,10 +55,12 @@ class NAOProtocol(RobotProtocol):
         print 'Following red ball on path'
         pprint.pprint(path)
         for way in path:
-            NAOControl.followRedBall('first')
+            while not NAOControl.followRedBall('first'):
+                deffered = protocol.callRemote(command.NXTLost, handle = protocol.self.handle, nxt_handle = nxt_handle)
+                deffered.addCallback(pass)
             deffered = protocol.callRemote(command.NXTFollowed, handle = protocol.self.handle, nxt_handle = nxt_handle, x_axis = path[0], y_axis = path[1])
             deffered.addCallback(NAOControl.followRedBall('second'))
-            NAOControl.followRedBall('second')
+
         return {'ack': 'followed path'}
     command.SendPath.responder(send_path)
 
