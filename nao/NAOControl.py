@@ -71,7 +71,7 @@ def main():
        pip,         # parent broker IP
        pport)       # parent broker port
 
-    global Control
+    global NAOControl
     NAOControl = NAOControlModule("NAOControl")
 
     try:
