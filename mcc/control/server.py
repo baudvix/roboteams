@@ -116,7 +116,7 @@ class MCCProtocol(amp.AMP):
         move the nxt to the next position of the path
         """
         print "moving nxt to next point of the path"
-        for robo in self.factory.robots:
+d        for robo in self.factory.robots:
             if robo.handle = nxt_handle:
                 self.go_to_position(robo, x_axis, y_axis)
                 return {'ack': 'got followed'}
@@ -154,7 +154,7 @@ class MCCProtocol(amp.AMP):
         #TODO: calculate new go_to_position
         
         print '#%d Arrived at (%d. %d)' % (handle, x_axis, y_axis)
-        deffered = self.protocol.callRemote(command.NXTMoved, handle = handle)
+d        deffered = self.protocol.callRemote(command.NXTMoved, handle = handle)
         return {'ack': 'got arrival'}
     command.ArrivedPoint.responder(arrived_point)
 
