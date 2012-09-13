@@ -107,26 +107,21 @@ class NaoWalk():
                 self.walkUpToBall()
                 break
             dist = self.__getDistance()
-            if self.currentCam == 0:
-                if dist < 0.75:
-                    self.__setBottomCamera()
-                    self.motion.angleInterpolation("HeadPitch", -((math.pi*10)/180),0.3,True)
-            if self.currentCam == 1:
-                if dist < 0.7:
-                    self.motion.stopWalk()
-                    self.__turnToBall()
-                    self.__safePosition()
+            if dist < 0.65:
+                self.motion.stopWalk()
+                self.__turnToBall()
+                self.__safePosition()
 #                    # !!
 #                    # meldung ans mcc dass nxt weiterlaufen soll
-#                    # !!
-#                    time.sleep(1)
-#                    self.tts.say("You have 5 seconds to get this Lego out of my way")
-#                    time.sleep(5)
-                    # walkToPosition() muss vom mcc aufgerufen werden und hier entfernt werden
-#                    self.walkToPosition()
-#                    self.__setTopCamera()
-#                    break
-                    return
+                    # !!
+#                   time.sleep(1)
+#                   self.tts.say("You have 5 seconds to get this Lego out of my way")
+#                   time.sleep(5)
+                # walkToPosition() muss vom mcc aufgerufen werden und hier entfernt werden
+#                 self.walkToPosition()
+#                 self.__setTopCamera()
+#                  break
+                return
 
     # has to be called after walkUpToBall() and the nxt`s gone
     # to the next position to make the last few steps
