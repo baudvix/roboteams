@@ -1,0 +1,86 @@
+from naoqi import ALBroker
+from naoqi import ALProxy
+from naoqi import ALModule
+
+from nao.NaoWalk import *
+from nao.NAOCalibration import *
+
+import time
+
+NAO_IP="germanopen3.local"
+
+
+NAOControl = None
+
+class NAOControlModule(ALModule):
+    """ controls behaviour of nao """
+
+    def __init__(self, name):
+        ALModule.__init__(self, name)
+        calibration = NAOCalibration()
+        walk = NaoWalk()
+        # No need for IP and port here because
+        # we have our Python broker connected to NAOqi broker
+
+    def calibrate(self, color):
+        try:
+            # calibration.changeBodyOrientation("init")
+            return self.calibration.performCalibration(color)
+        except NXTNotFoundException, e:
+            raise e
+        
+
+    def followRedBall(self, state):
+        print 'follow red ball'
+        if state == 'first':
+            print 'entered first state'
+            while True:
+                try:
+                    print 'walkInit'
+                    self.walk.motion.walkInit()
+                    print 'retrieveBall'
+                    self.walk.retrieveBall()
+                    print 'walkUpToBall'
+                    self.walk.walkUpToBall()
+                    return
+                except RedBallLostException, e:
+                    print e, ' retrieveBall'
+                    self.walk.retrieveBall()
+        else:
+            print 'entered second state'
+            while True:
+                try:
+                    print 'walkToPosition'
+                    self.walk.walkToPosition()
+                    self.walk.__setTopCamera()
+                    return
+                except RedBallLostException, e:
+                    print e, ' retrieveBall'
+                    self.walk.retrieveBall()
+
+
+
+def main():
+
+    pip=NAO_IP
+    pport=9559
+
+    myBroker = ALBroker("myBroker",
+       "0.0.0.0",   # listen to anyone
+       9560,           # find a free port and use it
+       pip,         # parent broker IP
+       pport)       # parent broker port
+
+    global Control
+    NAOControl = NAOControlModule("NAOControl")
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print "Stopped"
+        myBroker.shutdown()
+        sys.exit(0)
+
+if __name__ == "__main__":
+    main()
