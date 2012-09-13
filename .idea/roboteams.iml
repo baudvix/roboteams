@@ -5,6 +5,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="python_examples" />
+    <orderEntry type="module" module-name="Nao" />
   </component>
 </module>
 

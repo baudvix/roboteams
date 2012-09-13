@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$USER_HOME$/Downloads/Nao/.idea/Nao.iml" filepath="$USER_HOME$/Downloads/Nao/.idea/Nao.iml" />
       <module fileurl="file://$USER_HOME$/Documents/Studium/Semesterprojekt/NAO/python_examples/.idea/python_examples.iml" filepath="$USER_HOME$/Documents/Studium/Semesterprojekt/NAO/python_examples/.idea/python_examples.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/roboteams.iml" filepath="$PROJECT_DIR$/.idea/roboteams.iml" />
     </modules>

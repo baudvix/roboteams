@@ -30,7 +30,7 @@ class NAOCalibration():
 
         # this are the current intervals in degree in which the NAO looks for the nxt
         # = [CameraTopIntervals, CameraBottomIntervals]
-        self.pitchIntervals = [[],[0]] #[25, 5],[0]
+        self.pitchIntervals = [[25,5],[0]] #[25, 5],[0]
         self.yawIntervals = [0, -35, 35]
 
         self.selectedCamera = 0 # 0 for top, 1 for bottom
@@ -197,13 +197,13 @@ class NAOCalibration():
                     self.allDetectedMarkerAVG[i][4] = distancesToMarker
 
             self.calcAvgOfAllDetectedMarker()
-            self.printConsole("self.allDetectedMarker", self.allDetectedMarker)
-            self.printConsole("self.allDetectedMarkerAVG", self.allDetectedMarkerAVG)
-            self.printConsole("yawAngle", self.getHead()[0])
-            self.printConsole("pitchAngle", self.getHead()[1])
+            #self.printConsole("self.allDetectedMarker", self.allDetectedMarker)
+            #self.printConsole("self.allDetectedMarkerAVG", self.allDetectedMarkerAVG)
+            #self.printConsole("yawAngle", self.getHead()[0])
+            #self.printConsole("pitchAngle", self.getHead()[1])
 
         else:
-            self.printAndSayMessage("Error 8: Could not find marker again.")
+            self.printError("Could not find marker again.")
             return False
 
         return True
@@ -250,7 +250,7 @@ class NAOCalibration():
 
             # Check whether we found some markers
             if(numberOfMarker >= 1):
-                self.printConsole(str(i), arrayOfMarker)
+                #self.printConsole(str(i), arrayOfMarker)
 
                 # the first field contains the time - not in use
                 timeStamp = arrayOfMarker[0]
@@ -315,7 +315,6 @@ class NAOCalibration():
                         return interval
                     interval=interval+1
 
-        self.printAndSayMessage('NXT with color ' + str(self.colors[NXTColor]) + ' not found!')
         return -1
 
     def performCalibration(self, color):
@@ -353,15 +352,15 @@ class NAOCalibration():
                                 #self.textToSpeechProxy.say('The position of the NXT is ' + str(orientation))
                                 return x, y, orientation
                             else:
-                                self.printAndSayMessage("Error 3: Unknown marker found! Make sure that you using the right marker.")
+                                self.printError("Unknown marker found! Make sure that you using the right marker.")
                                 return -1
                                 #raise NXTNotFoundException("Unknown ID found!")
                     else:
-                        self.textToSpeechProxy.say("Error 2: Could not detect marker in the center of view")
+                        self.printError("Could not detect marker in the center of view")
                         return -1
                         #raise NXTNotFoundException("Could not calculate distance. Make sure that the nxt didn\'t move.")
         else:
-            self.printAndSayMessage("Error 1: NXT with right color not found!")
+            self.printError("NXT with right color not found!")
             return -1
             #raise NXTNotFoundException("NXT not found.")
 
@@ -369,13 +368,18 @@ class NAOCalibration():
 
     def printAndSayMessage(self, message):
         now = datetime.datetime.isoformat(datetime.datetime.now())
-        print "message "+str(self.globalMessageCounter)+" (", now ,"): "+message
+        print "("+now+") Message"+str(self.globalMessageCounter)+" :"+message
         self.textToSpeechProxy.say(message)
         self.globalMessageCounter += 1
 
+    def printError(self, errorMessage):
+        now = datetime.datetime.isoformat(datetime.datetime.now())
+        print "("+now+") Error: "+errorMessage
+        self.textToSpeechProxy.say(errorMessage)
+
     def printConsole(self, param, value):
         now = datetime.datetime.isoformat(datetime.datetime.now())
-        print "("+now+"): "+ param+" = "+ str(value)
+        print "("+now+") "+param+" = "+ str(value)
 
     def changeBodyOrientation(self, orientation):
         if(orientation == "init"):
@@ -404,23 +408,23 @@ class NAOCalibration():
             self.angleDeviation = 4.5 * math.pi/180
 
 def main():
-    print "-----begin:NAOCalibration-------"
+    print "-----------------begin:NAOCalibration-----------------------"
 
     n = NAOCalibration()
     n.changeBodyOrientation("init")
 
-    print "-------look for red NXT---------"
+    print "---------------------look for red NXT-----------------------"
     n.performCalibration(0) # red
-    print "-------look for green NXT-------"
+    print "---------------------look for green NXT---------------------"
     n.performCalibration(1) # green
-    print "-------look for blue NXT--------"
+    print "---------------------look for blue NXT----------------------"
     n.performCalibration(2) # blue
 
     config.setHeadMotion(n.motionProxy, 0, 0)
 
     n.changeBodyOrientation("knee")
 
-    print "-----end:NAOCalibration---------"
+    print "-------------------end:NAOCalibration-----------------------"
     sys.exit(1)
 
 if __name__ == '__main__':
