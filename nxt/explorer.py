@@ -562,5 +562,5 @@ class NXTClient():
 
 if __name__ == '__main__' and DEBUGLEVEL > 0:
     dbg_print("__main__ start")
-    test = NXTClient(1)
+    test = NXTClient(3)
     dbg_print("__main__ fertig")
