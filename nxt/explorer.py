@@ -191,7 +191,7 @@ class Explorer():
         self.send_message(message = '1,' + str(int(round(distance*CM2GRAD))))#*self.calibrationFactor))))
 
     def go_back(self, distance):
-        self.send_message(message = '2,' + str(int(round(distance))))#*self.calibrationFactor))))#*CM2GRAD))))
+        self.send_message(message = '2,' + str(int(round(distance*CM2GRAD))))#*self.calibrationFactor))))
         self.position_lock.acquire()
         self.position = berechnePunkt(self.ausrichtung, -1 * distance, self.position)
         self.position_lock.release()
@@ -265,7 +265,7 @@ class Explorer():
                     self.go_forward(0)
                 elif state == 1:
                     #self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_DODGE_CENTER, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
-                    self.go_back(1)
+                    self.go_back(30)
                 elif state == 2:
                     linksrechts = random.choice([0, 1]) #0=links || 1=rechts
                     grad = random.randint(30, 160) # 30 - 160
@@ -530,20 +530,28 @@ class Explorer():
                 except:
                     dbg_print("message-parsing-error: falsches Format", self.identitaet)
                 dbg_print("ident=" + str(t_id) + " msg=" + str(payload), 4, self.identitaet)
-                csv = payload.split(',') #TODO: payload = event, entfernung, sensor(optional)
+                csv = payload.split(',') 
                 if int(csv[0]) == 1: #nach Zeitintervall 500ms update_position (Entfernung)
                     dbg_print("Update: " + str(csv[1]) + " Einheiten gefahren",1, self.identitaet)
                     self.position_lock.acquire()
-                    self.position = berechnePunkt(self.ausrichtung, csv[1], self.position)#TODO an MCC
-                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
+                    tmpPosition = berechnePunkt(self.ausrichtung, int(csv[1]), self.position)
+                    tmpYaw = self.ausrichtung
                     self.position_lock.release()
+                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=tmpPosition["x"], y_axis=tmpPosition["y"], yaw=tmpYaw)
                 elif int(csv[0]) == 2: #kollision update_position (Entfernung)
                     self.status_lock.acquire()
                     self.status = 1 # hit
                     self.status_lock.release()
+                    point = map.POINT_DODGE_CENTER
+                    self.payload_lock.acquire()
+                    if self.payload == -9:
+                        point = map.POINT_TARGET
+                        self.payload = -1
+                    self.payload_lock.release()
                     dbg_print("Kollision: " + str(csv[1]) + " Einheiten gefahren",1, self.identitaet)
                     self.position_lock.acquire()
-                    self.position = berechnePunkt(self.ausrichtung,int(str(csv[1])),self.position)
+                    self.position = berechnePunkt(self.ausrichtung,int(csv[1]),self.position)
+                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=point, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
                     self.position_lock.release()
                     dbg_print(str(self.position),2, self.identitaet)
                     self.blockiert_lock.acquire()
@@ -574,16 +582,17 @@ class Explorer():
                     self.blockiert_lock.acquire()
                     self.blockiert = False
                     self.blockiert_lock.release()
+                elif int(csv[0]) == 6: #intervall anstossen
+                    pass
                 elif int(csv[0]) == 9: #ziel gefunden gleich kommt 2
                     dbg_print("Ziel gefunden", self.identitaet)
-                    self.position_lock.acquire()
-                    self.position = berechnePunkt(self.ausrichtung,int(csv[1]),self.position)
-                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_TARGET, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
-                    self.position_lock.release()
+                    self.payload_lock.acquire()
+                    self.payload = -9
+                    self.payload_lock.release()
                 else:
                     dbg_print("csv konnt nicht geparst werden", self.identitaet)
-            except:
-                pass
+            except Exception as err:
+                pass #print err
             count += 1
 
     def work(self):
@@ -600,7 +609,7 @@ class Explorer():
                 self.abbruch = False
                 self.abbruch_lock.release()
                 if phase == 0:
-                    algo = random.choice([2])
+                    algo = random.choice([0,1,2])
                     if algo == 0:
                         self.exploration_simple() #blockierender Aufruf
                     elif algo == 1:
