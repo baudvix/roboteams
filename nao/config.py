@@ -3,7 +3,7 @@ import math
 from naoqi import ALProxy
 
 IP = "localhost"
-NAO_PORT = 9560
+NAO_PORT = 9559
 NAO_IP = '194.95.174.188'
 
 def loadProxy(pName):

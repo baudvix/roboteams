@@ -16,6 +16,7 @@ class NAOControlModule(ALModule):
     """ controls behaviour of nao """
 
     def __init__(self, name):
+        print "INIT"
         ALModule.__init__(self, name)
         calibration = NAOCalibration()
         walk = NaoWalk()
@@ -67,7 +68,7 @@ def main():
 
     myBroker = ALBroker("myBroker",
        "0.0.0.0",   # listen to anyone
-       9560,           # find a free port and use it
+       0,           # find a free port and use it
        pip,         # parent broker IP
        pport)       # parent broker port
 
