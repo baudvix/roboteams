@@ -13,7 +13,7 @@ task target()
  #endif
  while(true)
  {
-  #if DEBUG == 3
+  #if DEBUG == 2
   if(!found)
   {
    if(SensorRaw(S4) < 480)
@@ -44,8 +44,7 @@ task event()
 {
  while(true)
  {
-  Wait(5000);
-  #if DEBUG == 3
+  #if DEBUG == 2
   string news;
   news=StrCat(NumToStr(id++),";1,",NumToStr(MotorTachoCount(OUT_A)));  // s: save_way
   id %= 10;
@@ -53,6 +52,7 @@ task event()
   Acquire(blue_mutex);
   SendResponseString(OUTBOX,news);
   Release(blue_mutex);
+  Wait(5000);
   #endif
  }
 }
@@ -157,7 +157,7 @@ task movement()
   }
   else
   {
-   #if DEBUG == 2
+   #if DEBUG == 3
    Acquire(print_mutex);
     lcd_print("queue is empty");//DEBUGINFO
    Release(print_mutex);

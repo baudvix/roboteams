@@ -1,27 +1,36 @@
 #include "libmov.h"
 
+/* Kalibrierungsdaten:
+* Umdrehung -> cm: 17,6cm +- 0,1cm
+* SensorUS(S1)~14, ungefähr 10cm
+*/
+
+/*
+* Methode zum vorwärts fahren
+* Parameter:
+* strecke = die zu fahrende Distanz in Grad oder "0" für endlos fahren
+* d = Rückgabe des Motortachos in Grad
+*/
 int vor(int strecke, distance& d)
 {
-//umdrehungen in cm = 17,6 +-0,1
-// SensorUS(S1)~14, ungefähr 10cm
- Off(OUT_AB);
+ Off(OUT_AB); // Motortacho reseten
  int k_strecke = 0;
  int sen = 0;
- if(strecke == 0)
+ if(strecke == 0) // distance || endless
  {
   while(weiter)
   {
-   SetOutput(OUT_AB,Power, MOTOR_POWER,TachoLimit, 10000,RegMode, OUT_REGMODE_SYNC,RunState, OUT_RUNSTATE_RUNNING,OutputMode, 7,UpdateFlags, 7);
-   while((MotorRunState(OUT_B) == OUT_RUNSTATE_RUNNING) && (SensorUS(S1) > 15) && (SENSOR_2 < 1) && (SENSOR_3 < 1) && weiter != 0);
-   if(!((SensorUS(S1) > 15) && (SENSOR_2 < 1) && (SENSOR_3 < 1)))
+   SetOutput(OUT_AB,Power, MOTOR_POWER,TachoLimit, 10000,RegMode, OUT_REGMODE_SYNC,RunState, OUT_RUNSTATE_RUNNING,OutputMode, 7,UpdateFlags, 7); // Motorsteuerbefehl
+   while((MotorRunState(OUT_B) == OUT_RUNSTATE_RUNNING) && (SensorUS(S1) > 15) && (SENSOR_2 < 1) && (SENSOR_3 < 1) && weiter != 0); // Fahrschleife
+   if(!((SensorUS(S1) > 15) && (SENSOR_2 < 1) && (SENSOR_3 < 1))) // Sensorevents
    {
-    weiter = 0;
-    hit=1;
-    if(SensorUS(S1) < 15){sen = 1;}
+    weiter = 0; // nicht weiter fahren
+    hit=1; // Kollision merken
+    if(SensorUS(S1) < 15){sen = 1;} // den Sensor merken der ausgelöst hat
     if(SENSOR_2 > 0){sen = 2;}
     if(SENSOR_3 > 0){sen = 3;}
    }
-   if(weiter)
+   if(weiter) // Tachoüberlauf verhindern
    {
     k_strecke++;
     ResetTachoCount(OUT_A);
@@ -31,26 +40,33 @@ int vor(int strecke, distance& d)
  }
  else
  {
-   SetOutput(OUT_AB,Power, MOTOR_POWER,TachoLimit, strecke,RegMode, OUT_REGMODE_SYNC,RunState, OUT_RUNSTATE_RUNNING,OutputMode, 7,UpdateFlags, 7); 
-   while((MotorRunState(OUT_B) == OUT_RUNSTATE_RUNNING) && (SensorUS(S1) > 15) && (SENSOR_2 < 1) && (SENSOR_3 < 1) && weiter != 0);
-   if(!((SensorUS(S1) > 15) && (SENSOR_2 < 1) && (SENSOR_3 < 1)))
+   SetOutput(OUT_AB,Power, MOTOR_POWER,TachoLimit, strecke,RegMode, OUT_REGMODE_SYNC,RunState, OUT_RUNSTATE_RUNNING,OutputMode, 7,UpdateFlags, 7); // Motorsteuerbefehl
+   while((MotorRunState(OUT_B) == OUT_RUNSTATE_RUNNING) && (SensorUS(S1) > 15) && (SENSOR_2 < 1) && (SENSOR_3 < 1) && weiter != 0); // Fahrschleife
+   if(!((SensorUS(S1) > 15) && (SENSOR_2 < 1) && (SENSOR_3 < 1))) // Sensorevents
    {
-    hit=1;
-    if(SensorUS(S1) < 15){sen = 1;}
+    hit=1; // Kollision merken
+    if(SensorUS(S1) < 15){sen = 1;} // den Sensor merken der ausgelöst hat
     if(SENSOR_2 > 0){sen = 2;}
     if(SENSOR_3 > 0){sen = 3;}
    }
  }
- d.k = k_strecke;
- d.rest = MotorTachoCount(OUT_A);
- Off(OUT_AB);
- return sen;
+ d.k = k_strecke; // Tachorückgabe
+ d.rest = MotorTachoCount(OUT_A); // Tachorückgabe
+ Off(OUT_AB); // Motortacho reseten
+ return sen; // Ausgelösten Sensor zurück geben
 }
 
+/*
+* Methode um zu wenden
+* Parameter:
+* richtung = l oder r (left/right)
+* winkel = wie weit der Motor drehen soll (in Grad)
+*/
 void drehen(char richtung, int winkel){
  Off(OUT_AB);
  int lr; //links oder rechts
- switch(richtung){
+ switch(richtung)
+ {
  case 'l':
       lr = 100;
       RotateMotorEx(OUT_AB, MOTOR_POWER, 2*winkel*TEPPICH_ABWEICHUNG_L, lr, true/*=sync*/, true/*=bremsen*/);
@@ -63,20 +79,31 @@ void drehen(char richtung, int winkel){
       lr = 100;
       RotateMotorEx(OUT_AB, MOTOR_POWER, 2*winkel*TEPPICH_ABWEICHUNG_L, lr, true/*=sync*/, true/*=bremsen*/);
  }
-
  Off(OUT_AB);
 }
 
-void zurueck(int umdrehungen){
+/*
+* Methode zum rückwärts Fahren
+* Parameter:
+* umdrehung = die zu fahrende Distanz,
+*           (in Motorumdrehungen)
+*/
+void zurueck(int umdrehungen)
+{
  RotateMotorEx(OUT_AB, MOTOR_POWER, -360*umdrehungen, 0, true/*=sync*/, true/*=bremsen*/);
  Wait(300);
  Off(OUT_AB);
 }
 
+/*
+* Methode um den Ultraschallsensor manuel abzufragen
+* Rückgabe ist der Abstand zum nächsten Objekt
+* gemittelt über 5 Messungen
+*/
 int echo()
 {
- int l=0;
- int r=0;
+ int l=0; //Schleifen-Variable
+ int r=0; //Ergebnis
 
  while(l<5)
  {
