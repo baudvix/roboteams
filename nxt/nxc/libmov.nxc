@@ -49,8 +49,8 @@ int vor(int strecke, distance& d)
    {
     hit=1; // Kollision merken
     if(SensorUS(S1) < 15){sen = 1;} // den Sensor merken der ausgelöst hat
-    if(SENSOR_2 > 0){sen = 2;}
-    if(SENSOR_3 > 0){sen = 3;}
+    if(SENSOR_2 > 0){sen = 2;}   // rechts
+    if(SENSOR_3 > 0){sen = 3;}   // links
    }
  }
  d.k = k_strecke; // Tachorückgabe

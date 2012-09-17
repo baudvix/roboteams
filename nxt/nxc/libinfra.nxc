@@ -1,6 +1,13 @@
 #include "libinfra.h"
 #include "explorer.h"
 
+/*
+* deprecated!!!
+*
+* Methode um zu schauen ob ein
+* bestimmter Brick per BT
+* verbunden ist
+*/
 void BTCheck(int conn)
 {
  if(!BluetoothStatus(conn)==NO_ERR)
@@ -11,6 +18,12 @@ void BTCheck(int conn)
  }
 }
 
+/*
+* Methode um die empfangene Nachricht in
+* ihre Bestandteile zu zerlegen.
+* Parameter:
+* in = empfange String
+*/
 message splitMsg(string in)
 {
  message tmp;

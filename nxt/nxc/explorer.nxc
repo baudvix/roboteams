@@ -48,9 +48,11 @@ task nothing()
  string news;
  string test;
 
+ Wait(1000);
+
  while(true)
  {
-  Wait(1000);
+
   #if DEBUG == 2
   Acquire(blue_mutex);
   news=StrCat(NumToStr(id++),";1,",NumToStr(MotorTachoCount(OUT_A)));  // s: save_way
@@ -62,7 +64,7 @@ task nothing()
   Acquire(print_mutex);
   lcd_print(news);
   Release(print_mutex);
-  Wait(4000);
+  Wait(500);
   #endif
  }
 }
@@ -234,7 +236,7 @@ task dispatcher()
 
 task main()
 {
- Precedes(dispatcher, movement, nothing);
+ Precedes(dispatcher, movement, nothing, target);
  queueInit(queue1, queue2);
 
  //Init Sensoren:
