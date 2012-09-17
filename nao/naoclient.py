@@ -58,7 +58,7 @@ class NAOProtocol(RobotProtocol):
             while not NAOControl.followRedBall('first'):
                 deffered = self.factory.protocol.callRemote(command.NXTLost, handle = self.factory.protocol.handle, nxt_handle = nxt_handle)
 #                deffered.addCallback(pass)
-            deffered = .self.factory.protocol.callRemote(command.NXTFollowed, handle = self.factory.protocol.handle, nxt_handle = nxt_handle, x_axis = path[0], y_axis = path[1])
+            deffered = self.factory.protocol.callRemote(command.NXTFollowed, handle = self.factory.protocol.handle, nxt_handle = nxt_handle, x_axis = path[0], y_axis = path[1])
             
 
         return {'ack': 'followed path'}
