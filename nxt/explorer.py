@@ -101,13 +101,13 @@ class NXTProtocol(RobotProtocol):
 
     def update_position(self, handle, x_axis, y_axis, yaw):
         print 'Updating position (%d, %d, %d)' % (x_axis, y_axis, yaw)
-        self.factory.robots[0].position_lock.acquire()#FIXME: rhandle
-        self.factory.robots[0].position['x'] = x_axis
-        self.factory.robots[0].position['y'] = y_axis
-        self.factory.robots[0].ausrichtung = yaw
-        self.factory.robots[0].position_lock.release()
+        self.factory.robots[handle].position_lock.acquire()
+        self.factory.robots[handle].position['x'] = x_axis
+        self.factory.robots[handle].position['y'] = y_axis
+        self.factory.robots[handle].ausrichtung = yaw
+        self.factory.robots[handle].position_lock.release()
         return {'ack': 'got position'}
-    command.UpdatePosition.responder(update_position)#FIXME: rhandle
+    command.UpdatePosition.responder(update_position)
 
     def send_map(self, map):
         print 'Updating map '
@@ -138,6 +138,8 @@ class Explorer():
         self.active = False
         self.blockiert = False
         self.blockiert_lock = threading.Lock()
+        self.payload = 0
+        self.payload_lock = threading.Lock()
         self.abbruch = True
         self.abbruch_lock = threading.Lock()
         self.robot_type = 0
@@ -152,7 +154,7 @@ class Explorer():
         dispatcher.setDaemon(True)
         dispatcher.start()
         worker = threading.Thread(target = self.work, args = ())
-        worker.setDaemon(False)
+        worker.setDaemon(True)
         worker.start()
 
     def __del__(self):
@@ -186,10 +188,10 @@ class Explorer():
         self.blockiert_lock.release()
 
     def go_forward(self, distance):
-        self.send_message(message = '1,' + str(int(round(distance*CM2GRAD*self.calibrationFactor))))
+        self.send_message(message = '1,' + str(int(round(distance*CM2GRAD))))#*self.calibrationFactor))))
 
     def go_back(self, distance):
-        self.send_message(message = '2,' + str(int(round(distance*self.calibrationFactor))))#*CM2GRAD))))
+        self.send_message(message = '2,' + str(int(round(distance))))#*self.calibrationFactor))))#*CM2GRAD))))
         self.position_lock.acquire()
         self.position = berechnePunkt(self.ausrichtung, -1 * distance, self.position)
         self.position_lock.release()
@@ -243,12 +245,7 @@ class Explorer():
             return False
 
     def scan_ultrasonic(self):
-        #FIXME:
-        self.blockiert_lock.acquire()
-        if self.blockiert:
-            self.blockiert = False
-        self.blockiert_lock.release()
-        return 255
+        self.send_message(message = '5,0')
 
     def exploration_simple(self):
         state = 0
@@ -299,18 +296,50 @@ class Explorer():
                 dbg_print("exploration_circle - state=%d" % state, 1)
 
                 if state == 0:
-                    first_mesurement = self.scan_ultrasonic()
-                    if first_mesurement < 1.2*step:
+                    self.scan_ultrasonic()
+                    while True:
+                        self.payload_lock.acquire()
+                        if self.payload > 0:
+                            first_mesurement = self.payload
+                            dbg_print("first_mesurement: "+str(first_mesurement), 1)
+                            self.payload = 0
+                            self.payload_lock.release() 
+                            break
+                        self.payload_lock.release()
+                        time.sleep(0.5)
+                    
+                    if first_mesurement < 1.5*step:
+                        first_mesurement = 0
                         state = 2 #+1 am ende = 3 -> drehen
+                    self.position_lock.acquire()
                     self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
+                    self.position_lock.release()
                 elif state == 1:
                     self.go_forward(step)
                 elif state == 2:
+                    self.position_lock.acquire()
                     self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
-                    second_mesurement = self.scan_ultrasonic()
-                    if first_mesurement < 255 and second_mesurement < first_mesurement:
-                        self.calibrationFactor = float(step)/(first_mesurement - second_mesurement)
-                        dbg_print("calibrationFactor: %.2f" % self.calibrationFactor, 1)
+                    self.position_lock.release()
+                    if first_mesurement < 255:
+                        self.scan_ultrasonic()
+                        while True:
+                            self.payload_lock.acquire()
+                            if self.payload > 0:
+                                second_mesurement = self.payload
+                                dbg_print("second_mesurement: "+str(second_mesurement), 1)
+                                self.payload = 0
+                                self.payload_lock.release() 
+                                break
+                            self.payload_lock.release() 
+                            time.sleep(0.5)
+                            
+                        if second_mesurement < first_mesurement:
+                            self.calibrationFactor = float(step)/(first_mesurement - second_mesurement)
+                            dbg_print("calibrationFactor: %.2f" % self.calibrationFactor, 1)
+                    else:
+                        self.blockiert_lock.acquire()
+                        self.blockiert = False
+                        self.blockiert_lock.release()
                     step += 10
                 elif state == 3:
                     first_mesurement = 0
@@ -341,6 +370,9 @@ class Explorer():
                 self.blockiert_lock.release()
                 dbg_print("exploration_radar - state=%d" % state, 1)
                 if state == 0:
+                    self.position_lock.acquire()
+                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
+                    self.position_lock.release()
                     if direction < 2:
                         self.turnright(90)
                     else:
@@ -348,16 +380,48 @@ class Explorer():
                     direction += 1
                     direction %= 4
                 elif state == 1:
-                    first_mesurement = self.scan_ultrasonic()
+                    self.scan_ultrasonic()
+                    while True:
+                        self.payload_lock.acquire()
+                        if self.payload > 0:
+                            first_mesurement = self.payload
+                            dbg_print("first_mesurement: "+str(first_mesurement), 1)
+                            self.payload = 0
+                            self.payload_lock.release() 
+                            break
+                        self.payload_lock.release()
+                        time.sleep(0.5)
+                    
                     if first_mesurement < 1.5*forward:
                         state = -1 #+1 am ende = 0 -> drehen
+                        first_mesurement = 0
                 elif state == 2:
                     self.go_forward(forward)
                 elif state == 3:
-                    second_mesurement = self.scan_ultrasonic()
-                    if first_mesurement < 255 and second_mesurement < first_mesurement:
-                        self.calibrationFactor = float(forward)/(first_mesurement - second_mesurement)
-                        dbg_print("calibrationFactor: %.2f" % self.calibrationFactor, 1)
+                    self.position_lock.acquire()
+                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
+                    self.position_lock.release()
+                    if first_mesurement < 255:
+                        self.scan_ultrasonic()
+                        while True:
+                            self.payload_lock.acquire()
+                            if self.payload > 0:
+                                second_mesurement = self.payload
+                                dbg_print("sec_mesurement: "+str(second_mesurement), 1)
+                                self.payload = 0
+                                self.payload_lock.release() 
+                                break
+    
+                            self.payload_lock.release() 
+                            time.sleep(0.5)
+                        
+                        if second_mesurement < first_mesurement:
+                            self.calibrationFactor = float(forward)/(first_mesurement - second_mesurement)
+                            dbg_print("calibrationFactor: %.2f" % self.calibrationFactor, 1)
+                    else:
+                        self.blockiert_lock.acquire()
+                        self.blockiert = False
+                        self.blockiert_lock.release()
                 elif state == 4:
                     first_mesurement = 0
                     second_mesurement = 0
@@ -368,17 +432,48 @@ class Explorer():
                     direction += 1
                     direction %= 4
                 elif state == 5:
-                    first_mesurement = self.scan_ultrasonic()
+                    self.scan_ultrasonic()
+                    while True:
+                        self.payload_lock.acquire()
+                        if self.payload > 0:
+                            first_mesurement = self.payload
+                            dbg_print("first_mesurement: "+str(first_mesurement), 1)
+                            self.payload = 0
+                            self.payload_lock.release() 
+                            break
+                        self.payload_lock.release() 
+                        time.sleep(0.5)
+                        
                     if first_mesurement < 1.5*step:
                         state = -1 #+1 am ende = 0 -> drehen
+                        first_mesurement = 0
                 elif state == 6:
                     self.go_forward(step)
                     step += 20
+                    self.position_lock.acquire()
+                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
+                    self.position_lock.release()
                 elif state == 7:
-                    second_mesurement = self.scan_ultrasonic()
-                    if first_mesurement < 255 and second_mesurement < first_mesurement:
-                        self.calibrationFactor = float(step)/(first_mesurement - second_mesurement)
-                        dbg_print("calibrationFactor: %.2f" % self.calibrationFactor, 1)
+                    if first_mesurement < 255:
+                        self.scan_ultrasonic()
+                        while True:
+                            self.payload_lock.acquire()
+                            if self.payload > 0:
+                                second_mesurement = self.payload
+                                dbg_print("second_mesurement: "+str(second_mesurement), 1)
+                                self.payload = 0
+                                self.payload_lock.release() 
+                                break
+                            self.payload_lock.release() 
+                            time.sleep(0.5)
+                            
+                        if second_mesurement < first_mesurement:
+                            self.calibrationFactor = float(step)/(first_mesurement - second_mesurement)
+                            dbg_print("calibrationFactor: %.2f" % self.calibrationFactor, 1)
+                    else:
+                        self.blockiert_lock.acquire()
+                        self.blockiert = False
+                        self.blockiert_lock.release()
                 state += 1
                 state %= 8
                 step %= 200
@@ -434,12 +529,11 @@ class Explorer():
                 except:
                     dbg_print("message-parsing-error: falsches Format")
                 dbg_print("ident=" + str(t_id) + " msg=" + str(payload), 4)
-
                 csv = payload.split(',') #TODO: payload = event, entfernung, sensor(optional)
                 if int(csv[0]) == 1: #nach Zeitintervall 500ms update_position (Entfernung)
                     dbg_print("Update: " + str(csv[1]) + " Einheiten gefahren",1)
                     self.position_lock.acquire()
-                    #print berechnePunkt(self.ausrichtung, csv[1], self.position)#TODO an MCC
+                    print berechnePunkt(self.ausrichtung, csv[1], self.position)#TODO an MCC
                     self.position_lock.release()
                 elif int(csv[0]) == 2: #kollision update_position (Entfernung)
                     self.status_lock.acquire()
@@ -470,6 +564,13 @@ class Explorer():
                     self.blockiert_lock.acquire()
                     self.blockiert = False
                     self.blockiert_lock.release()
+                elif int(csv[0]) == 5:
+                    self.payload_lock.acquire()
+                    self.payload = int(str(csv[1]).strip("\x00"))
+                    self.payload_lock.release()
+                    self.blockiert_lock.acquire()
+                    self.blockiert = False
+                    self.blockiert_lock.release()
                 elif int(csv[0]) == 9: #ziel gefunden gleich kommt 2
                     dbg_print("Ziel gefunden")
                 else:
@@ -492,7 +593,7 @@ class Explorer():
                 self.abbruch = False
                 self.abbruch_lock.release()
                 if phase == 0:
-                    algo = random.choice([0,1,2])
+                    algo = random.choice([2])
                     if algo == 0:
                         self.exploration_simple() #blockierender Aufruf
                     elif algo == 1:
@@ -562,5 +663,10 @@ class NXTClient():
 
 if __name__ == '__main__' and DEBUGLEVEL > 0:
     dbg_print("__main__ start")
-    test = NXTClient(3)
+    test = NXTClient(1)
+    try:
+        s = raw_input('--> ')
+    except:
+        pass    
+    test.factory.robots = []
     dbg_print("__main__ fertig")
