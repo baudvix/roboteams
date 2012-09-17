@@ -57,7 +57,7 @@ class NAOProtocol(RobotProtocol):
         for way in path:
             while not NAOControl.followRedBall('first'):
                 deffered = protocol.callRemote(command.NXTLost, handle = protocol.self.handle, nxt_handle = nxt_handle)
-                deffered.addCallback(pass)
+#                deffered.addCallback(pass)
             deffered = protocol.callRemote(command.NXTFollowed, handle = protocol.self.handle, nxt_handle = nxt_handle, x_axis = path[0], y_axis = path[1])
             
 
@@ -139,7 +139,7 @@ class NAOClient():
                 time.sleep(30)
         time.sleep(10)
         print "Send NXTSpotted to MCC"
-        deffered = self.protocol.callRemote(command.NXTSpotted(handle = self.handle, nxt_handle = 0)
+        deffered = self.protocol.callRemote(command.NXTSpotted(handle = self.handle, nxt_handle = 0))
 
 if __name__ == '__main__':
     nao_client = NAOClient()
