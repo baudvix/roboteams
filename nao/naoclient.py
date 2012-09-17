@@ -4,6 +4,7 @@ from twisted.internet.protocol import _InstanceFactory
 from twisted.protocols import amp
 from mcc.control import command
 from nao.NAOCalibration import *
+from nao.NaoWalk import *
 from naoqi import ALProxy
 from naoqi import ALBroker
 
@@ -136,7 +137,7 @@ class NAOClient():
             try:
 #                clientbroker = ALBroker("clientbroker", "0.0.0.0", 0, config.NAO_IP, config.NAO_PORT)
                 self.NAOControl = ALProxy("NAOControl", config.NAO_IP, config.NAO_PORT)
-                break
+#                break
             except Exception, e:
                 print "Connection to NAO not established: ", str(e)
                 print "Please check NAO. Automatic retry in 30 seconds."

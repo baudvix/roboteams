@@ -1,10 +1,11 @@
+#!/usr/bin/env python2
 import sys
 sys.path.append("..")
-from mcc.control import server
+from mcc.control import headless_server
 
 
 def main():
-    server.MCCServer()
+    headless_server.MCCServer()
 
 
 #this calls the 'main' function when this script is executed
