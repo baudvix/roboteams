@@ -42,10 +42,17 @@ class NAOControlModule(ALModule):
                     self.walk.retrieveBall()
                     print 'walkUpToBall'
                     self.walk.walkUpToBall()
+<<<<<<< HEAD
                     return True
                 except RedBallLostException, e:
                     print e
                     return False
+=======
+                    return
+                except RedBallLostException, e:
+                    print e, ' retrieveBall'
+                    self.walk.retrieveBall()
+>>>>>>> master
         else:
             print 'entered second state'
             while True:
@@ -71,7 +78,11 @@ def main():
        pip,         # parent broker IP
        pport)       # parent broker port
 
+<<<<<<< HEAD
     global NAOControl
+=======
+    global Control
+>>>>>>> master
     NAOControl = NAOControlModule("NAOControl")
 
     try:

@@ -55,12 +55,19 @@ class NAOProtocol(RobotProtocol):
         print 'Following red ball on path'
         pprint.pprint(path)
         for way in path:
+<<<<<<< HEAD
             while not NAOControl.followRedBall('first'):
                 deffered = protocol.callRemote(command.NXTLost, handle = protocol.self.handle, nxt_handle = nxt_handle)
                 deffered.addCallback(pass)
             deffered = protocol.callRemote(command.NXTFollowed, handle = protocol.self.handle, nxt_handle = nxt_handle, x_axis = path[0], y_axis = path[1])
             
 
+=======
+            NAOControl.followRedBall('first')
+            deffered = protocol.callRemote(command.NXTFollowed, handle = protocol.self.handle, nxt_handle = nxt_handle, x_axis = path[0], y_axis = path[1])
+            deffered.addCallback(NAOControl.followRedBall('second'))
+            NAOControl.followRedBall('second')
+>>>>>>> master
         return {'ack': 'followed path'}
     command.SendPath.responder(send_path)
     
@@ -130,7 +137,11 @@ class NAOClient():
     def connectToNao(self):
         for i in range(0,5):
             try:
+<<<<<<< HEAD
                 mybroker = ALBroker("mybroker", "0.0.0.0", 0, config.NAO_IP, config.NAO_PORT)
+=======
+                controlbroker = ALBroker("controlbroker", "0.0.0.0", 0, config.NAO_IP, config.NAO_PORT)
+>>>>>>> master
                 self.NAOControl = ALProxy("NAOControl")
                 break
             except Exception, e:
@@ -139,8 +150,14 @@ class NAOClient():
                 time.sleep(30)
         time.sleep(10)
         print "Send NXTSpotted to MCC"
+<<<<<<< HEAD
         deffered = self.protocol.callRemote(command.NXTSpotted(handle = self.handle, nxt_handle = 0)
 
 if __name__ == '__main__':
+=======
+        deffered = self.protocol.callRemote(command.NXTSpotted, handle = self.handle, nxt_handle = 0)
+
+if __name__ == "__main__":
+>>>>>>> master
     nao_client = NAOClient()
     print 'x'
