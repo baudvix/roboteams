@@ -131,6 +131,9 @@ class MCCProtocol(amp.AMP):
         """
         saves incoming data from the NXT
         """
+        f = open('logs.txt', 'a')
+        f.write('%d,%d,%d,%d,%d\n' % (handle, point_tag, x_axis, y_axis, yaw))
+        f.close()
         for robo in self.factory.robots:
             if robo.handle == handle:
                 robo.put(Point(x_axis, y_axis, yaw), point_tag)

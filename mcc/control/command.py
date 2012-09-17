@@ -225,7 +225,7 @@ class PerformCalibration(Command):
     """
     The MCC requests a calibration of a given NXT
     """
-    arguments = [('handle', Integer()),
+    arguments = [('nao_handle', Integer()),
                  ('nxt_handle', Integer()),
                  ('color', Integer())]
     response = [('nao_handle', Integer()),
