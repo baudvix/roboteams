@@ -24,7 +24,10 @@ int vor(int strecke, distance& d)
    while((MotorRunState(OUT_B) == OUT_RUNSTATE_RUNNING) && (SensorUS(S1) > 15) && (SENSOR_2 < 1) && (SENSOR_3 < 1) && weiter != 0); // Fahrschleife
    if(!((SensorUS(S1) > 15) && (SENSOR_2 < 1) && (SENSOR_3 < 1))) // Sensorevents
    {
+    Acquire(weiter_mutex);
     weiter = 0; // nicht weiter fahren
+    Release(weiter_mutex);
+    
     hit=1; // Kollision merken
     if(SensorUS(S1) < 15){sen = 1;} // den Sensor merken der ausgelöst hat
     if(SENSOR_2 > 0){sen = 2;}
@@ -86,11 +89,11 @@ void drehen(char richtung, int winkel){
 * Methode zum rückwärts Fahren
 * Parameter:
 * umdrehung = die zu fahrende Distanz,
-*           (in Motorumdrehungen)
+*           (in Grad)
 */
 void zurueck(int umdrehungen)
 {
- RotateMotorEx(OUT_AB, MOTOR_POWER, -360*umdrehungen, 0, true/*=sync*/, true/*=bremsen*/);
+ RotateMotorEx(OUT_AB, MOTOR_POWER, -1*umdrehungen, 0, true/*=sync*/, true/*=bremsen*/);
  Wait(300);
  Off(OUT_AB);
 }

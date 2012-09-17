@@ -10,9 +10,8 @@
 
  mutex print_mutex;
  mutex blue_mutex;
+ mutex weiter_mutex;
  
  int id = 10;
- 
- void undo_found(void);
  
 #endif
