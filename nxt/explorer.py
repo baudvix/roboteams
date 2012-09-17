@@ -154,7 +154,7 @@ class Explorer():
         dispatcher.setDaemon(True)
         dispatcher.start()
         worker = threading.Thread(target = self.work, args = ())
-        worker.setDaemon(False)
+        worker.setDaemon(True)
         worker.start()
 
     def __del__(self):
@@ -188,10 +188,10 @@ class Explorer():
         self.blockiert_lock.release()
 
     def go_forward(self, distance):
-        self.send_message(message = '1,' + str(int(round(distance*CM2GRAD*self.calibrationFactor))))
+        self.send_message(message = '1,' + str(int(round(distance*CM2GRAD))))#*self.calibrationFactor))))
 
     def go_back(self, distance):
-        self.send_message(message = '2,' + str(int(round(distance*self.calibrationFactor))))#*CM2GRAD))))
+        self.send_message(message = '2,' + str(int(round(distance))))#*self.calibrationFactor))))#*CM2GRAD))))
         self.position_lock.acquire()
         self.position = berechnePunkt(self.ausrichtung, -1 * distance, self.position)
         self.position_lock.release()
@@ -311,11 +311,15 @@ class Explorer():
                     if first_mesurement < 1.5*step:
                         first_mesurement = 0
                         state = 2 #+1 am ende = 3 -> drehen
+                    self.position_lock.acquire()
                     self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
+                    self.position_lock.release()
                 elif state == 1:
                     self.go_forward(step)
                 elif state == 2:
+                    self.position_lock.acquire()
                     self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
+                    self.position_lock.release()
                     if first_mesurement < 255:
                         self.scan_ultrasonic()
                         while True:
@@ -366,6 +370,9 @@ class Explorer():
                 self.blockiert_lock.release()
                 dbg_print("exploration_radar - state=%d" % state, 1)
                 if state == 0:
+                    self.position_lock.acquire()
+                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
+                    self.position_lock.release()
                     if direction < 2:
                         self.turnright(90)
                     else:
@@ -391,6 +398,9 @@ class Explorer():
                 elif state == 2:
                     self.go_forward(forward)
                 elif state == 3:
+                    self.position_lock.acquire()
+                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
+                    self.position_lock.release()
                     if first_mesurement < 255:
                         self.scan_ultrasonic()
                         while True:
@@ -440,6 +450,9 @@ class Explorer():
                 elif state == 6:
                     self.go_forward(step)
                     step += 20
+                    self.position_lock.acquire()
+                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
+                    self.position_lock.release()
                 elif state == 7:
                     if first_mesurement < 255:
                         self.scan_ultrasonic()
@@ -650,5 +663,10 @@ class NXTClient():
 
 if __name__ == '__main__' and DEBUGLEVEL > 0:
     dbg_print("__main__ start")
-    test = NXTClient(3)
+    test = NXTClient(1)
+    try:
+        s = raw_input('--> ')
+    except:
+        pass    
+    test.factory.robots = []
     dbg_print("__main__ fertig")
