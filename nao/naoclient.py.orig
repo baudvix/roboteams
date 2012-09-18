@@ -4,7 +4,6 @@ from twisted.internet.protocol import _InstanceFactory
 from twisted.protocols import amp
 from mcc.control import command
 from nao.NAOCalibration import *
-from nao.NaoWalk import *
 from naoqi import ALProxy
 from naoqi import ALBroker
 
@@ -46,7 +45,7 @@ class NAOProtocol(RobotProtocol):
     def perform_calibration(self, nao_handle, nxt_handle, color):
         print 'Performing calibration on NXT #%d, color=%d' % (nxt_handle, color)
         try:
-            calibrationResult = self.factory.protocol.NAOControl.calibrate(color)
+            calibrationResult = NAOControl.calibrate(color)
             return {'handle': nao_handle,'nxt_handle': nxt_handle,'x_axis':calibrationResult[0],'y_axis':calibrationResult[1],'yaw': calibrationResult[2]}
         except NXTNotFoundException, e:
             print e
@@ -56,12 +55,19 @@ class NAOProtocol(RobotProtocol):
         print 'Following red ball on path'
         pprint.pprint(path)
         for way in path:
+<<<<<<< HEAD
             while not NAOControl.followRedBall('first'):
-                deffered = self.factory.protocol.callRemote(command.NXTLost, handle = self.factory.protocol.handle, nxt_handle = nxt_handle)
-#                deffered.addCallback(pass)
-            deffered = self.factory.protocol.callRemote(command.NXTFollowed, handle = self.factory.protocol.handle, nxt_handle = nxt_handle, x_axis = path[0], y_axis = path[1])
+                deffered = protocol.callRemote(command.NXTLost, handle = protocol.self.handle, nxt_handle = nxt_handle)
+                deffered.addCallback(pass)
+            deffered = protocol.callRemote(command.NXTFollowed, handle = protocol.self.handle, nxt_handle = nxt_handle, x_axis = path[0], y_axis = path[1])
             
 
+=======
+            NAOControl.followRedBall('first')
+            deffered = protocol.callRemote(command.NXTFollowed, handle = protocol.self.handle, nxt_handle = nxt_handle, x_axis = path[0], y_axis = path[1])
+            deffered.addCallback(NAOControl.followRedBall('second'))
+            NAOControl.followRedBall('second')
+>>>>>>> master
         return {'ack': 'followed path'}
     command.SendPath.responder(send_path)
     
@@ -79,15 +85,14 @@ class NAOClient():
 
     def __init__(self):
         self.protocol = None
-        self.host = '194.95.174.180'
+        self.host = '194.95.174.187'
         self.port = 5000
         self.color = 0
         self.handle = None
         self.active = False
         self.robot_type = 1
-        self.calibration = NAOCalibration()
-        self.walk = NaoWalk()
         self.connect()
+        self.connectToNao()
         loop = task.LoopingCall(self.run)
         loop.start(1.0)
         reactor.run()
@@ -108,7 +113,7 @@ class NAOClient():
     def connected(self, protocol):
         self.protocol = protocol
         print 'connected to mcc'
-        deffered = protocol.callRemote(command.Register, robot_type=self.robot_type, rhandle = 4, color=self.color)
+        deffered = protocol.callRemote(command.Register, robot_type=self.robot_type, color=self.color)
         deffered.addCallback(self.activate)
         deffered.addErrback(self.failure)
 
@@ -122,8 +127,6 @@ class NAOClient():
     def activated(self, ack):
         print 'active'
         self.active = True
-#        self.connectToNao()
-        
 
     def success(self, ack):
         print 'Success: %s:%s::%s' % (self.host, self.port, ack)
@@ -132,22 +135,29 @@ class NAOClient():
         print 'Error: %s:%s::%s' % (self.host, self.port, error)
 
     def connectToNao(self):
-        try:
-#            for i in range(0,5):
+        for i in range(0,5):
             try:
-#                clientbroker = ALBroker("clientbroker", "0.0.0.0", 0, config.NAO_IP, config.NAO_PORT)
-                self.NAOControl = ALProxy("NAOControl", config.NAO_IP, config.NAO_PORT)
-#                break
+<<<<<<< HEAD
+                mybroker = ALBroker("mybroker", "0.0.0.0", 0, config.NAO_IP, config.NAO_PORT)
+=======
+                controlbroker = ALBroker("controlbroker", "0.0.0.0", 0, config.NAO_IP, config.NAO_PORT)
+>>>>>>> master
+                self.NAOControl = ALProxy("NAOControl")
+                break
             except Exception, e:
                 print "Connection to NAO not established: ", str(e)
                 print "Please check NAO. Automatic retry in 30 seconds."
                 time.sleep(30)
-            time.sleep(10)
-            print "Send NXTSpotted to MCC"
-            deffered = self.protocol.callRemote(command.NXTSpotted(handle = self.handle, nxt_handle = 0))
-        except KeyboardInterrupt:
-            print "Stopped"
-            sys.exit(0)
+        time.sleep(10)
+        print "Send NXTSpotted to MCC"
+<<<<<<< HEAD
+        deffered = self.protocol.callRemote(command.NXTSpotted(handle = self.handle, nxt_handle = 0)
 
 if __name__ == '__main__':
+=======
+        deffered = self.protocol.callRemote(command.NXTSpotted, handle = self.handle, nxt_handle = 0)
+
+if __name__ == "__main__":
+>>>>>>> master
     nao_client = NAOClient()
+    print 'x'

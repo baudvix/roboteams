@@ -68,7 +68,7 @@ class NXTClient():
         self.robot_type = 0
         self.connect()
         loop = task.LoopingCall(self.run)
-        loop.start(0.25)
+        loop.start(1.0)
         reactor.run()
 
     def run(self):

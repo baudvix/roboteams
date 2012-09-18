@@ -18,7 +18,7 @@ class Simulator(object):
         self.yaw = random.random() * math.pi * 2
         self.speed = 5
         self.fake_map = fake.FakeMap(5, size=350)
-        self.logfile = open('../../logs.txt')
+        self.logfile = open('./base1.txt')
 
     def go_point(self, n):
 
@@ -46,6 +46,8 @@ class SimulatorNXT(nxtclient.NXTClient):
     def __init__(self):
         self._sim = Simulator()
         nxtclient.NXTClient.__init__(self, 1)
+        loop = task.LoopingCall(self.run)
+        loop.start(0.25)
 
     def run(self):
         if self.active:

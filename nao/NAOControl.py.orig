@@ -16,7 +16,6 @@ class NAOControlModule(ALModule):
     """ controls behaviour of nao """
 
     def __init__(self, name):
-        print "INIT"
         ALModule.__init__(self, name)
         calibration = NAOCalibration()
         walk = NaoWalk()
@@ -43,10 +42,17 @@ class NAOControlModule(ALModule):
                     self.walk.retrieveBall()
                     print 'walkUpToBall'
                     self.walk.walkUpToBall()
+<<<<<<< HEAD
                     return True
                 except RedBallLostException, e:
                     print e
                     return False
+=======
+                    return
+                except RedBallLostException, e:
+                    print e, ' retrieveBall'
+                    self.walk.retrieveBall()
+>>>>>>> master
         else:
             print 'entered second state'
             while True:
@@ -68,11 +74,15 @@ def main():
 
     myBroker = ALBroker("myBroker",
        "0.0.0.0",   # listen to anyone
-       0,           # find a free port and use it
+       9560,           # find a free port and use it
        pip,         # parent broker IP
        pport)       # parent broker port
 
+<<<<<<< HEAD
     global NAOControl
+=======
+    global Control
+>>>>>>> master
     NAOControl = NAOControlModule("NAOControl")
 
     try:
