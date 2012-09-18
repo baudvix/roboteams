@@ -99,63 +99,22 @@ class NAO():
         self.calibrating = False
         self.calibrating_lock = threading.Lock()
         self.calibration = None
-#        self.walking = False
-#        self.walking_lock = threading.Lock()
         self.nao_walk = None
-        self.nxt_color = None
-        self.nxt_color_lock = threading.Lock()
-        self.nxt_handle = None
-        self.nxt_handle_lock = threading.Lock()
-        self.calibration_result = None
 #        dispatcher = threading.Thread(target = self.dispatch, args = ())
 #        dispatcher.setDaemon(True)
 #        dispatcher.start()
-#        worker = threading.Thread(target = self.work, args = ())
-#        worker.setDaemon(True)
-#        worker.start()
         
-#    def dispatch(self):
-#        while True:
-#            
-#            while phase == 2:
-#                self.blocked_lock.acquire()
-#                if self.blocked:
-#                    self.walk_state1_lock.acquire()
-#                    if self.walk_state1:
-#                        if self.walk = None:
-#                            self.walk = NaoWalk.NaoWalk()
-#                        try:
-#                            print 'walkInit'
-#                            self.walk.motion.walkInit()
-#                            print 'retrieveBall'
-#                            self.walk.retrieveBall()
-#                            print 'walkUpToBall'
-#                            self.walk.walkUpToBall()
-#                            self.walk_state2_lock.acquire()
-#                            self.walk_state2 = True
-#                            self.walk_state2_lock.release()
-#                            continue
-#                        except NaoWalk.RedBallNotFoundException, e:
-#                            print e
-#                            self.blocked = False
-#                            self.walk_state1 = False
-#                            self.walk_state1_lock.release()
-#                            self.blocked_lock.release()
-#                            deferred = self.protocol.callRemote(command.NXTLost, self.handle, self.nxt_handle)
-#                            continue
-#                    if self.walk.
-#                    
-#                self.blocked_lock.release()
-#                time.sleep(1)
       
     def calibrate(self, nxt_color):
+        self.state_lock.acquire()
         while self.state == state.STATE_GUIDED_EXPOLRATION:
+            self.state_lock.release()
             self.calibrating_lock.acquire()
             if self.calibrating:
                 self.calibrating_lock.release()
                 time.sleep(1)
                 continue
-            if self.calibration = None:
+            if self.calibration == None:
                 self.calibration = NAOCalibration.NAOCalibration()
             try:
                 result = self.calibration.performCalibration(nxt_color)
@@ -165,10 +124,13 @@ class NAO():
             except NAOCalibration.NXTNotFoundException, e:
                 print e
                 raise e
+        self.state_lock.release()
         raise Exception("no calibration in state " + str(self.state))
     
     def walk(self):
+        self.state_lock.acquire()
         while self.state == state.STATE_NAOWALK:
+            self.state_lock.release()
             self.walk_state1_lock.acquire()
             if self.walk_state1:
                 self.walk_state1_lock.release()
@@ -204,16 +166,21 @@ class NAO():
                 self.walk_state2_lock.release()
                 self.walk_state1_lock.release()
                 continue
-                                
+        self.state_lock.release()                        
         raise Exception("no calibration in state " + str(self.state))
-                    
+    
+    def update_state(self, state):
+        self.state_lock.acquire()
+        self.state = state
+        self.state_lock.release()
             
 
 class NAOClient():
 
     def __init__(self):
         self.protocol = None
-        self.host = '194.95.174.180'
+        self.factory = None
+        self.host = '194.95.174.167'
         self.port = 5000
         self.color = 0
         self.handle = None
@@ -233,16 +200,17 @@ class NAOClient():
         deferred = defer.Deferred()
         if self.protocol is not None:
             self.protocol.transport.loseConnection()
-        factory = RobotFactory(reactor, NAOProtocol(), deferred)
-        reactor.connectTCP(self.host, self.port, factory)
+        self.factory = RobotFactory(reactor, NAOProtocol(), deferred)
+        reactor.connectTCP(self.host, self.port, self.factory)
         deferred.addCallback(self.connected)
         deferred.addErrback(self.failure)
         return deferred
 
     def connected(self, protocol):
         self.protocol = protocol
+        self.protocol.factory = self.factory
         print 'connected to mcc'
-        self.protocol.factory.robot = NAO(protocol)
+        self.factory.robot = NAO(protocol)
         deffered = protocol.callRemote(command.Register, robot_type=self.robot_type, rhandle = 4, color=self.color)
         deffered.addCallback(self.activate)
         deffered.addErrback(self.failure)

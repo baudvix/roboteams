@@ -4,6 +4,7 @@ server provides the communication between the mcc and the robots
 """
 
 import pprint
+import time
 
 from twisted.protocols import amp
 from twisted.internet import reactor, task
@@ -66,6 +67,10 @@ class MCCProtocol(amp.AMP):
                     self.factory._view.gui.dummy_register_map(robo.map_overlay)
                     self.update_position(robo, self.positions[self.rcount][0], self.positions[self.rcount][1],self.positions[self.rcount][2], True)
                     self.rcount += 1
+                    
+                if robo._robot_type == 1:
+                    time.sleep(5)
+                    deferred = robo.connection.callRemote(command.PerformCalibration, nao_handle = robo.handle, nxt_handle = 1, color = 0)
                 return {'ack': 'got activate'}
         raise command.CommandHandleError('No robot with handle')
     command.Activate.responder(activate)
@@ -113,7 +118,7 @@ class MCCProtocol(amp.AMP):
                 print '#%d Roboter spotted NXT #%d' % (handle, nxt_handle)
                 self.go_to_position(robo, robo.x_axis, robo.y_axis)
                 #TODO: calibrate nxt
-                deffered = self.factory.protocol.callRemote(command.PerformCalibration, handle = handle, nxt_handle = nxt_handle, color = robo.color)
+                deffered = robo.connection.callRemote(command.PerformCalibration, handle = handle, nxt_handle = nxt_handle, color = robo.color)
                 deffered.addCallBack(self.print_out)
                 return {'ack': 'got spotted'}
         raise command.CommandNXTHandleError("No NXT robot with handle")
@@ -242,7 +247,7 @@ class MCCServer(object):
         """
         self.protocol = None
         self.factory = None
-        self.host = 'localhost'
+        self.host = '194.95.174.167'
         self.port = 5000
         self.robots = None
         self.listen()
