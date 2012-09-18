@@ -123,12 +123,11 @@ class MCCProtocol(amp.AMP):
         move the nxt to the next position of the path
         """
         print "moving nxt to next point of the path"
-d        for robo in self.factory.robots:
-            if robo.handle = nxt_handle:
+        for robo in self.factory.robots:
+            if robo.handle == nxt_handle:
                 self.go_to_position(robo, x_axis, y_axis)
                 return {'ack': 'got followed'}
         raise command.CommandHandleError("No NXT robot with handle")
-    command.SendData.responder(send_data)
     command.NXTFollowed.responder(nxt_followed)
 
     def nxt_lost(self, handle, nxt_handle):
