@@ -335,51 +335,48 @@ class NAOCalibration():
                 if(nearestMarker != []):
                     centerMarkerAVG = nearestMarker[0] #not in use
                     centerMarker = nearestMarker[1]
-                    self.printConsole("Nearest Marker", centerMarker)
+                    self.printConsole("nearestMarker", centerMarker)
 
                     if(centerMarker!=[]):
                         directDistance = int(centerMarker[4][0])
                         x = int(centerMarker[4][1])
                         y = int(centerMarker[4][2])
-                        self.printConsole("x", str(x))
-                        self.printConsole("y", str(y))
                         IDs = centerMarker[3]
                         for i in range(0, len(IDs)):
                             if(IDs[i] in self.markerPosition[0]):
                                 orientation = self.markerPosition[1][self.markerPosition[0].index(IDs[i])]
-                                print "orientation", str(orientation), "directDist", str(directDistance), "x", str(x), "y", str(y)
-                                self.textToSpeechProxy.say('The NXT is '+ str(directDistance) + ' centimeter away from me!')
-                                #self.textToSpeechProxy.say('The position of the NXT is ' + str(orientation))
+                                print "orientation = %d, directDist = %d, x = %d, y = %d" %(orientation, directDistance, x, y)
+                                self.printAndSayMessage('The NXT is '+ str(directDistance) + ' centimeter away from me!')
                                 return x, y, orientation
                             else:
                                 self.printError("Unknown marker found! Make sure that you using the right marker.")
-                                return -1
-                                #raise NXTNotFoundException("Unknown ID found!")
+                                #return -1
+                                raise NXTNotFoundException("Unknown ID found!")
                     else:
                         self.printError("Could not detect marker in the center of view")
-                        return -1
-                        #raise NXTNotFoundException("Could not calculate distance. Make sure that the nxt didn\'t move.")
+                        #return -1
+                        raise NXTNotFoundException("Could not calculate distance. Make sure that the nxt didn\'t move.")
         else:
             self.printError("NXT with right color not found!")
-            return -1
-            #raise NXTNotFoundException("NXT not found.")
+            #return -1
+            raise NXTNotFoundException("NXT not found.")
 
         self.myBroker.shutdown()
 
     def printAndSayMessage(self, message):
         now = datetime.datetime.isoformat(datetime.datetime.now())
-        print "("+now+") Message"+str(self.globalMessageCounter)+" :"+message
+        print "(%s) Message %d: %s" %(now, self.globalMessageCounter, message)
         self.textToSpeechProxy.say(message)
         self.globalMessageCounter += 1
 
     def printError(self, errorMessage):
         now = datetime.datetime.isoformat(datetime.datetime.now())
-        print "("+now+") Error: "+errorMessage
+        print "(%s) Error: %s" %(now, errorMessage)
         self.textToSpeechProxy.say(errorMessage)
 
     def printConsole(self, param, value):
         now = datetime.datetime.isoformat(datetime.datetime.now())
-        print "("+now+") "+param+" = "+ str(value)
+        print "(%s) %s = %s" %(now, param, value)
 
     def changeBodyOrientation(self, orientation):
         if(orientation == "init"):
