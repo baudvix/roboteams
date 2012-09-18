@@ -36,7 +36,7 @@ class MCCProtocol(amp.AMP):
         self.factory = None
         self.rcount = 0
         #self.positions = [(100,100,90),(-40,0,90),(40,0,90)]
-        self.positions = [(0,0,0),(0,0,0),(0,0,0)]
+        self.positions = [(0,0,90),(0,0,90),(0,0,90)]
         self.stateTimer = threading.Thread(target = self.stateChange, args = ())
         self.stateTimer.setDaemon(True)
         random.seed()
@@ -169,7 +169,7 @@ class MCCProtocol(amp.AMP):
                 print '#%d Roboter spotted NXT #%d' % (handle, nxt_handle)
                 self.go_to_position(robo, robo.x_axis, robo.y_axis)
                 #TODO: calibrate nxt
-                deffered = protocol.callRemote(command.PerformCalibration, handle = handle, nxt_handle = nxt_handle, color = robo.color)
+                deffered = protocol.callRemote(command.PerformCalibration, nao_handle = handle, nxt_handle = nxt_handle, color = robo.color)
                 deffered.addCallBack(print_out)
                 return {'ack': 'got spotted'}
         raise command.CommandNXTHandleError("No NXT robot with handle")
@@ -226,6 +226,7 @@ class MCCProtocol(amp.AMP):
         for robo in self.factory.robots:
             if robo.connection == self:
                 robo.active = False
+                self.rcount -= 1
                 print 'Connection Lost to robo %d ' % robo.handle
 
     def update_position(self, robo, x_axis, y_axis, yaw, to_nxt=False):
