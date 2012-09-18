@@ -647,7 +647,8 @@ class NXTClient():
 
     def __init__(self, anzahl = 1):
         self.protocol = None
-        self.host = 'localhost'
+        #self.host = 'localhost'
+        self.host = '194.95.174.176'
         self.port = 5000
         self.anzahl = anzahl
         self.factory = None
