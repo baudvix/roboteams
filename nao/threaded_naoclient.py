@@ -52,7 +52,12 @@ class NAOProtocol(RobotProtocol):
         print 'Performing calibration on NXT #%d, color=%d' % (nxt_handle, color)
         try:
             result = self.factory.robot.calibrate(color)
-            return {'handle': nao_handle,'nxt_handle': nxt_handle,'x_axis':result[0],'y_axis':result[1],'yaw': result[2]}
+            self.factory.robot.blocked_lock.acquire()
+            while self.factory.robot.blocked:
+                self.factory.robot.blocked_lock.release()
+                pass
+            
+            return {'nao_handle': nao_handle,'nxt_handle': nxt_handle,'x_axis':result[0],'y_axis':result[1],'yaw': result[2]}
         except NAOCalibration.NXTNotFoundException, e:
             self.factory.protocol.callRemote(command.NXTLost, nao_handle = nao_handle, nxt_handle = nxt_handle)
         except:

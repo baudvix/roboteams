@@ -51,6 +51,10 @@ class NAOCalibration():
         self.videoDeviceProxy = self.startVideoDeviceProxy()
 
         self.globalMessageCounter = 0
+        
+    def __del__(self):
+#        self.landMarkProxy.stop()
+        self.myBroker.shutdown()
 
     def startLandmarkProxy(self):
         # Create a proxy to ALLandMarkDetection

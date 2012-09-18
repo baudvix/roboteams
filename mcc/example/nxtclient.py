@@ -60,7 +60,7 @@ class NXTClient():
 
     def __init__(self, color):
         self.protocol = None
-        self.host = '192.168.0.196'
+        self.host = '194.95.174.167'
         self.port = 5000
         self.color = color
         self.handle = None

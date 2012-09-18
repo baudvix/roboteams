@@ -60,7 +60,7 @@ class NXTClient():
 
     def __init__(self, color):
         self.protocol = None
-        self.host = '192.168.0.196'
+        self.host = '192.168.0.167'
         self.port = 5000
         self.color = color
         self.handle = None
@@ -68,7 +68,7 @@ class NXTClient():
         self.robot_type = 0
         self.connect()
         loop = task.LoopingCall(self.run)
-        loop.start(1.0)
+        loop.start(0.25)
         reactor.run()
 
     def run(self):

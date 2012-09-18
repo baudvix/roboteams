@@ -57,7 +57,7 @@ class MCCProtocol(amp.AMP):
                 tmpColor = robo.color
                 self.go_to_position(robo, 0, 0)
                 break
-        time.sleep(60)
+        time.sleep(20)
         for robo in self.factory.robots:
             if robo.robot_type == NAO_TYPE:
                 deffered = robo.connection.callRemote(command.PerformCalibration,
