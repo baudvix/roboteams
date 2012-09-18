@@ -90,7 +90,7 @@ class NXTProtocol(RobotProtocol):
                             x_axis = self.factory.robots[handle].position['x'],
                             y_axis = self.factory.robots[handle].position['y'])
             self.factory.robots[handle].position_lock.release()
-            return {'ack': 'not'}
+            return {'ack': 'Punkt nicht erreicht'}
     command.GoToPoint.responder(go_to_point)
 
     def update_state(self, handle, state):
@@ -116,7 +116,7 @@ class NXTProtocol(RobotProtocol):
     def send_map(self, map):
         print 'Updating map '
         pprint.pprint(map)
-        return {'ACK': 'got map'}
+        return {'ack': 'got map'}
     command.SendMap.responder(send_map)
 
 class RobotFactory(_InstanceFactory):
@@ -202,7 +202,7 @@ class Explorer():
         self.position_lock.release()
 
     def go_to_point(self, x, y):
-        self.stop()
+        #self.stop()
         self.position_lock.acquire()
         vektor = berechneVektor(self.position, {'x': x, 'y': y})
         self.position_lock.release()
@@ -647,7 +647,8 @@ class NXTClient():
 
     def __init__(self, anzahl = 1):
         self.protocol = None
-        self.host = 'localhost'#'194.95.174.180'
+        #self.host = 'localhost'
+        self.host = '194.95.174.167'
         self.port = 5000
         self.anzahl = anzahl
         self.factory = None
