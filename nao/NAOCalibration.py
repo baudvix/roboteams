@@ -432,7 +432,7 @@ if __name__ == '__main__':
     main()
 
 class NXTNotFoundException(Exception):
-    def __init__(self, value):
+    def __init__(self, value = "NXT not found"):
         self.parameter = value
     def __str__(self):
         return repr(self.parameter)

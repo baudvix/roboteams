@@ -60,6 +60,7 @@ class NAOProtocol(RobotProtocol):
             
             return {'nao_handle': nao_handle,'nxt_handle': nxt_handle,'x_axis':result[0],'y_axis':result[1],'yaw': result[2]}
         except NAOCalibration.NXTNotFoundException, e:
+            print e
             self.factory.protocol.callRemote(command.NXTLost, nao_handle = nao_handle, nxt_handle = nxt_handle)
         except:
             raise
@@ -132,6 +133,8 @@ class NAO():
                 return result
             except NAOCalibration.NXTNotFoundException, e:
                 print e
+                config.setHeadMotion(self.calibration.motionProxy, 0, 0)
+                self.calibration.changeBodyOrientation("knee")
                 raise e
         self.state_lock.release()
         raise Exception("no calibration in state " + str(self.state))
