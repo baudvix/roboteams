@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
 OFFLINE = False
-phase = 0 # TODO phase von mcc
 
-#TODO: calibrating via ultrasonic distance and engine distance
+
 #TODO: dividing into logical explorer and physical explorer 
-#TODO: communication with MCC (callback functions)
+
 #TODO: commenting functions
-#TODO: dodges in expl-algos...
+
 
 import random
 import sys
@@ -16,6 +15,7 @@ import threading
 import math
 sys.path.append('..')
 import pprint
+import mcc.model.state
 from mcc.model import map
 from twisted.internet import reactor, defer, task
 from twisted.internet.protocol import Factory, _InstanceFactory
@@ -79,24 +79,28 @@ class NXTProtocol(RobotProtocol):
             self.factory.robots[handle].position_lock.acquire()
             self.callRemote(command.ArrivedPoint,
                             handle = self.factory.robots[handle].handle, 
-                            x_axis = self.factory.robots[handle].position['x_axis'],
-                            y_axis = self.factory.robots[handle].position['y_axis'])
+                            x_axis = self.factory.robots[handle].position['x'],
+                            y_axis = self.factory.robots[handle].position['y'])
             self.factory.robots[handle].position_lock.release()
-            return {'ACK': 'got point'}
+            return {'ack': 'got point'}
         else:#FIXME: Exception 
             self.factory.robots[handle].position_lock.acquire()
             self.callRemote(command.ArrivedPoint,
                             handle = self.factory.robots[handle].handle,
-                            x_axis = self.factory.robots[handle].position['x_axis'],
-                            y_axis = self.factory.robots[handle].position['y_axis'])
+                            x_axis = self.factory.robots[handle].position['x'],
+                            y_axis = self.factory.robots[handle].position['y'])
             self.factory.robots[handle].position_lock.release()
-            return {'ACK': 'not'}
+            return {'ack': 'not'}
     command.GoToPoint.responder(go_to_point)
 
-    def update_state(self, state):
+    def update_state(self, handle, state):
         print 'Updating state to %d' % state
-        phase = state
-        return {'ACK': 'got state'}
+        self.factory.robots[handle].phase_lock.acquire()
+        self.factory.robots[handle].phase = state
+        self.factory.robots[handle].phase_lock.release()
+        if state != mcc.model.state.STATE_AUTONOM_EXPLORATION:
+            self.factory.robots[handle].exploration_abort()
+        return {'ack': 'got state'}
     command.UpdateState.responder(update_state)
 
     def update_position(self, handle, x_axis, y_axis, yaw):
@@ -121,7 +125,6 @@ class RobotFactory(_InstanceFactory):
         self.anzahl = anzahl
         self.robots = [None] * anzahl
 
-
 class Explorer():
     '''Die Explorer-Klasse stellt die Verbindung zu einem durch seine MAC-Adresse identifizierten NXT her und stellt die Funktionalitaet zur Steuerung bereit.'''
     #FIXME: trennen von blosser Steuerung und Logik
@@ -130,6 +133,8 @@ class Explorer():
         self.color = color# FIXME: potentiell unnoetig
         self.ausrichtung = 90; # 0 - 359 Grad; 0 Osten, 90 Norden, 180 Westen, 270 Sueden
         self.calibrationFactor = 1 
+        self.phase_lock = threading.Lock()
+        self.phase = mcc.model.state.STATE_INIT
         self.protokoll = protokoll
         self.identitaet = identitaet
         self.status = -1
@@ -159,7 +164,7 @@ class Explorer():
 
     def __del__(self):
         pass
-
+    
     def event(self, message):
         pass
 
@@ -480,17 +485,27 @@ class Explorer():
             else:
                 self.blockiert_lock.release()
 
+    def exploration_abort(self):
+        self.abbruch_lock.acquire()
+        self.abbruch = True
+        self.abbruch_lock.release()
 
     def exploration_cancel(self):
-        while(phase == 0):
+        while(True):
+            self.phase_lock.acquire()
+            if self.phase != mcc.model.state.STATE_AUTONOM_EXPLORATION:
+                self.phase_lock.release()
+                break
+            self.phase_lock.release()
             intervall = random.choice([30.0, 60.0])
             time.sleep(intervall)
-            if phase == 0:
-                self.abbruch_lock.acquire()
-                self.abbruch = True
-                self.abbruch_lock.release()
-                self.stop()
+            self.phase_lock.acquire()
+            if self.phase == mcc.model.state.STATE_AUTONOM_EXPLORATION:
+                self.phase_lock.release()
+                self.exploration_abort()
                 print "exploration_cancel - abbruch= True gewartet fuer %d sek" % intervall
+            else:
+                self.phase_lock.release()
 
     def find_programs(self):
         ff = FileFinder(self.brick, "*.rxe")
@@ -600,32 +615,39 @@ class Explorer():
         t = threading.Thread(target = self.exploration_cancel, args = ())
         t.setDaemon(True)
         t.start()
-        while(phase == 0):
-            time.sleep(1.0)
-            if self.handle == None:
-                continue
-            self.abbruch_lock.acquire()
-            if self.abbruch:
-                self.abbruch = False
-                self.abbruch_lock.release()
-                if phase == 0:
-                    algo = random.choice([0,1,2])
-                    if algo == 0:
-                        self.exploration_simple() #blockierender Aufruf
-                    elif algo == 1:
-                        self.exploration_radar() #blockierender Aufruf
-                    elif algo == 2:
-                        self.exploration_circle() #blockierender Aufruf
-            else:
-                self.abbruch_lock.release()
-
+        while True:
+            while(True):
+                self.phase_lock.acquire()
+                if self.phase != mcc.model.state.STATE_AUTONOM_EXPLORATION:
+                    self.phase_lock.release()
+                    break
+                self.phase_lock.release()
+                self.abbruch_lock.acquire()
+                if self.abbruch:
+                    self.abbruch = False
+                    self.abbruch_lock.release()
+                    self.phase_lock.acquire()
+                    if self.phase == mcc.model.state.STATE_AUTONOM_EXPLORATION:
+                        self.phase_lock.release()
+                        algo = random.choice([0])
+                        if algo == 0:
+                            self.exploration_simple() #blockierender Aufruf
+                        elif algo == 1:
+                            self.exploration_radar() #blockierender Aufruf
+                        elif algo == 2:
+                            self.exploration_circle() #blockierender Aufruf
+                    else: 
+                        self.phase_lock.release()
+                else:
+                    self.abbruch_lock.release()
+                time.sleep(1.0)
 
 
 class NXTClient():
 
     def __init__(self, anzahl = 1):
         self.protocol = None
-        self.host = 'localhost'
+        self.host = 'localhost'#'194.95.174.180'
         self.port = 5000
         self.anzahl = anzahl
         self.factory = None
@@ -678,8 +700,11 @@ class NXTClient():
         print 'Error: %s:%s\n%s' % (self.host, self.port, error)
 
 if __name__ == '__main__' and DEBUGLEVEL > 0:
+    if len(sys.argv) < 2:
+        print >> sys.stderr, "Usage: python explorer.py [ANZAHL DER NXT]"
+        exit(1)
     dbg_print("__main__ start")
-    test = NXTClient(2)
+    test = NXTClient(int(sys.argv[1]))
     try:
         s = raw_input('--> ')
     except:

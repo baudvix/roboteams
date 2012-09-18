@@ -16,8 +16,12 @@ from mcc.control.interpolate import Interpolate
 from mcc.model import robot, map, state
 from mcc.utils import Color, Point
 
+import threading
+import time
+
 #from mcc.view import view
 from mcc.view import view_wx
+from mcc.model.robot import NXT_TYPE, NAO_TYPE
 
 
 class MCCProtocol(amp.AMP):
@@ -30,7 +34,37 @@ class MCCProtocol(amp.AMP):
         self.rcount = 0
         #self.positions = [(100,100,90),(-40,0,90),(40,0,90)]
         self.positions = [(0,0,0),(0,0,0),(0,0,0)]
+        self.stateTimer = threading.Thread(target = self.stateChange, args = ())
+        self.stateTimer.setDaemon(True)
 
+    def stateChange(self):
+        tmpNXT = 0
+        tmpColor = 0
+        self.factory.state_machine.fset_state(state.STATE_AUTONOM_EXPLORATION)
+        print "state: %d" % state.STATE_AUTONOM_EXPLORATION
+        for robo in self.factory.robots:
+            self.update_state(robo, self.factory.state_machine.fget_state())
+        time.sleep(30)
+        self.factory.state_machine.fset_state(state.STATE_GUIDED_EXPOLRATION)
+        print "state: %d" % state.STATE_GUIDED_EXPOLRATION
+        for robo in self.factory.robots:
+            self.update_state(robo, self.factory.state_machine.fget_state())
+        #FIXME: zu testzwecken
+        time.sleep(5)
+        for robo in self.factory.robots:
+            if robo.robot_type == NXT_TYPE:
+                tmpNXT = robo.handle
+                tmpColor = robo.color
+                self.go_to_position(robo, 0, 0)
+                break
+        time.sleep(60)
+        for robo in self.factory.robots:
+            if robo.robot_type == NAO_TYPE:
+                deffered = robo.connection.callRemote(command.PerformCalibration,
+                                                        handle=robo.handle,
+                                                        nxt_handle=tmpNXT,
+                                                        color=tmpColor)
+                deffered.addErrback(self.default_failure)
     def register(self, robot_type, rhandle, color=None):
         """
         register defines the reaction on a new robot. the robot is added to
@@ -62,9 +96,12 @@ class MCCProtocol(amp.AMP):
                 self.factory._view.gui.dummy_register_map(robo.map_overlay)
                 print '#%d activated' % handle
 
-                if robo._robot_type == 0:
+                if robo._robot_type == NXT_TYPE:
                     self.update_position(robo, self.positions[self.rcount][0], self.positions[self.rcount][1],self.positions[self.rcount][2], True)
                     self.rcount += 1
+                if self.rcount == 1:
+                    self.stateTimer.start()
+                
                 return {'ack': 'got activate'}
         raise command.CommandHandleError('No robot with handle')
     command.Activate.responder(activate)
@@ -133,13 +170,14 @@ class MCCProtocol(amp.AMP):
         f = open('logs.txt', 'a')
         f.write('%d,%d,%d,%d,%d\n' % (handle, point_tag, x_axis, y_axis, yaw))
         f.close()
+        
         for robo in self.factory.robots:
             if robo.handle == handle:
                 robo.put(Point(x_axis, y_axis, yaw), point_tag)
                 #TODO: Respect dodges in update_map
                 new_points = robo.calc_map.insert_position_data(x_axis, y_axis, yaw)
                 robo.map_overlay.increase_points(new_points)
-                print '#%d Send data %d: (%d, %d, %f)' % (handle, point_tag,
+                print '#%d Send data %d:\t(%d, %d, %f)' % (handle, point_tag,
                                                           x_axis, y_axis, yaw)
                 return{'ack': 'got data'}
         raise command.CommandHandleError("No NXT robot with handle")
@@ -150,7 +188,7 @@ class MCCProtocol(amp.AMP):
         recognize and fire action
         """
         #TODO: calculate new go_to_position
-        print '#%d Arrived at (%d. %d)' % (handle, x_axis, y_axis)
+        print '#%d Arrived at \t(%d, %d)' % (handle, x_axis, y_axis)
         return {'ack': 'got arrival'}
     command.ArrivedPoint.responder(arrived_point)
 
@@ -178,6 +216,12 @@ class MCCProtocol(amp.AMP):
                                                         handle=robo.handle,
                                                         x_axis=x_axis,
                                                         y_axis=y_axis)
+        deffered.addErrback(self.default_failure)
+
+    def update_state(self, robo, state):
+        deffered = robo.connection.callRemote(command.UpdateState,
+                                                        handle=robo.handle,
+                                                        state=state)
         deffered.addErrback(self.default_failure)
 
     def default_failure(self, error):
