@@ -44,7 +44,7 @@ class MCCProtocol(amp.AMP):
         print "state: %d" % state.STATE_AUTONOM_EXPLORATION
         for robo in self.factory.robots:
             self.update_state(robo, self.factory.state_machine.fget_state())
-        time.sleep(30)
+        time.sleep(10)
         self.factory.state_machine.fset_state(state.STATE_GUIDED_EXPOLRATION)
         print "state: %d" % state.STATE_GUIDED_EXPOLRATION
         for robo in self.factory.robots:
@@ -57,7 +57,7 @@ class MCCProtocol(amp.AMP):
                 tmpColor = robo.color
                 self.go_to_position(robo, 0, 0)
                 break
-        time.sleep(20)
+        time.sleep(5)
         for robo in self.factory.robots:
             if robo.robot_type == NAO_TYPE:
                 deffered = robo.connection.callRemote(command.PerformCalibration,

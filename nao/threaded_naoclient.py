@@ -4,7 +4,7 @@ from twisted.internet.protocol import _InstanceFactory
 from twisted.protocols import amp
 from mcc.control import command
 from nao import NAOCalibration
-from nao import NaoWalk
+from nao import NaoWalk, config
 from naoqi import ALProxy
 from naoqi import ALBroker
 import threading
@@ -19,6 +19,7 @@ class RobotProtocol(amp.AMP):
 
     def update_state(self, handle, state):
         print 'Updating state to %d' % state
+        self.factory.robot.update_state(state)
         return {'ack': 'got state'}
     command.UpdateState.responder(update_state)
 
@@ -122,7 +123,10 @@ class NAO():
             if self.calibration == None:
                 self.calibration = NAOCalibration.NAOCalibration()
             try:
+                self.calibration.changeBodyOrientation("init")
                 result = self.calibration.performCalibration(nxt_color)
+                config.setHeadMotion(self.calibration.motionProxy, 0, 0)
+                self.calibration.changeBodyOrientation("knee")
                 self.calibrating = False
                 self.calibrating_lock.release()
                 return result
