@@ -90,7 +90,7 @@ class Gui(wx.Frame):
 
         self.Show(True)
         self.test()
-        self.timer.Start(5000)
+        self.timer.Start(100)
 
     def on_quit(self, e):
         self.Close()
