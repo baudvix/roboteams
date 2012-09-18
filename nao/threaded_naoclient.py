@@ -17,7 +17,7 @@ phase = 0
 
 class RobotProtocol(amp.AMP):
 
-    def update_state(self, state):
+    def update_state(self, handle, state):
         print 'Updating state to %d' % state
         return {'ack': 'got state'}
     command.UpdateState.responder(update_state)
@@ -54,7 +54,7 @@ class NAOProtocol(RobotProtocol):
             result = self.factory.robot.calibrate(color)
             return {'handle': nao_handle,'nxt_handle': nxt_handle,'x_axis':result[0],'y_axis':result[1],'yaw': result[2]}
         except NAOCalibration.NXTNotFoundException, e:
-            self.factory.protocol.callRemote(command.NXTLost, handle = nao_handle, nxt_handle = nxt_handle)
+            self.factory.protocol.callRemote(command.NXTLost, nao_handle = nao_handle, nxt_handle = nxt_handle)
         except:
             raise
             

@@ -61,7 +61,7 @@ class MCCProtocol(amp.AMP):
         for robo in self.factory.robots:
             if robo.robot_type == NAO_TYPE:
                 deffered = robo.connection.callRemote(command.PerformCalibration,
-                                                        handle=robo.handle,
+                                                        nao_handle=robo.handle,
                                                         nxt_handle=tmpNXT,
                                                         color=tmpColor)
                 deffered.addErrback(self.default_failure)
@@ -93,10 +93,11 @@ class MCCProtocol(amp.AMP):
         for robo in self.factory.robots:
             if robo.handle == handle:
                 robo.active = True
-                self.factory._view.gui.dummy_register_map(robo.map_overlay)
+                
                 print '#%d activated' % handle
 
                 if robo._robot_type == NXT_TYPE:
+                    self.factory._view.gui.dummy_register_map(robo.map_overlay)
                     self.update_position(robo, self.positions[self.rcount][0], self.positions[self.rcount][1],self.positions[self.rcount][2], True)
                     self.rcount += 1
                 if self.rcount == 1:
