@@ -3,9 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="2b3f0bc5-1a81-44d6-a9a8-ba04217144cc" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$USER_HOME$/Downloads/Nao/demo.py" afterPath="$USER_HOME$/Downloads/Nao/demo.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nao/NAOCalibration.py" afterPath="$PROJECT_DIR$/nao/NAOCalibration.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nao/config.py" afterPath="$PROJECT_DIR$/nao/config.py" />
     </list>
     <ignored path="roboteams.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -48,7 +46,7 @@
       <file leaf-file-name="NAOCalibration.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/nao/NAOCalibration.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="361" column="12" selection-start="16034" selection-end="16034" vertical-scroll-proportion="1.8024691">
+            <state line="278" column="65" selection-start="11719" selection-end="11719" vertical-scroll-proportion="-3.9382715">
               <folding />
             </state>
           </provider>
@@ -622,7 +620,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/nao/NAOCalibration.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="361" column="12" selection-start="16034" selection-end="16034" vertical-scroll-proportion="1.8024691">
+        <state line="278" column="65" selection-start="11719" selection-end="11719" vertical-scroll-proportion="-3.9382715">
           <folding />
         </state>
       </provider>

@@ -276,7 +276,6 @@ class NAOCalibration():
                         print arrayOfMarker
                         print "Error msg %s" % (str(e))
             else:
-                # this should not happen because before method starts nao enshures that the head centres the right marker
                 self.printConsole(str(i), " No landmark detected.")
 
     # This is a method for finding any NAOMarker with a certain Color (NXTColor) - at least this finds the NXTs
