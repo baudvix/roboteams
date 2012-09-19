@@ -7,6 +7,7 @@ Those commands are based on amp the twisted Asynchronous Message Protocol.
 
 from twisted.protocols.amp import Command, Integer, String, AmpList, Float
 from nao.NAOCalibration import NXTNotFoundException
+from nao.NaoWalk import RedBallNotFoundException
 
 
 class CommandTypeError(Exception):
@@ -237,6 +238,13 @@ class PerformCalibration(Command):
     errors = [(Exception, 'CALIBRATION_ERROR'),
               (NXTNotFoundException, 'NXT_NOT_FOUND')]
 
+class FollowRedBall(Command):
+    """
+    The MCC makes the NAO to follow the red ball
+    """
+    arguments = []
+    response = [('ack', String())]
+    errors = [(RedBallNotFoundException, 'RED_BALL_LOST')]
 
 class SendPath(Command):
     """

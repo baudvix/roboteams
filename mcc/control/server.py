@@ -37,30 +37,88 @@ class MCCProtocol(amp.AMP):
         self.factory = None
         self.rcount = 0
         #self.positions = [(100,100,90),(-40,0,90),(40,0,90)]
-        self.positions = [(-30,80,90),(25,0,90),(-40,0,90)]
+        self.positions = [(0,0,90),(-15,-15,210),(15,-15,330)]
         self.stateTimer = threading.Thread(target = self.stateChange, args = ())
         self.stateTimer.setDaemon(True)
         self.wahl = 0
+        self.blocked_lock = threading.Lock()
+        self.blocked = False
 
     def stateChange(self):
         tmpNXT = 0
         tmpColor = 0
+        count = 0
+        nao = None
+        latest_nxt = 0
+        latest_point = 0
         
-#        self.factory.state_machine.fset_state(state.STATE_AUTONOM_EXPLORATION)
-#        print "state: %d" % state.STATE_AUTONOM_EXPLORATION
-#        for robo in self.factory.robots:
-#            self.update_state(robo, self.factory.state_machine.fget_state())
-#        time.sleep(120)
-        self.factory.state_machine.fset_state(state.STATE_GUIDED_EXPOLRATION)
-        print "state: %d" % state.STATE_GUIDED_EXPOLRATION
-        for robo in self.factory.robots:
-            self.update_state(robo, self.factory.state_machine.fget_state())
+         
+        while True:
+            if self.factory.state_machine.fget_state() == state.STATE_GUIDED_EXPOLRATION:
+                count += 1
+                if count > 10:
+                    self.factory.state_machine.fset_state(state.STATE_NAOWALK)
+                    continue
+                for robo in self.factory.robots:
+                    if robo.handle == latest_nxt:
+                        self.blocked_lock.acquire()
+                        if self.blocked:
+                            self.blocked_lock.release()
+                            time.sleep(1)
+                            break    
+                        self.blocked = True
+                        self.blocked_lock.release()  
+                        latest_nxt = (latest_nxt + 1)
+                        if latest_nxt > 2:
+                            latest_nxt = 0
+                            self.factory.state_machine.fset_state(state.STATE_AUTONOM_EXPLORATION)
+                            break
+                        self.go_to_position(robo, -60+latest_nxt*60, 80)
+                        time.sleep(10)               
+                        deffered = nao.connection.callRemote(command.PerformCalibration,
+                            nao_handle=nao.handle,
+                            nxt_handle=robo.handle,
+                            color=robo.color)
+                        deffered.addCallback(self.updatePosition)
+                        
+            if self.factory.state_machine.fget_state() == state.STATE_INIT or self.factory.state_machine.fget_state() == state.STATE_AUTONOM_EXPLORATION:
+                self.factory.state_machine.fset_state(state.STATE_AUTONOM_EXPLORATION)
+                print "state: %d" % state.STATE_AUTONOM_EXPLORATION
+                for robo in self.factory.robots:
+                    self.update_state(robo, self.factory.state_machine.fget_state())
+                time.sleep(60)
+        
+                self.factory.state_machine.fset_state(state.STATE_GUIDED_EXPOLRATION)
+                print "state: %d" % state.STATE_GUIDED_EXPOLRATION
+                for robo in self.factory.robots:
+                    self.update_state(robo, self.factory.state_machine.fget_state())
+                    if robo.robot_type == NAO_TYPE:
+                        nao = robo
+                        
+            if self.factory.state_machine.fget_state() == state.STATE_NAOWALK:
+                if latest_point < len(self.factory.path):
+                    self.blocked_lock.acquire()
+                    if self.blocked:
+                        self.blocked_lock.release()
+                        time.sleep(1)
+                        continue    
+                    self.blocked = True
+                    self.blocked_lock.release()
+                    self.go_to_position(self.factory.robots[0], self.factory.path[latest_point][0], self.factory.path[latest_point][1])
+                    latest_point += 1
+                    time.sleep(5)
+                    deferred = nao.connection(command.FollowRedBall)
+                    deferred.addCallback(self.nextPosition)
+                    deferred.addErrback(self.lastPosition)
+                else:
+                   self.factory.state_machine.fset_state(state.STATE_DONE) 
+
+            else:
+                print "Finally DONE !!!"
+                break
             
-#        self.update_position(robo, -20, 64, 90)
-        self.go_to_position(robo, 30, 79)
-        time.sleep(2)
-        self.go_to_position(robo, 30, 80)
-        
+#        self.go_to_position(self.factory.robots[1], -50, 0)
+#        self.go_to_position(self.factory.robots[2], 50, 0)
 
 #        self.factory.state_machine.fset_state(state.STATE_NAOWALK)
 #        for robo in self.factory.robots:
@@ -80,7 +138,38 @@ class MCCProtocol(amp.AMP):
 #                                                        color=tmpColor)
 #                deffered.addCallback(self.test)
 #                deffered.addErrback(self.moveNXTTowardsNAO)
-                
+   
+    def updatePosition(self, result):
+        nxt_handle = result["nxt_handle"]
+        nao_handle = result["nao_handle"]
+        x_axis = result["x_axis"]
+        y_axis = result["y_axis"]
+        yaw = result["yaw"]
+        print "nxt %d, nao %d, x %d, y %d, yaw %d" % (nxt_handle, nao_handle, x_axis, y_axis, yaw)
+        for robo in self.factory.robots:
+            if robo.handle == nxt_handle:
+                self.update_position(robo, x_axis, y_axis, yaw)
+                self.blocked_lock.acquire()
+                self.blocked = False
+                self.blocked_lock.release()
+                break    
+        
+    def nextPosition(self, result):
+        self.blocked_lock.acquire()
+        self.blocked = False
+        self.blocked_lock.release()
+        pass
+    
+    def lastPosition(self, result):
+        self.go_to_position(self.factory.robots[0], self.factory.robots[0].position[0]+10 if self.factory.robots[0].position[0]<0 else self.factory.robots[0].position[0]-10, self.factory.robots[0].position[1]-10)
+        time.sleep(3)
+        for nao in self.factory.robots:
+            if nao.robot_type == NAO_TYPE:
+                break
+        deferred = nao.connection(command.FollowRedBall)
+        deferred.addCallback(self.nextPosition)
+        deferred.addErrback(self.lastPosition)
+        pass
         
                 
     def moveNXTTowardsNAO(self, failure):
@@ -330,6 +419,8 @@ class MCCFactory(Factory):
         self.robots = []
         self.maps = []
         self.maps.append(map.MapModel('Calibrated_Map'))
+#        self.path = None
+        self.path = [(0,40),(40,40),(80,80),(0,70),(-50,100)] 
         #self.maps[0].get_point(0, 1)
         #TODO: start a thread for heavy calculation
         #TODO: start a thread for view

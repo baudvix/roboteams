@@ -75,6 +75,12 @@ class NAOProtocol(RobotProtocol):
         return {'ack': 'followed path'}
     command.SendPath.responder(send_path)
     
+    def follow_red_ball(self):
+        print 'Following NXT with red ball'
+        #blockieren
+        return {'ack': 'followed'}
+    command.FollowRedBall.responder(follow_red_ball)
+    
     def nxt_moved(self, nxt_handle):
         print 'NXT moved - go to point'
         self.factory.robot.walk()
@@ -101,8 +107,8 @@ class NAO():
         self.walk_state1_lock = threading.Lock()
         self.walk_state2 = False
         self.walk_state2_lock = threading.Lock()
-        self.calibrating = False
-        self.calibrating_lock = threading.Lock()
+        self.blocked = False
+        self.blocked_lock = threading.Lock()
         self.calibration = None
         self.nao_walk = None
 #        dispatcher = threading.Thread(target = self.dispatch, args = ())
@@ -114,9 +120,9 @@ class NAO():
         self.state_lock.acquire()
         while self.state == state.STATE_GUIDED_EXPOLRATION:
             self.state_lock.release()
-            self.calibrating_lock.acquire()
-            if self.calibrating:
-                self.calibrating_lock.release()
+            self.blocked_lock.acquire()
+            if self.blocked:
+                self.blocked_lock.release()
                 time.sleep(1)
                 continue
             if self.calibration == None:
@@ -126,8 +132,8 @@ class NAO():
                 result = self.calibration.performCalibration(nxt_color)
                 config.setHeadMotion(self.calibration.motionProxy, 0, 0)
                 self.calibration.changeBodyOrientation("knee")
-                self.calibrating = False
-                self.calibrating_lock.release()
+                self.blocked = False
+                self.blocked_lock.release()
                 return result
             except NAOCalibration.NXTNotFoundException, e:
                 print "client.calibrate ", type(e)
