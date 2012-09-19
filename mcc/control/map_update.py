@@ -13,9 +13,9 @@ class UpdateNXTData(object):
         Each object must be used for exact one NXT
 
         """
-        self.__nxt_width = 9
-        self.__nxt_height = 15
-        self.__points_per_second = 0.5
+        self.__nxt_width = 15
+        self.__nxt_height = 20
+        self.__max_distance = 5
         self.__nxt_speed = 5
         self.__points = []
         self.__points_max = 5
@@ -24,7 +24,7 @@ class UpdateNXTData(object):
         self.__corner_radius = math.sqrt(math.pow(self.__nxt_height / 2, 2) + math.pow(self.__nxt_width / 2, 2))
         self.__angel = math.atan((self.__nxt_width / 2.0) / (self.__nxt_height / 2.0))
 
-    def insert_position_data(self, x_coord, y_coord, yaw):
+    def insert_position_data(self, x_coord, y_coord, yaw, skip = 0):
         """
         Computes the new points to be added to the map
 
@@ -38,10 +38,21 @@ class UpdateNXTData(object):
         :rtype: list
         """
 
-        corners = self.compute_rotation(x_coord, y_coord, yaw)
+        new_points = []
 
-        #first insert
-        new_points = self.relative_complement(self.fill_polygon(corners), self.__filled)
+        corners = self.compute_rotation(x_coord, y_coord, yaw)
+        # if path too long, compute recursive
+
+        if (len(self.__points) != 0) and (skip != 1):
+            list = self.bresenham(self.__points[len(self.__points) - 1][0], self.__points[len(self.__points) - 1][1], x_coord, y_coord)
+            count = len(list) / self.__max_distance
+            for i in range(0, count):
+                if [list[(i + 1) * self.__max_distance - 1][0], list[(i + 1) * self.__max_distance - 1][1]] not in self.__points:
+                    new_points = self.insert_position_data(list[(i + 1) * self.__max_distance - 1][0], list[(i + 1) * self.__max_distance - 1][1], yaw, 1)
+
+
+       #first insert
+        new_points.extend(self.relative_complement(self.fill_polygon(corners), self.__filled))
         for point in new_points:
             self.get_put(self.__filled, point, self.__filled_max)
         self.get_put(self.__points, [x_coord, y_coord], self.__points_max)

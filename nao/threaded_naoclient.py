@@ -4,7 +4,7 @@ from twisted.internet.protocol import _InstanceFactory
 from twisted.protocols import amp
 from mcc.control import command
 from nao import NAOCalibration
-from nao import NaoWalk
+from nao import NaoWalk, config
 from naoqi import ALProxy
 from naoqi import ALBroker
 import threading
@@ -17,8 +17,9 @@ phase = 0
 
 class RobotProtocol(amp.AMP):
 
-    def update_state(self, state):
+    def update_state(self, handle, state):
         print 'Updating state to %d' % state
+        self.factory.robot.update_state(state)
         return {'ack': 'got state'}
     command.UpdateState.responder(update_state)
 
@@ -52,9 +53,15 @@ class NAOProtocol(RobotProtocol):
         print 'Performing calibration on NXT #%d, color=%d' % (nxt_handle, color)
         try:
             result = self.factory.robot.calibrate(color)
-            return {'handle': nao_handle,'nxt_handle': nxt_handle,'x_axis':result[0],'y_axis':result[1],'yaw': result[2]}
+            self.factory.robot.blocked_lock.acquire()
+            while self.factory.robot.blocked:
+                self.factory.robot.blocked_lock.release()
+                pass
+            
+            return {'nao_handle': nao_handle,'nxt_handle': nxt_handle,'x_axis':result[0],'y_axis':result[1],'yaw': result[2]}
         except NAOCalibration.NXTNotFoundException, e:
-            self.factory.protocol.callRemote(command.NXTLost, handle = nao_handle, nxt_handle = nxt_handle)
+            print e
+            self.factory.protocol.callRemote(command.NXTLost, nao_handle = nao_handle, nxt_handle = nxt_handle)
         except:
             raise
             
@@ -117,12 +124,17 @@ class NAO():
             if self.calibration == None:
                 self.calibration = NAOCalibration.NAOCalibration()
             try:
+                self.calibration.changeBodyOrientation("init")
                 result = self.calibration.performCalibration(nxt_color)
+                config.setHeadMotion(self.calibration.motionProxy, 0, 0)
+                self.calibration.changeBodyOrientation("knee")
                 self.calibrating = False
                 self.calibrating_lock.release()
                 return result
             except NAOCalibration.NXTNotFoundException, e:
                 print e
+                config.setHeadMotion(self.calibration.motionProxy, 0, 0)
+                self.calibration.changeBodyOrientation("knee")
                 raise e
         self.state_lock.release()
         raise Exception("no calibration in state " + str(self.state))

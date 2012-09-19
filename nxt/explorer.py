@@ -15,6 +15,7 @@ from twisted.internet import reactor, defer, task
 from twisted.internet.protocol import Factory, _InstanceFactory
 from twisted.protocols import amp
 from mcc.control import command
+from mcc.model.robot import NXT_TYPE
 from nxt_debug import dbg_print, DEBUGLEVEL
 from nxt.brick import FileFinder
 from nxt.locator import Method
@@ -66,7 +67,8 @@ class NXTProtocol(RobotProtocol):
 
     def go_to_point(self, handle, x_axis , y_axis):
         dbg_print('Going to Point (' + str(x_axis) + ',' + str(y_axis) + ')', 2, self.factory.robots[handle].identitaet)
-        if self.factory.robots[handle].go_to_point(x_axis, y_axis):
+        reached = self.factory.robots[handle].go_to_point(x_axis, y_axis)#FIXME: sollte blockieren
+        if reached == True:
             self.factory.robots[handle].position_lock.acquire()
             self.callRemote(command.ArrivedPoint,
                             handle = self.factory.robots[handle].handle, 
@@ -74,7 +76,7 @@ class NXTProtocol(RobotProtocol):
                             y_axis = self.factory.robots[handle].position['y'])
             self.factory.robots[handle].position_lock.release()
             return {'ack': 'got point'}
-        else:
+        else: 
             self.factory.robots[handle].position_lock.acquire()
             self.callRemote(command.ArrivedPoint,
                             handle = self.factory.robots[handle].handle,
@@ -134,7 +136,7 @@ class Explorer():
         self.payload_lock = threading.Lock()
         self.abbruch = True
         self.abbruch_lock = threading.Lock()
-        self.robot_type = 0
+        self.robot_type = NXT_TYPE
         self.message_id = 0
         self.position_lock = threading.Lock()
         self.position = {'x': 0.0, 'y': 0.0}

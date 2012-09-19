@@ -6,6 +6,7 @@ Those commands are based on amp the twisted Asynchronous Message Protocol.
 """
 
 from twisted.protocols.amp import Command, Integer, String, AmpList, Float
+from nao.NAOCalibration import NXTNotFoundException
 
 
 class CommandTypeError(Exception):
@@ -233,8 +234,8 @@ class PerformCalibration(Command):
                 ('x_axis', Integer()),
                 ('y_axis', Integer()),
                 ('yaw', Integer())]
-    # errors = [(Exception, 'CALIBRATION_ERROR'),
-    #          (NXTNotFoundException, 'NXT_NOT_FOUND')]
+    errors = [(Exception, 'CALIBRATION_ERROR'),
+              (NXTNotFoundException, 'NXT_NOT_FOUND')]
 
 
 class SendPath(Command):
