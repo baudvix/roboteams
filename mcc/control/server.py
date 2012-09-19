@@ -36,7 +36,7 @@ class MCCProtocol(amp.AMP):
         self.factory = None
         self.rcount = 0
         #self.positions = [(100,100,90),(-40,0,90),(40,0,90)]
-        self.positions = [(-80,0,90),(25,0,90),(-40,0,90)]
+        self.positions = [(0,0,90),(25,0,90),(-40,0,90)]
         self.stateTimer = threading.Thread(target = self.stateChange, args = ())
         self.stateTimer.setDaemon(True)
         random.seed()
@@ -44,32 +44,17 @@ class MCCProtocol(amp.AMP):
     def stateChange(self):
         tmpNXT = 0
         tmpColor = 0
-        pathlength = 5
-        path = [None]*pathlength
         
         self.factory.state_machine.fset_state(state.STATE_AUTONOM_EXPLORATION)
         print "state: %d" % state.STATE_AUTONOM_EXPLORATION
         for robo in self.factory.robots:
             self.update_state(robo, self.factory.state_machine.fget_state())
-        time.sleep(120)
+        time.sleep(30)
         self.factory.state_machine.fset_state(state.STATE_GUIDED_EXPOLRATION)
         print "state: %d" % state.STATE_GUIDED_EXPOLRATION
         for robo in self.factory.robots:
             self.update_state(robo, self.factory.state_machine.fget_state())
 
-    #    1. send nxt to first point on path
-    #    2. callRemote(SendPath, ...) on NAO
-#        3. REPEAT UNTIL (no point on path left):
-    #        3. NAO approach as near as possible to NXt
-    #        4. NAO responds calls "NXTFollowed"
-    #        5. move NXT to next point on path (block answer)
-    #        6. send answer to "NXTFollowed" call
-    #    7. move NXT away from last point
-#        
-#        self.factory.state_machine.fset_state(state.STATE_NAOWALK)
-#        for robo in self.factory.robots:
-#            self.update_state(robo, self.factory.state_machine.fget_state())
-#        for way in path:
             
         #FIXME: zu testzwecken
         
