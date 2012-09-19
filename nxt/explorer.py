@@ -42,11 +42,11 @@ def berechneVektor(standort = {'x':0.0, 'y':0.0}, ziel = {'x': 0.0, 'y': 0.0}):
     relativ_ziel = {'x': ziel['x'] - standort['x'], 'y': ziel['y'] - standort['y']}
     entfernung = math.sqrt(relativ_ziel['x'] ** 2 + relativ_ziel['y'] ** 2)
     if relativ_ziel['x'] == 0:
-        winkel = 0
+        winkel = 90
     elif relativ_ziel['x'] < 0:
-        winkel = math.atan(relativ_ziel['y'] / relativ_ziel['x']) * (180.0 / math.pi) + 180
+        winkel = math.atan(float(relativ_ziel['y']) / float(relativ_ziel['x'])) * (180.0 / math.pi) + 180
     else:
-        winkel = math.atan(relativ_ziel['y'] / relativ_ziel['x']) * (180.0 / math.pi) + 360
+        winkel = math.atan(float(relativ_ziel['y']) / float(relativ_ziel['x'])) * (180.0 / math.pi) + 360
     return {'winkel': winkel % 360, 'entfernung': entfernung}
 
 class RobotProtocol(amp.AMP):
@@ -107,7 +107,8 @@ class NXTProtocol(RobotProtocol):
         self.factory.robots[handle].position_lock.acquire()
         self.factory.robots[handle].position['x'] = x_axis
         self.factory.robots[handle].position['y'] = y_axis
-        self.factory.robots[handle].ausrichtung = yaw
+        if yaw != -1:
+            self.factory.robots[handle].ausrichtung = yaw
         self.factory.robots[handle].position_lock.release()
         return {'ack': 'got position'}
     command.UpdatePosition.responder(update_position)
@@ -126,10 +127,9 @@ class RobotFactory(_InstanceFactory):
 
 class Explorer():
     '''Die Explorer-Klasse stellt die Verbindung zu einem durch seine MAC-Adresse identifizierten NXT her und stellt die Funktionalitaet zur Steuerung bereit.'''
-    #FIXME: trennen von blosser Steuerung und Logik
     def __init__(self, mac, protokoll, identitaet, color, outbox = 5, inbox = 1):
         self.brick = find_one_brick(host = mac, method = Method(usb = True, bluetooth = True))
-        self.color = color# FIXME: potentiell unnoetig
+        self.color = color
         self.ausrichtung = 90; # 0 - 359 Grad; 0 Osten, 90 Norden, 180 Westen, 270 Sueden
         self.calibrationFactor = 1 
         self.phase_lock = threading.Lock()
@@ -216,12 +216,12 @@ class Explorer():
         self.go_back(15)
         self.position_lock.acquire()
         vektor = berechneVektor(self.position, {'x': x, 'y': y})
-        ausrichtung = self.ausrichtung
-        if ausrichtung < vektor['winkel']:
-            ausrichtung += 360
-        ausrichtung -= vektor['winkel']
-        ausrichtung %= 360
-        vektor['winkel'] -= ausrichtung
+        dbg_print("go_to_point() - self.ausrichtung=%d" % self.ausrichtung, 1, self.identitaet)
+        dbg_print("go_to_point() - vektor="+str(vektor), 1, self.identitaet)
+        vektor['winkel'] -= self.ausrichtung
+        vektor['winkel'] += 360
+        vektor['winkel'] %= 360
+        
         dbg_print("go_to_point: (%d,%d) von (%d,%d) Vektor=(entf:%d, winkel:%d)" % (x,y,self.position['x'],self.position['y'],vektor['entfernung'],vektor['winkel']), 1, self.identitaet)
         self.position_lock.release()
         while(True):
@@ -255,13 +255,15 @@ class Explorer():
         self.status_lock.acquire()
         if self.status == 0:
             self.status_lock.release()
+            dbg_print('go_to_point(): true', 1, self.identitaet)
             return True
         elif self.status == 1:
             self.status_lock.release()
+            dbg_print('go_to_point(): false', 1, self.identitaet)
             return False
         else: #TODO: potentiell Exception, oder ziel gefunden
             self.status_lock.release()
-            dbg_print('brick.go_to_point(): else', 1, self.identitaet)
+            dbg_print('go_to_point(): else', 1, self.identitaet)
             return False
 
     def scan_ultrasonic(self):
@@ -284,7 +286,7 @@ class Explorer():
                 if state == 0:
                     self.go_forward(0)
                 elif state == 1:
-                    self.go_back(30)
+                    self.go_back(15)
                 elif state == 2:
                     linksrechts = random.choice([0, 1]) #0=links || 1=rechts
                     grad = random.randint(30, 160) # 30 - 160
@@ -300,6 +302,10 @@ class Explorer():
                         self.turnleft(grad)
                     else:
                         dbg_print("Sensorfehler sensor = %d"%self.sensor, 1, self.identitaet)
+                        if linksrechts == 0:
+                            self.turnleft(grad)
+                        else:
+                            self.turnright(grad)
                     self.sensor = -1
                     self.sensor_lock.release()
                 state += 1
@@ -572,6 +578,8 @@ class Explorer():
                     self.payload_lock.acquire()
                     if self.payload == -9:
                         point = map.POINT_TARGET
+                        tmp = berechnePunkt(self.ausrichtung,int(csv[1]),self.position)
+                        dbg_print("Ziel gefunden bei (%d,%d)"% (tmp['x'],tmp['y']), 1, self.identitaet)
                         self.payload = -1
                     else:
                         self.sensor_lock.acquire()
@@ -595,7 +603,7 @@ class Explorer():
                 elif int(csv[0]) == 3: #strecke ohne vorkommnisse abgefahren
                     self.status_lock.acquire()
                     self.status = 0 #arrived
-                    dbg_print("status: arrived(%d)" %self.status, 1, self.identitaet)
+                    dbg_print("status: arrived" %self.status, 1, self.identitaet)
                     self.status_lock.release()
                     dbg_print(str(csv[1]) + " Einheiten gefahren",1, self.identitaet)
                     self.position_lock.acquire()

@@ -1,4 +1,5 @@
 import threading
+import time
 DEBUGLEVEL = 7
 print_lock = threading.Lock()
 
@@ -21,4 +22,4 @@ def dbg_print(element, dbglevel=0, bot=-2):
         print('#'+str(bot+1)+' '+element)
         return
     if dbglevel < DEBUGLEVEL:
-        print('#'+str(bot+1)+'---DEBUG.level '+str(dbglevel)+': '+str(element))
+        print("DEBUG(%d) #%d-> %s"%(dbglevel, bot+1, element))
