@@ -36,7 +36,7 @@ class MCCProtocol(amp.AMP):
         self.factory = None
         self.rcount = 0
         #self.positions = [(100,100,90),(-40,0,90),(40,0,90)]
-        self.positions = [(0,0,0),(0,0,0),(0,0,0)]
+        self.positions = [(-80,0,90),(25,0,90),(-40,0,90)]
         self.stateTimer = threading.Thread(target = self.stateChange, args = ())
         self.stateTimer.setDaemon(True)
         random.seed()
@@ -183,12 +183,12 @@ class MCCProtocol(amp.AMP):
         return {'ack': 'got followed'}
     command.NXTFollowed.responder(nxt_followed)
     
-    def nxt_lost(self, handle, nxt_handle):
-        for robo in self.factory.robots:
-            if robo.handle == nxt_handle:
-                self.go_to_position(robo, robo.x_axis + random.randint(-20,20), robo.y_axis + random.randint(-20,20))
-                return {'ack', 'nxt moved'}       
-    command.NXTLost(nxt_lost)
+#    def nxt_lost(self, handle, nxt_handle):
+#        for robo in self.factory.robots:
+#            if robo.handle == nxt_handle:
+#                self.go_to_position(robo, robo.x_axis + random.randint(-20,20), robo.y_axis + random.randint(-20,20))
+#                return {'ack', 'nxt moved'}       
+#    command.NXTLost(nxt_lost)
 
     def send_data(self, handle, point_tag, x_axis, y_axis, yaw):
         """
