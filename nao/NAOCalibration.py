@@ -51,10 +51,6 @@ class NAOCalibration():
         self.videoDeviceProxy = self.startVideoDeviceProxy()
 
         self.globalMessageCounter = 0
-        
-    def __del__(self):
-#        self.landMarkProxy.stop()
-        self.myBroker.shutdown()
 
     def startLandmarkProxy(self):
         # Create a proxy to ALLandMarkDetection
@@ -432,7 +428,7 @@ if __name__ == '__main__':
     main()
 
 class NXTNotFoundException(Exception):
-    def __init__(self, value = "NXT not found"):
+    def __init__(self, value):
         self.parameter = value
     def __str__(self):
         return repr(self.parameter)
