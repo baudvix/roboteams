@@ -46,9 +46,8 @@ class UpdateNXTData(object):
         if (len(self.__points) != 0) and skip != 1:
             list = self.bresenham(self.__points[len(self.__points) - 1][0], self.__points[len(self.__points) - 1][1], x_coord, y_coord)
             count = len(list) / self.__max_distance
-            print list
             for i in range(0, count):
-                new_points = self.insert_position_data(list[(i + 1) * self.__max_distance][0], list[(i + 1) * self.__max_distance][1], yaw, 1)
+                new_points = self.insert_position_data(list[(i + 1) * self.__max_distance - 1][0], list[(i + 1) * self.__max_distance - 1][1], yaw, 1)
 
 
        #first insert
