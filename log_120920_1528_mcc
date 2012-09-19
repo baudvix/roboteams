@@ -1,0 +1,87 @@
+MCC is started and listens on 5000
+NEW robot: type=0 color=1
+got activate 0 
+#0 activated
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+NEW robot: type=1 color=0
+got activate 1 
+#1 activated
+state: 2
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+#0 Send data 0:	(-30, 80, 90.000000)
+0
+<mcc.model.robot.RobotNXT instance at 0x3962cf8>
+<mcc.model.robot.RobotNAO instance at 0x3ff20e0>
+Amp server or network failure unhandled by client application.  Dropping connection!  To avoid, add errbacks to ALL remote commands!
+Traceback (most recent call last):
+  File "/usr/lib/python2.7/site-packages/twisted/protocols/amp.py", line 913, in ampBoxReceived
+    self._errorReceived(box)
+  File "/usr/lib/python2.7/site-packages/twisted/protocols/amp.py", line 862, in _errorReceived
+    question.errback(Failure(exc))
+  File "/usr/lib/python2.7/site-packages/twisted/internet/defer.py", line 397, in errback
+    self._startRunCallbacks(fail)
+  File "/usr/lib/python2.7/site-packages/twisted/internet/defer.py", line 464, in _startRunCallbacks
+    self._runCallbacks()
+--- <exception caught here> ---
+  File "/usr/lib/python2.7/site-packages/twisted/internet/defer.py", line 551, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/home/guenthse/uni/semesterprojekt/roboteams/mcc/control/server.py", line 98, in moveNXTTowardsNAO
+    print "Moving NXT %d  with color %s towards NAO" % (robo.handle, robo.color)
+exceptions.AttributeError: RobotNAO instance has no attribute 'color'
+Connection Lost to robo 1 
+Connection Lost to robo 0 

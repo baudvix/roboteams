@@ -1,0 +1,64 @@
+MCC is started and listens on 5000
+NEW robot: type=0 color=1
+got activate 0 
+#0 activated
+state: 1
+Exception in thread Thread-3:
+Traceback (most recent call last):
+  File "/usr/lib/python2.7/threading.py", line 551, in __bootstrap_inner
+    self.run()
+  File "/usr/lib/python2.7/threading.py", line 504, in run
+    self.__target(*self.__args, **self.__kwargs)
+  File "/home/guenthse/uni/semesterprojekt/roboteams/mcc/control/server.py", line 52, in stateChange
+    time.sleep|(120)
+TypeError: unsupported operand type(s) for |: 'builtin_function_or_method' and 'int'
+
+#0 Send data 0:	(0, 0, 90.000000)
+#0 Send data 0:	(0, 0, 90.000000)
+#0 Send data 0:	(0, 0, 90.000000)
+#0 Send data 0:	(0, 0, 90.000000)
+#0 Send data 0:	(0, 0, 90.000000)
+#0 Send data 0:	(0, 0, 90.000000)
+#0 Send data 0:	(0, 5, 90.000000)
+#0 Send data 0:	(0, 14, 90.000000)
+#0 Send data 0:	(0, 22, 90.000000)
+#0 Send data 0:	(0, 31, 90.000000)
+#0 Send data 3:	(0, 37, 90.000000)
+#0 Send data 0:	(0, 23, 90.000000)
+#0 Send data 0:	(0, 23, 90.000000)
+#0 Send data 0:	(0, 22, 90.000000)
+#0 Send data 0:	(0, 15, 90.000000)
+0
+add
+exec
+#0 Send data 0:	(0, 7, 90.000000)
+#0 Send data 0:	(0, 7, 90.000000)
+#0 Send data 0:	(0, 22, 199.000000)
+#0 Send data 0:	(2, 23, 199.000000)
+#0 Send data 0:	(6, 24, 199.000000)
+#0 Send data 0:	(0, 22, 199.000000)
+#0 Send data 0:	(-2, 21, 199.000000)
+#0 Send data 0:	(-9, 18, 199.000000)
+#0 Send data 0:	(-17, 16, 199.000000)
+#0 Send data 3:	(-22, 14, 199.000000)
+#0 Send data 0:	(-8, 19, 199.000000)
+#0 Send data 0:	(-8, 19, 199.000000)
+#0 Send data 0:	(0, 21, 199.000000)
+#0 Send data 0:	(6, 24, 199.000000)
+#0 Send data 0:	(6, 24, 199.000000)
+#0 Send data 0:	(-8, 19, 277.000000)
+#0 Send data 0:	(-8, 21, 277.000000)
+#0 Send data 0:	(-7, 11, 277.000000)
+#0 Send data 0:	(-8, 19, 277.000000)
+#0 Send data 0:	(-7, 15, 277.000000)
+#0 Send data 0:	(-6, 7, 277.000000)
+#0 Send data 3:	(-6, 6, 277.000000)
+#0 Send data 0:	(-8, 20, 277.000000)
+#0 Send data 0:	(-8, 24, 277.000000)
+#0 Send data 0:	(-9, 32, 277.000000)
+#0 Send data 0:	(-10, 36, 277.000000)
+#0 Send data 0:	(-8, 21, 233.000000)
+#0 Send data 0:	(-8, 21, 233.000000)
+#0 Send data 0:	(-8, 21, 233.000000)
+#0 Send data 0:	(-10, 18, 233.000000)
+#0 Send data 0:	(-8, 21, 233.000000)
