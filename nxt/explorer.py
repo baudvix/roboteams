@@ -4,7 +4,6 @@ OFFLINE = False
 
 
 #TODO: dividing into logical explorer and physical explorer 
-
 #TODO: commenting functions
 
 
@@ -139,6 +138,8 @@ class Explorer():
         self.identitaet = identitaet
         self.status = -1
         self.status_lock = threading.Lock()
+        self.sensor = -1
+        self.sensor_lock = threading.Lock()
         self.handle = None
         self.active = False
         self.blockiert = False
@@ -171,19 +172,20 @@ class Explorer():
     def turnright(self, degrees):
         self.send_message(message = '4,' + str(degrees))
         self.position_lock.acquire()
-        self.ausrichtung += degrees
+        if self.ausrichtung < degrees:
+            self.ausrichtung += 360
+        self.ausrichtung -= degrees
         self.ausrichtung %= 360
         self.position_lock.release()
+        time.sleep(1)
 
     def turnleft(self, degrees):
         self.send_message(message = '3,' + str(degrees))
         self.position_lock.acquire()
-        if self.ausrichtung < degrees:
-            self.ausrichtung += 360
-
-        self.ausrichtung -= degrees
+        self.ausrichtung += degrees
         self.ausrichtung %= 360
         self.position_lock.release()
+        time.sleep(1)
 
     def stop(self):
         self.send_message(message = '0,0')
@@ -198,13 +200,29 @@ class Explorer():
     def go_back(self, distance):
         self.send_message(message = '2,' + str(int(round(distance*CM2GRAD))))#*self.calibrationFactor))))
         self.position_lock.acquire()
-        self.position = berechnePunkt(self.ausrichtung, -1 * distance, self.position)
+        self.position = berechnePunkt(self.ausrichtung,int(round(-1*distance*CM2GRAD)),self.position)
         self.position_lock.release()
 
     def go_to_point(self, x, y):
-        #self.stop()
+        while(True):
+            self.blockiert_lock.acquire()
+            if self.blockiert:
+                self.blockiert_lock.release()
+                time.sleep(0.2)
+                continue
+            self.blockiert = True
+            self.blockiert_lock.release()
+            break
+        self.go_back(15)
         self.position_lock.acquire()
         vektor = berechneVektor(self.position, {'x': x, 'y': y})
+        ausrichtung = self.ausrichtung
+        if ausrichtung < vektor['winkel']:
+            ausrichtung += 360
+        ausrichtung -= vektor['winkel']
+        ausrichtung %= 360
+        vektor['winkel'] -= ausrichtung
+        dbg_print("go_to_point: (%d,%d) von (%d,%d) Vektor=(entf:%d, winkel:%d)" % (x,y,self.position['x'],self.position['y'],vektor['entfernung'],vektor['winkel']), 1, self.identitaet)
         self.position_lock.release()
         while(True):
             self.blockiert_lock.acquire()
@@ -215,10 +233,7 @@ class Explorer():
             self.blockiert = True
             self.blockiert_lock.release()
             break
-        if vektor['winkel'] > 90 and vektor['winkel'] <= 270:
-            self.turnleft(int(round(vektor['winkel'])))
-        else:
-            self.turnright(int(round(vektor['winkel'])))
+        self.turnleft(int(round(vektor['winkel'])))
         while(True):
             self.blockiert_lock.acquire()
             if self.blockiert:
@@ -269,15 +284,24 @@ class Explorer():
                 if state == 0:
                     self.go_forward(0)
                 elif state == 1:
-                    #self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_DODGE_CENTER, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
                     self.go_back(30)
                 elif state == 2:
                     linksrechts = random.choice([0, 1]) #0=links || 1=rechts
                     grad = random.randint(30, 160) # 30 - 160
-                    if linksrechts == 0:
+                    self.sensor_lock.acquire()
+                    if self.sensor == 0 or self.sensor == 1:
+                        if linksrechts == 0:
+                            self.turnleft(grad)
+                        else:
+                            self.turnright(grad)
+                    elif self.sensor == 3:
+                        self.turnright(grad)
+                    elif self.sensor == 2:
                         self.turnleft(grad)
                     else:
-                        self.turnright(grad)
+                        dbg_print("Sensorfehler sensor = %d"%self.sensor, 1, self.identitaet)
+                    self.sensor = -1
+                    self.sensor_lock.release()
                 state += 1
                 state %= 3
             else:
@@ -317,15 +341,9 @@ class Explorer():
                         first_mesurement = 0
                         state = 3 #-> drehen
                         continue
-                    self.position_lock.acquire()
-                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
-                    self.position_lock.release()
                 elif state == 1:
                     self.go_forward(step)
                 elif state == 2:
-                    self.position_lock.acquire()
-                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
-                    self.position_lock.release()
                     if first_mesurement < 255:
                         self.scan_ultrasonic()
                         while True:
@@ -402,9 +420,6 @@ class Explorer():
                 elif state == 2:
                     self.go_forward(forward)
                 elif state == 3:
-                    self.position_lock.acquire()
-                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
-                    self.position_lock.release()
                     if first_mesurement < 255:
                         self.scan_ultrasonic()
                         while True:
@@ -455,9 +470,6 @@ class Explorer():
                 elif state == 6:
                     self.go_forward(step)
                     step += 20
-                    self.position_lock.acquire()
-                    self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=map.POINT_FREE, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
-                    self.position_lock.release()
                 elif state == 7:
                     if first_mesurement < 255:
                         self.scan_ultrasonic()
@@ -540,7 +552,6 @@ class Explorer():
                 dbg_print("message: " + str(message), 9, self.identitaet)
                 try:
                     t_id, payload = str(message).split(';')
-                    ident = int(t_id)
                     payload = payload.strip("\x00")
                 except:
                     dbg_print("message-parsing-error: falsches Format", self.identitaet)
@@ -562,8 +573,17 @@ class Explorer():
                     if self.payload == -9:
                         point = map.POINT_TARGET
                         self.payload = -1
+                    else:
+                        self.sensor_lock.acquire()
+                        self.sensor = int(csv[2])
+                        if self.sensor == 2:
+                            point = map.POINT_DODGE_LEFT
+                        elif self.sensor == 3:
+                            point = map.POINT_DODGE_RIGHT
+                        self.sensor_lock.release()
                     self.payload_lock.release()
-                    dbg_print("Kollision: " + str(csv[1]) + " Einheiten gefahren",1, self.identitaet)
+                    dbg_print("Kollision/Ziel: " + str(csv[1]) + " Einheiten gefahren",1, self.identitaet)
+                    
                     self.position_lock.acquire()
                     self.position = berechnePunkt(self.ausrichtung,int(csv[1]),self.position)
                     self.protokoll.callRemote(command.SendData, handle=self.handle, point_tag=point, x_axis=self.position["x"], y_axis=self.position["y"], yaw=self.ausrichtung)
@@ -606,8 +626,8 @@ class Explorer():
                     self.payload_lock.release()
                 else:
                     dbg_print("csv konnt nicht geparst werden", self.identitaet)
-            except Exception as err:
-                pass #print err
+            except:
+                pass
             count += 1
 
     def work(self):
@@ -645,10 +665,9 @@ class Explorer():
 
 class NXTClient():
 
-    def __init__(self, anzahl = 1):
+    def __init__(self, ip = 'localhost', anzahl = 1):
         self.protocol = None
-        #self.host = 'localhost'
-        self.host = '194.95.174.176'
+        self.host = ip
         self.port = 5000
         self.anzahl = anzahl
         self.factory = None
@@ -701,11 +720,11 @@ class NXTClient():
         print 'Error: %s:%s\n%s' % (self.host, self.port, error)
 
 if __name__ == '__main__' and DEBUGLEVEL > 0:
-    if len(sys.argv) < 2:
-        print >> sys.stderr, "Usage: python explorer.py [ANZAHL DER NXT]"
+    if len(sys.argv) < 3:
+        print >> sys.stderr, "Usage: python explorer.py [IP MCC] [ANZAHL DER NXT]"
         exit(1)
     dbg_print("__main__ start")
-    test = NXTClient(int(sys.argv[1]))
+    test = NXTClient(sys.argv[1], int(sys.argv[2]))
     try:
         s = raw_input('--> ')
     except:
