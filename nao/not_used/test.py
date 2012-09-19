@@ -1,20 +1,32 @@
-import math
+from naoqi import ALProxy
 
-def getNearestMarker(marker):
-    dist = -1
-    minDist = -1
-    nearest = -1
-    for i in range(0, len(allDetectedMarker)+1):
-        dist = math.sqrt(allDetectedMarker[i][0][0] + allDetectedMarker[i][1][0])
-        if(dist < minDist or minDist == -1):
-            minDist = dist
-            nearest = i
-    return nearest
+IP = "194.95.174.187"
+PORT = 9559
 
-#allDetectedMarker = [[[0.4],[0.1],[],[], []], [[0.2],[0.2],[],[], []], [[0.4],[0.0],[],[], []], [[0.2],[0.1],[],[], []], [[0.5],[0.1],[],[], []], [[0.0],[0.0],[],[], []]]
-#print allDetectedMarker[0][0][0]
-#print getNearestMarker(allDetectedMarker)
+def startSensorProxy():
+    # Create a proxy to Motion
+    try:
+        sensorProxy = ALProxy("ALSensorsProxy", IP, PORT)
+    except Exception, e:
+        print "Error when creating sensor proxy: "
+        print str(e)
+        exit(1)
+    return sensorProxy
 
-a = True
-if(a):
-    print True
+#sensorProxy = startSensorProxy()
+
+def startMemoryProxy():
+    # Create a proxy to ALMemory
+    try:
+        memoryProxy = ALProxy("ALMemory", IP, PORT)
+    except Exception, e:
+        print "Error when creating memory proxy: "
+        print str(e)
+        exit(1)
+    return memoryProxy
+
+handBefore = startMemoryProxy.getData("FrontTactilTouched")
+print handBefore
+
+if(sensorProxy.FrontTactilTouched() or sensorProxy.FrontTactilTouched() or sensorProxy.FrontTactilTouched()):
+    print "yeaah"

@@ -350,15 +350,15 @@ class NAOCalibration():
                             else:
                                 self.printError("Unknown marker found! Make sure that you using the right marker.")
                                 #return -1
-                                raise NXTNotFoundException("Unknown ID found!")
+                                raise NXTNotFoundException("Unknown ID found!", color)
                     else:
                         self.printError("Could not detect marker in the center of view")
                         #return -1
-                        raise NXTNotFoundException("Could not calculate distance. Make sure that the nxt didn\'t move.")
+                        raise NXTNotFoundException("Could not calculate distance. Make sure that the nxt didn\'t move.", color)
         else:
             self.printError("NXT with right color not found!")
             #return -1
-            raise NXTNotFoundException("NXT not found.")
+            raise NXTNotFoundException("NXT not found.", color)
 
         self.myBroker.shutdown()
 
@@ -427,7 +427,8 @@ if __name__ == '__main__':
     main()
 
 class NXTNotFoundException(Exception):
-    def __init__(self, value):
+    def __init__(self, value, nxt):
         self.parameter = value
+        self.nxt = nxt
     def __str__(self):
-        return repr(self.parameter)
+        return repr(self.parameter, self.nxt)
