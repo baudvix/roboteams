@@ -59,8 +59,8 @@ class NAOProtocol(RobotProtocol):
                 pass
             
             return {'nao_handle': nao_handle,'nxt_handle': nxt_handle,'x_axis':result[0],'y_axis':result[1],'yaw': result[2]}
-        except Exception, e:
-            raise
+        except NAOCalibration.NXTNotFoundException, e:
+            raise e
             
     command.PerformCalibration.responder(perform_calibration)
 
@@ -128,7 +128,8 @@ class NAO():
                 self.calibrating = False
                 self.calibrating_lock.release()
                 return result
-            except Exception, e:
+            except NAOCalibration.NXTNotFoundException, e:
+                print "client.calibrate ", type(e)
                 config.setHeadMotion(self.calibration.motionProxy, 0, 0)
                 self.calibration.changeBodyOrientation("knee")
                 raise e

@@ -49,7 +49,7 @@ class MCCProtocol(amp.AMP):
         print "state: %d" % state.STATE_AUTONOM_EXPLORATION
         for robo in self.factory.robots:
             self.update_state(robo, self.factory.state_machine.fget_state())
-        time.sleep(30)
+        time.sleep(120)
         self.factory.state_machine.fset_state(state.STATE_GUIDED_EXPOLRATION)
         print "state: %d" % state.STATE_GUIDED_EXPOLRATION
         for robo in self.factory.robots:

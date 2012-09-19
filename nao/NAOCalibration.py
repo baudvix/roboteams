@@ -30,8 +30,8 @@ class NAOCalibration():
 
         # this are the current intervals in degree in which the NAO looks for the nxt
         # = [CameraTopIntervals, CameraBottomIntervals]
-        self.pitchIntervals = [[25,5],[0]] #[25, 5],[0]
-        self.yawIntervals = [0, -35, 35]
+        self.pitchIntervals = [[],[0]] #[25, 5],[0]
+        self.yawIntervals = []
 
         self.selectedCamera = 0 # 0 for top, 1 for bottom
         self.pitchAngleCorrection = 0 # if the bottom camera is selected we have to add 40 deg in the calculation for correction
@@ -350,15 +350,15 @@ class NAOCalibration():
                             else:
                                 self.printError("Unknown marker found! Make sure that you using the right marker.")
                                 #return -1
-                                raise NXTNotFoundException("Unknown ID found!", color)
+                                raise NXTNotFoundException("Unknown ID found on NXT with color #!" + color)
                     else:
                         self.printError("Could not detect marker in the center of view")
                         #return -1
-                        raise NXTNotFoundException("Could not calculate distance. Make sure that the nxt didn\'t move.", color)
+                        raise NXTNotFoundException("Could not calculate distance. Make sure that the nxt didn\'t move. #" + color)
         else:
             self.printError("NXT with right color not found!")
             #return -1
-            raise NXTNotFoundException("NXT not found.", color)
+            raise NXTNotFoundException("NXT not found with color #"+str(color))
 
         self.myBroker.shutdown()
 
@@ -427,8 +427,7 @@ if __name__ == '__main__':
     main()
 
 class NXTNotFoundException(Exception):
-    def __init__(self, value, nxt):
-        self.parameter = value
-        self.nxt = nxt
+    def __init__(self, value):
+        self.value = value
     def __str__(self):
-        return repr(self.parameter, self.nxt)
+        return repr(self.value)
