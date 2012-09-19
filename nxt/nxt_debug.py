@@ -1,5 +1,4 @@
 import threading
-import time
 DEBUGLEVEL = 7
 print_lock = threading.Lock()
 

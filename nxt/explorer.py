@@ -1,19 +1,14 @@
 #!/usr/bin/env python
 
-OFFLINE = False
-
-
-#TODO: dividing into logical explorer and physical explorer 
 #TODO: commenting functions
 
+import sys
+sys.path.append('..')
 
 import random
-import sys
 import time
 import threading
 import math
-sys.path.append('..')
-import pprint
 import mcc.model.state
 from mcc.model import map
 from twisted.internet import reactor, defer, task
@@ -23,11 +18,8 @@ from mcc.control import command
 from nxt_debug import dbg_print, DEBUGLEVEL
 from nxt.brick import FileFinder
 from nxt.locator import Method
+from nxt.locator import find_one_brick
 
-if OFFLINE == False:
-    from nxt.locator import find_one_brick
-else:
-    from pseudobrick import find_one_brick
 
 MAC = ["00:16:53:10:49:4D", "00:16:53:10:48:E7", "00:16:53:10:48:F3"]
 GRAD2CM = 17.59 / 360.0
@@ -39,7 +31,13 @@ def berechnePunkt(ausrichtung, entfernung, standort = {'x':0.0, 'y':0.0}):
 
 
 def berechneVektor(standort = {'x':0.0, 'y':0.0}, ziel = {'x': 0.0, 'y': 0.0}):
-    relativ_ziel = {'x': ziel['x'] - standort['x'], 'y': ziel['y'] - standort['y']}
+    relativ_ziel = {'x': abs(ziel['x'] - standort['x']), 'y': abs(ziel['y'] - standort['y'])}
+    dbg_print("StO: (%d,%d), Z: (%d,%d), rZ: (%d,%d)"%(standort['x'],
+                                                       standort['y'],
+                                                       ziel['x'], 
+                                                       ziel['y'], 
+                                                       relativ_ziel['x'], 
+                                                       relativ_ziel['y']), 1, 0)
     entfernung = math.sqrt(relativ_ziel['x'] ** 2 + relativ_ziel['y'] ** 2)
     if relativ_ziel['x'] == 0:
         winkel = 90
@@ -47,7 +45,7 @@ def berechneVektor(standort = {'x':0.0, 'y':0.0}, ziel = {'x': 0.0, 'y': 0.0}):
         winkel = math.atan(float(relativ_ziel['y']) / float(relativ_ziel['x'])) * (180.0 / math.pi) + 180
     else:
         winkel = math.atan(float(relativ_ziel['y']) / float(relativ_ziel['x'])) * (180.0 / math.pi) + 360
-    return {'winkel': winkel % 360, 'entfernung': entfernung}
+    return {'winkel': winkel % 360, 'entfernung': entfernung, 'rel_x': relativ_ziel['x'], 'rel_y': relativ_ziel['y']}
 
 class RobotProtocol(amp.AMP):
 
@@ -60,12 +58,6 @@ class RobotProtocol(amp.AMP):
         print 'Updating position (%d, %d, %d)' % (x_axis, y_axis, yaw)
         return {'ack': 'got position'}
     command.UpdatePosition.responder(update_position)
-
-    def send_map(self, map):
-        print 'Updating map '
-        pprint.pprint(map)
-        return {'ACK': 'got map'}
-    command.SendMap.responder(send_map)
 
 class NXTProtocol(RobotProtocol):
 
@@ -82,7 +74,7 @@ class NXTProtocol(RobotProtocol):
                             y_axis = self.factory.robots[handle].position['y'])
             self.factory.robots[handle].position_lock.release()
             return {'ack': 'got point'}
-        else:#FIXME: Exception 
+        else:
             self.factory.robots[handle].position_lock.acquire()
             self.callRemote(command.ArrivedPoint,
                             handle = self.factory.robots[handle].handle,
@@ -107,17 +99,11 @@ class NXTProtocol(RobotProtocol):
         self.factory.robots[handle].position_lock.acquire()
         self.factory.robots[handle].position['x'] = x_axis
         self.factory.robots[handle].position['y'] = y_axis
-        if yaw != -1:
+        if False:
             self.factory.robots[handle].ausrichtung = yaw
         self.factory.robots[handle].position_lock.release()
         return {'ack': 'got position'}
     command.UpdatePosition.responder(update_position)
-
-    def send_map(self, map):
-        print 'Updating map '
-        pprint.pprint(map)
-        return {'ack': 'got map'}
-    command.SendMap.responder(send_map)
 
 class RobotFactory(_InstanceFactory):
     def __init__(self, reactor, instance, deferred, anzahl):
@@ -162,12 +148,6 @@ class Explorer():
         worker = threading.Thread(target = self.work, args = ())
         worker.setDaemon(True)
         worker.start()
-
-    def __del__(self):
-        pass
-    
-    def event(self, message):
-        pass
 
     def turnright(self, degrees):
         self.send_message(message = '4,' + str(degrees))
@@ -215,14 +195,9 @@ class Explorer():
             break
         self.go_back(15)
         self.position_lock.acquire()
+        ausrichtung = self.ausrichtung
         vektor = berechneVektor(self.position, {'x': x, 'y': y})
-        dbg_print("go_to_point() - self.ausrichtung=%d" % self.ausrichtung, 1, self.identitaet)
-        dbg_print("go_to_point() - vektor="+str(vektor), 1, self.identitaet)
-        vektor['winkel'] -= self.ausrichtung
-        vektor['winkel'] += 360
-        vektor['winkel'] %= 360
-        
-        dbg_print("go_to_point: (%d,%d) von (%d,%d) Vektor=(entf:%d, winkel:%d)" % (x,y,self.position['x'],self.position['y'],vektor['entfernung'],vektor['winkel']), 1, self.identitaet)
+        dbg_print("go_to_point: (%d,%d) von (%d,%d) Vektor=(entf:%f, winkel:%f)" % (x,y,self.position['x'],self.position['y'],vektor['entfernung'],vektor['winkel']), 1, self.identitaet)
         self.position_lock.release()
         while(True):
             self.blockiert_lock.acquire()
@@ -233,7 +208,10 @@ class Explorer():
             self.blockiert = True
             self.blockiert_lock.release()
             break
-        self.turnleft(int(round(vektor['winkel'])))
+        if ((((ausrichtung - vektor['winkel'] )%360)+360)%360) > 180: 
+            self.turnleft(int(round(vektor['winkel'])-90))
+        else:
+            self.turnright(int(450-round(vektor['winkel']))%360)
         while(True):
             self.blockiert_lock.acquire()
             if self.blockiert:
@@ -261,7 +239,7 @@ class Explorer():
             self.status_lock.release()
             dbg_print('go_to_point(): false', 1, self.identitaet)
             return False
-        else: #TODO: potentiell Exception, oder ziel gefunden
+        else:
             self.status_lock.release()
             dbg_print('go_to_point(): else', 1, self.identitaet)
             return False
@@ -563,6 +541,7 @@ class Explorer():
                     dbg_print("message-parsing-error: falsches Format", self.identitaet)
                 dbg_print("ident=" + str(t_id) + " msg=" + str(payload), 4, self.identitaet)
                 csv = payload.split(',') 
+                dbg_print("payload %s,%s"%(csv[0], csv[1]), 1, self.identitaet)
                 if int(csv[0]) == 1: #nach Zeitintervall 500ms update_position (Entfernung)
                     dbg_print("Update: " + str(csv[1]) + " Einheiten gefahren",1, self.identitaet)
                     self.position_lock.acquire()
@@ -603,7 +582,7 @@ class Explorer():
                 elif int(csv[0]) == 3: #strecke ohne vorkommnisse abgefahren
                     self.status_lock.acquire()
                     self.status = 0 #arrived
-                    dbg_print("status: arrived" %self.status, 1, self.identitaet)
+                    dbg_print("status: arrived", 1, self.identitaet)
                     self.status_lock.release()
                     dbg_print(str(csv[1]) + " Einheiten gefahren",1, self.identitaet)
                     self.position_lock.acquire()
@@ -634,8 +613,10 @@ class Explorer():
                     self.payload_lock.release()
                 else:
                     dbg_print("csv konnt nicht geparst werden", self.identitaet)
-            except:
-                pass
+            except Exception as err:
+                if DEBUGLEVEL>9:
+                    print err
+                    
             count += 1
 
     def work(self):
@@ -657,7 +638,7 @@ class Explorer():
                     self.phase_lock.acquire()
                     if self.phase == mcc.model.state.STATE_AUTONOM_EXPLORATION:
                         self.phase_lock.release()
-                        algo = random.choice([0])
+                        algo = random.choice([0,1,2])
                         if algo == 0:
                             self.exploration_simple() #blockierender Aufruf
                         elif algo == 1:
@@ -702,7 +683,7 @@ class NXTClient():
         print 'connected to mcc'
         for bot in range(self.anzahl):
             try:
-                self.factory.robots[bot] = Explorer(MAC[bot], self.protocol, bot, bot + 1, 5 + bot, 1 + bot)
+                self.factory.robots[bot] = Explorer(MAC[bot], self.protocol, bot, bot, 5 + bot, 1 + bot)
             except:
                 print "Bot %s nicht gefunden" % MAC[bot]
                 self.factory.robots[bot] = None
