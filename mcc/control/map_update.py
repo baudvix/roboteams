@@ -13,9 +13,9 @@ class UpdateNXTData(object):
         Each object must be used for exact one NXT
 
         """
-        self.__nxt_width = 9
-        self.__nxt_height = 15
-        self.__points_per_second = 0.5
+        self.__nxt_width = 15
+        self.__nxt_height = 20
+        self.__points_per_second = 5
         self.__nxt_speed = 5
         self.__points = []
         self.__points_max = 5
@@ -39,8 +39,15 @@ class UpdateNXTData(object):
         """
 
         corners = self.compute_rotation(x_coord, y_coord, yaw)
+        # if path too long, compute recursive
+        list = self.bresenham(self.__points[len(self.__points)][0], self.__points[len(self.__points)][1], x_coord, y_coord)
+        count = len(list) / self.__max_distance
+        for i in range(0, count):
+            self.insert_position_data(list[i * self.__max_distance][0], list[i * self.__max_distance][0], yaw)
+        if count * self.__max_distance != len(list):
+            self.insert_position_data(list[count * self.__max_distance][0], list[count * self.__max_distance][0], yaw)
 
-        #first insert
+       #first insert
         new_points = self.relative_complement(self.fill_polygon(corners), self.__filled)
         for point in new_points:
             self.get_put(self.__filled, point, self.__filled_max)
