@@ -59,7 +59,7 @@ class MCCProtocol(amp.AMP):
 #        self.update_position(robo, -20, 64, 90)
         self.go_to_position(robo, 30, 79)
         time.sleep(2)
-#        self.go_to_position(robo, 30, 80)
+        self.go_to_position(robo, 30, 80)
         
 
 #        self.factory.state_machine.fset_state(state.STATE_NAOWALK)
