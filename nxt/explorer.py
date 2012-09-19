@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
+
 OFFLINE = False
 
 
 #TODO: dividing into logical explorer and physical explorer 
-
 #TODO: commenting functions
 
 
@@ -21,6 +21,7 @@ from twisted.internet import reactor, defer, task
 from twisted.internet.protocol import Factory, _InstanceFactory
 from twisted.protocols import amp
 from mcc.control import command
+from mcc.model.robot import NXT_TYPE
 from nxt_debug import dbg_print, DEBUGLEVEL
 from nxt.brick import FileFinder
 from nxt.locator import Method
@@ -75,7 +76,8 @@ class NXTProtocol(RobotProtocol):
 
     def go_to_point(self, handle, x_axis , y_axis):
         dbg_print('Going to Point (' + str(x_axis) + ',' + str(y_axis) + ')', 2, self.factory.robots[handle].identitaet)
-        if self.factory.robots[handle].go_to_point(x_axis, y_axis):
+        reached = self.factory.robots[handle].go_to_point(x_axis, y_axis)#FIXME: sollte blockieren
+        if reached == True:
             self.factory.robots[handle].position_lock.acquire()
             self.callRemote(command.ArrivedPoint,
                             handle = self.factory.robots[handle].handle, 
@@ -83,7 +85,7 @@ class NXTProtocol(RobotProtocol):
                             y_axis = self.factory.robots[handle].position['y'])
             self.factory.robots[handle].position_lock.release()
             return {'ack': 'got point'}
-        else:#FIXME: Exception 
+        else: 
             self.factory.robots[handle].position_lock.acquire()
             self.callRemote(command.ArrivedPoint,
                             handle = self.factory.robots[handle].handle,
@@ -130,7 +132,7 @@ class Explorer():
     #FIXME: trennen von blosser Steuerung und Logik
     def __init__(self, mac, protokoll, identitaet, color, outbox = 5, inbox = 1):
         self.brick = find_one_brick(host = mac, method = Method(usb = True, bluetooth = True))
-        self.color = color# FIXME: potentiell unnoetig
+        self.color = color
         self.ausrichtung = 90; # 0 - 359 Grad; 0 Osten, 90 Norden, 180 Westen, 270 Sueden
         self.calibrationFactor = 1 
         self.phase_lock = threading.Lock()
@@ -147,7 +149,7 @@ class Explorer():
         self.payload_lock = threading.Lock()
         self.abbruch = True
         self.abbruch_lock = threading.Lock()
-        self.robot_type = 0
+        self.robot_type = NXT_TYPE
         self.message_id = 0
         self.position_lock = threading.Lock()
         self.position = {'x': 0.0, 'y': 0.0}
@@ -240,13 +242,15 @@ class Explorer():
         self.status_lock.acquire()
         if self.status == 0:
             self.status_lock.release()
+            dbg_print('go_to_point(): reached', 1, self.identitaet)
             return True
         elif self.status == 1:
             self.status_lock.release()
+            dbg_print('go_to_point(): not reached', 1, self.identitaet)
             return False
         else: #TODO: potentiell Exception, oder ziel gefunden
             self.status_lock.release()
-            dbg_print('brick.go_to_point(): else', 1, self.identitaet)
+            dbg_print('go_to_point(): else', 1, self.identitaet)
             return False
 
     def scan_ultrasonic(self):
@@ -540,7 +544,6 @@ class Explorer():
                 dbg_print("message: " + str(message), 9, self.identitaet)
                 try:
                     t_id, payload = str(message).split(';')
-                    ident = int(t_id)
                     payload = payload.strip("\x00")
                 except:
                     dbg_print("message-parsing-error: falsches Format", self.identitaet)
@@ -606,8 +609,8 @@ class Explorer():
                     self.payload_lock.release()
                 else:
                     dbg_print("csv konnt nicht geparst werden", self.identitaet)
-            except Exception as err:
-                pass #print err
+            except:
+                pass
             count += 1
 
     def work(self):

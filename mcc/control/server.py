@@ -46,6 +46,7 @@ class MCCProtocol(amp.AMP):
         tmpColor = 0
         pathlength = 5
         path = [None]*pathlength
+        
         self.factory.state_machine.fset_state(state.STATE_AUTONOM_EXPLORATION)
         print "state: %d" % state.STATE_AUTONOM_EXPLORATION
         for robo in self.factory.robots:
@@ -56,6 +57,15 @@ class MCCProtocol(amp.AMP):
         for robo in self.factory.robots:
             self.update_state(robo, self.factory.state_machine.fget_state())
 
+    #    1. send nxt to first point on path
+    #    2. callRemote(SendPath, ...) on NAO
+#        3. REPEAT UNTIL (no point on path left):
+    #        3. NAO approach as near as possible to NXt
+    #        4. NAO responds calls "NXTFollowed"
+    #        5. move NXT to next point on path (block answer)
+    #        6. send answer to "NXTFollowed" call
+    #    7. move NXT away from last point
+#        
 #        self.factory.state_machine.fset_state(state.STATE_NAOWALK)
 #        for robo in self.factory.robots:
 #            self.update_state(robo, self.factory.state_machine.fget_state())
