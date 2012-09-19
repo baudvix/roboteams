@@ -52,12 +52,13 @@ class NAOProtocol(RobotProtocol):
     def perform_calibration(self, nao_handle, nxt_handle, color):
         print 'Performing calibration on NXT #%d, color=%d' % (nxt_handle, color)
         try:
-            result = self.factory.robot.calibrate(color)
             self.factory.robot.blocked_lock.acquire()
             while self.factory.robot.blocked:
                 self.factory.robot.blocked_lock.release()
                 pass
-            
+            self.factory.robot.blocked = True
+            self.factory.robot.blocked_lock.release()
+            result = self.factory.robot.calibrate(color)            
             return {'nao_handle': nao_handle,'nxt_handle': nxt_handle,'x_axis':result[0],'y_axis':result[1],'yaw': result[2]}
         except NAOCalibration.NXTNotFoundException, e:
             raise e
@@ -147,6 +148,7 @@ class NAO():
                 continue
             self.walk_state2_lock.acquire()
             if not self.walk_state2:
+                self.walk_state1 = True
                 if self.nao_walk:
                     self.nao_walk = NaoWalk.NaoWalk()
                 try:
@@ -190,7 +192,7 @@ class NAOClient():
         self.protocol = None
         self.factory = None
         self.host = '194.95.174.181'
-        self.port = 5001
+        self.port = 5000
         self.color = 0
         self.handle = None
         self.active = False

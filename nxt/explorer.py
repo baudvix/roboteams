@@ -54,8 +54,8 @@ def berechneVektor(standort = {'x':0.0, 'y':0.0}, ziel = {'x': 0.0, 'y': 0.0}):
 class RobotProtocol(amp.AMP):
 
     def update_state(self, state):
-        print 'Updating state to %d' % state
-        return {'ACK': 'got state'}
+        print 'Updating wahl to %d' % state
+        return {'ACK': 'got wahl'}
     command.UpdateState.responder(update_state)
 
     def update_position(self, handle, x_axis, y_axis, yaw):
@@ -96,13 +96,13 @@ class NXTProtocol(RobotProtocol):
     command.GoToPoint.responder(go_to_point)
 
     def update_state(self, handle, state):
-        print 'Updating state to %d' % state
+        print 'Updating wahl to %d' % state
         self.factory.robots[handle].phase_lock.acquire()
         self.factory.robots[handle].phase = state
         self.factory.robots[handle].phase_lock.release()
-        if state != mcc.model.state.STATE_AUTONOM_EXPLORATION:
+        if state != mcc.model.wahl.STATE_AUTONOM_EXPLORATION:
             self.factory.robots[handle].exploration_abort()
-        return {'ack': 'got state'}
+        return {'ack': 'got wahl'}
     command.UpdateState.responder(update_state)
 
     def update_position(self, handle, x_axis, y_axis, yaw):
@@ -136,7 +136,7 @@ class Explorer():
         self.ausrichtung = 90; # 0 - 359 Grad; 0 Osten, 90 Norden, 180 Westen, 270 Sueden
         self.calibrationFactor = 1 
         self.phase_lock = threading.Lock()
-        self.phase = mcc.model.state.STATE_INIT
+        self.phase = mcc.model.wahl.STATE_INIT
         self.protokoll = protokoll
         self.identitaet = identitaet
         self.status = -1
@@ -268,7 +268,7 @@ class Explorer():
             if not self.blockiert:
                 self.blockiert = True
                 self.blockiert_lock.release()
-                dbg_print("exploration_simple - state=%d" % state,1, self.identitaet)
+                dbg_print("exploration_simple - wahl=%d" % state,1, self.identitaet)
 
                 if state == 0:
                     self.go_forward(0)
@@ -302,7 +302,7 @@ class Explorer():
             if not self.blockiert:
                 self.blockiert = True
                 self.blockiert_lock.release()
-                dbg_print("exploration_circle - state=%d" % state, 1, self.identitaet)
+                dbg_print("exploration_circle - wahl=%d" % state, 1, self.identitaet)
 
                 if state == 0:
                     self.scan_ultrasonic()
@@ -378,7 +378,7 @@ class Explorer():
             if not self.blockiert:
                 self.blockiert = True
                 self.blockiert_lock.release()
-                dbg_print("exploration_radar - state=%d" % state, 1, self.identitaet)
+                dbg_print("exploration_radar - wahl=%d" % state, 1, self.identitaet)
                 if state == 0:
                     if direction < 2:
                         self.turnright(90)
@@ -497,14 +497,14 @@ class Explorer():
     def exploration_cancel(self):
         while(True):
             self.phase_lock.acquire()
-            if self.phase != mcc.model.state.STATE_AUTONOM_EXPLORATION:
+            if self.phase != mcc.model.wahl.STATE_AUTONOM_EXPLORATION:
                 self.phase_lock.release()
                 break
             self.phase_lock.release()
             intervall = random.choice([30.0, 60.0])
             time.sleep(intervall)
             self.phase_lock.acquire()
-            if self.phase == mcc.model.state.STATE_AUTONOM_EXPLORATION:
+            if self.phase == mcc.model.wahl.STATE_AUTONOM_EXPLORATION:
                 self.phase_lock.release()
                 self.exploration_abort()
                 print "exploration_cancel - abbruch= True gewartet fuer %d sek" % intervall
@@ -621,7 +621,7 @@ class Explorer():
         while True:
             while(True):
                 self.phase_lock.acquire()
-                if self.phase != mcc.model.state.STATE_AUTONOM_EXPLORATION:
+                if self.phase != mcc.model.wahl.STATE_AUTONOM_EXPLORATION:
                     self.phase_lock.release()
                     break
                 self.phase_lock.release()
@@ -630,7 +630,7 @@ class Explorer():
                     self.abbruch = False
                     self.abbruch_lock.release()
                     self.phase_lock.acquire()
-                    if self.phase == mcc.model.state.STATE_AUTONOM_EXPLORATION:
+                    if self.phase == mcc.model.wahl.STATE_AUTONOM_EXPLORATION:
                         self.phase_lock.release()
                         algo = random.choice([0])
                         if algo == 0:

@@ -4,6 +4,7 @@ server provides the communication between the mcc and the robots
 """
 
 import pprint
+import sys
 
 from twisted.protocols import amp
 from twisted.internet import reactor, task
@@ -36,48 +37,105 @@ class MCCProtocol(amp.AMP):
         self.factory = None
         self.rcount = 0
         #self.positions = [(100,100,90),(-40,0,90),(40,0,90)]
-        self.positions = [(0,0,90),(25,0,90),(-40,0,90)]
+        self.positions = [(-30,80,90),(25,0,90),(-40,0,90)]
         self.stateTimer = threading.Thread(target = self.stateChange, args = ())
         self.stateTimer.setDaemon(True)
-        random.seed()
+        self.wahl = 0
 
     def stateChange(self):
         tmpNXT = 0
         tmpColor = 0
         
-        self.factory.state_machine.fset_state(state.STATE_AUTONOM_EXPLORATION)
-        print "state: %d" % state.STATE_AUTONOM_EXPLORATION
-        for robo in self.factory.robots:
-            self.update_state(robo, self.factory.state_machine.fget_state())
-        time.sleep(120)
+#        self.factory.state_machine.fset_state(state.STATE_AUTONOM_EXPLORATION)
+#        print "state: %d" % state.STATE_AUTONOM_EXPLORATION
+#        for robo in self.factory.robots:
+#            self.update_state(robo, self.factory.state_machine.fget_state())
+#        time.sleep(120)
         self.factory.state_machine.fset_state(state.STATE_GUIDED_EXPOLRATION)
         print "state: %d" % state.STATE_GUIDED_EXPOLRATION
         for robo in self.factory.robots:
             self.update_state(robo, self.factory.state_machine.fget_state())
+            
+#        self.update_position(robo, -20, 64, 90)
+        self.go_to_position(robo, 30, 79)
+        time.sleep(2)
+#        self.go_to_position(robo, 30, 80)
+        
 
+#        self.factory.state_machine.fset_state(state.STATE_NAOWALK)
+#        for robo in self.factory.robots:
+#            self.update_state(robo, self.factory.state_machine.fget_state())
+#        self.go_to_position(self.factory.robots[0], self.factory.path[0][0], self.factory.path[0][1])
+#        deferred = self.factory.robots[3].connection(command.SendPath, handle = self.factory.robots[3].handle, path = self.factory.path)
+#        deferred.callBack(self.print_out)
             
         #FIXME: zu testzwecken
         
-        time.sleep(5)
-        for robo in self.factory.robots:
-            if robo.robot_type == NXT_TYPE:
-                tmpNXT = robo.handle
-                tmpColor = robo.color
-                self.go_to_position(robo, 0, 0)
-                break
-        time.sleep(30)
-        for robo in self.factory.robots:
-            if robo.robot_type == NAO_TYPE:
-                deffered = robo.connection.callRemote(command.PerformCalibration,
-                                                        nao_handle=robo.handle,
-                                                        nxt_handle=tmpNXT,
-                                                        color=tmpColor)
-                deffered.addErrback(self.default_failure)
+#        time.sleep(5)
+#        for robo in self.factory.robots:
+#            if robo.robot_type == NAO_TYPE:
+#                deffered = robo.connection.callRemote(command.PerformCalibration,
+#                                                        nao_handle=robo.handle,
+#                                                        nxt_handle=tmpNXT,
+#                                                        color=tmpColor)
+#                deffered.addCallback(self.test)
+#                deffered.addErrback(self.moveNXTTowardsNAO)
+                
+        
                 
     def moveNXTTowardsNAO(self, failure):
-        error = failure.trap(NXTNotFoundException)
-        print error
-        print "Moving NXT towards NAO"
+        color_tmp = (str(failure.value).split('#'))[1]
+        color = color_tmp[len(color_tmp)-2]
+        print color
+        for robo in self.factory.robots:
+            print robo
+            if robo._robot_type == 0:
+                if robo.color == int(color):
+                    print "right nxt found"
+                    break
+        print "Moving NXT %d  with color %s towards NAO" % (robo.handle, robo.color)
+        sys.exit(0)
+#        self.go_to_position(robo, robo._position[0], robo._position[1])
+
+    def test(self, result):
+        self.checkPosition(result)
+        if self.wahl == 0:
+            self.wahl += 1
+            for robo in self.factory.robots:
+                if robo.robot_type == NXT_TYPE:
+                    tmpNXT = robo.handle
+                    tmpColor = robo.color
+                    self.go_to_position(robo, 30, 80)
+                    break
+            time.sleep(5)
+        elif self.wahl <= 2:
+            self.wahl += 1
+            for robo in self.factory.robots:
+                if robo.robot_type == NAO_TYPE:
+                    deffered = robo.connection.callRemote(command.PerformCalibration,
+                                                            nao_handle=robo.handle,
+                                                            nxt_handle=tmpNXT,
+                                                            color=tmpColor)
+                    deffered.addCallback(self.test)
+                    deffered.addErrback(self.moveNXTTowardsNAO)
+        else:
+            print "DONE"
+        
+            
+        
+
+    def checkPosition(self, result):
+        nxt_handle = result["nxt_handle"]
+        nao_handle = result["nao_handle"]
+        x_axis = result["x_axis"]
+        y_axis = result["y_axis"]
+        yaw = result["yaw"]
+        print "nxt %d, nao %d, x %d, y %d, yaw %d" % (nxt_handle, nao_handle, x_axis, y_axis, yaw)
+        for robo in self.factory.robots:
+            if robo.handle == nxt_handle:
+                self.update_position(robo, x_axis, y_axis, yaw)
+                break
+        
                 
     def register(self, robot_type, rhandle, color=None):
         """
@@ -116,6 +174,8 @@ class MCCProtocol(amp.AMP):
                     self.rcount += 1
                 if self.rcount == 1:
                     self.stateTimer.start()
+#                if robo._robot_type == NAO_TYPE:
+#                    self.stateTimer.start()
                 
                 return {'ack': 'got activate'}
         raise command.CommandHandleError('No robot with handle')
@@ -223,7 +283,7 @@ class MCCProtocol(amp.AMP):
                 robo.active = False
                 print 'Connection Lost to robo %d ' % robo.handle
 
-    def update_position(self, robo, x_axis, y_axis, yaw, to_nxt=False):
+    def update_position(self, robo, x_axis, y_axis, yaw, to_nxt=True):
         robo.position = Point(x_axis, y_axis, yaw)
         if not to_nxt:
             return
@@ -234,6 +294,7 @@ class MCCProtocol(amp.AMP):
         deffered.addErrback(self.default_failure)
 
     def go_to_position(self, robo, x_axis, y_axis):
+        print "send NXT #%d to (%d, %d)" % (robo.handle, x_axis, y_axis)
         deffered = robo.connection.callRemote(command.GoToPoint,
                                                         handle=robo.handle,
                                                         x_axis=x_axis,

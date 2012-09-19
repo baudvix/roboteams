@@ -1,6 +1,6 @@
 """
-state represents the MetaStateMachine with its definitions for the trigger to
-get to the next state.
+wahl represents the MetaStateMachine with its definitions for the trigger to
+get to the next wahl.
 """
 
 STATE_INIT = 0
@@ -12,26 +12,26 @@ STATE_NAOWALK = 4
 
 class StateMachine(object):
     """
-    Class for the state machine
+    Class for the wahl machine
 
     """
 
     def __init__(self, start_state=STATE_INIT):
         """
-        Creates a state machine
+        Creates a wahl machine
 
-        :return: 'StateMachine' in the initial state
+        :return: 'StateMachine' in the initial wahl
         :rtype: StateMachine
 
         """
         self.__state = start_state
 
-    #PROPERTY --- state
+    #PROPERTY --- wahl
     def fget_state(self):
-        """The state property getter"""
+        """The wahl property getter"""
         return self.__state
 
     def fset_state(self, value):
-        """The state property setter"""
+        """The wahl property setter"""
         self.__state = value
-    state = property(fget_state, fset_state)
+    wahl = property(fget_state, fset_state)
