@@ -6,6 +6,8 @@
 \usepackage{amssymb}
 \usepackage{makeidx}
 \usepackage{graphicx}
+\usepackage{bytefield2}
+\usepackage{marginnote}
 \usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \author{Sven Schröder}
 \title{Dokumentation -- NXT}
@@ -14,10 +16,23 @@
 \tableofcontents
 \section{Entwurf}
 \subsection{Software}
-Beim Entwurf der Software für unseren Teil der Aufgabe hatten wir zwei Dinge zu beachten, die mäßige Rechenleistung des LEGO$^\copyright$ Mindstorms$^\copyright$ NXT Brick (im folgenden nur noch Brick genannt) und die durch LEGO$^\copyright$ begrenzte Anzahl von Robotern auf maximal 4.  
+Beim Entwurf der Software für unseren Teil der Aufgabe hatten wir zwei Dinge zu beachten, die mäßige Rechenleistung\footnote{8-Bit ARM mit 48 MHz Takt, 64KB RAM} des LEGO$^\copyright$ Mindstorms$^\copyright$ NXT Brick (im folgenden nur noch Brick genannt) und die durch LEGO$^\copyright$ begrenzte Anzahl von Robotern auf maximal 4. 
 \subsubsection{nxc -- Not eXactly C}
+nxc ist die für LEGO$^\copyright$ NXT native Programmiersprache. Obwohl die Syntax von nxc der Programmiersprache C ähnlich ist, ist sie in ihrem Umfang erheblich eingeschränkt. Aus dem Fehlen des Pointerkonzept resultiert unter anderem der Verlust auf die Speicherverwaltung direkt einwirken zu können.
 \subsubsection{nxt-python-framework}
+Das nxt-python-framework\footnote{http://code.google.com/p/nxt-python/} agiert als Interface, welches die von LEGO$^\copyright$ in dem "`Bluetooth Development Kit"' veröffentlichten direkten Kommandos, nutzt um mit der Hardware zu interagieren.\\
+\\
+Wie wird dies erreicht?\\
+Mit LEGO$^\copyright$ NXT ist es möglich, dass sich bei maximal vier NXTs einer zum Master erklärt. Der Master kann nun durch speziell kodierte Befehle die anderen drei NXTs fernsteuern. Dieses Verhalt macht sich das nxt-python-framework zu nutze und täuscht maximal 3 NXTs vor, dass es ein NXT-Master sei. Wenn dies geschehen ist können die NXTs von PC-Seite ferngesteuert werden.\\
+\\
+Vorteil: Durch die Nutzung von nxt-python integriert sich die Komponente NXT-Erkunder nahtlos in das übrige System.\\
+\\
+Nachteil: Der synchrone Start bzw. Stopp von zwei Motoren ist nur schwerlich realisierbar, da zwei Befehle benötigt würden, die nacheinander verschickt und auf NXT-Seite nacheinander ausgewertet werden würden. \\
+\\
+Wegen dem immensen Vorteil der einfachen Integration in das Restsystem und dem Nachteil der asynchronen Ansteuerung von Motoren entstand die Idee die beiden Programmiersprachen (nxc und python) zu kombinieren.
 \subsubsection{hybrider Ansatz}
+Die Kombination von nxc und nxt-python wurde wie folgt realisiert. Es wurde in einfaches Kommunikationsprotokoll (siehe Abbildung \ref{protokoll} auf Seite \pageref{protokoll}) konzipiert durch welches der Aufruf von in nxc implementierten Funktionen durch nxt-python ermöglicht wird.
+
 \subsection{Idee 1 $\rightarrow$ Modell 1}%Kettenfahrzeug + Radar
 \subsubsection{Idee}
 Unsere erste Idee bestand im Prinzip aus zwei unabhängigen Ideen. Zum Einen wollten wir ein Fahrgestell konzipieren, das auch bei unwegsamen Gelände eine kontrollierte Bewegung des Explorer ermöglichen würde und zum Anderen wollten wir einen Sensor der schon viele Informationen über die Umgebung sammelt ohne, dass der Explorer jeden Quadratzentimeter abfahren muss.
@@ -41,9 +56,56 @@ Unsere erste Idee bestand im Prinzip aus zwei unabhängigen Ideen. Zum Einen wol
 \section{Kommunikation}
 \subsection{Bluetooth}
 \subsection{Kommunikationsprotokoll PC $\leftrightarrow$ NXT}
+anfänglich 3-way-handshake wegen missverständnis
+\begin{figure}[h]
+Kommunikation PC $\rightarrow$ NXT:$\qquad$
+\begin{bytefield}[bitwidth=2em]{5}
+\bitheader{0-6} \\
+\bitbox{1}{A} & \bitbox{1}{;} & \bitbox{1}{ID} & \bitbox{1}{;} & \bitbox{1}{F} & \bitbox{1}{,} & \bitbox{1}{W}
+\end{bytefield}\\
+~\\
+Kommunikation PC $\leftarrow$ NXT:$\qquad$
+\begin{bytefield}[bitwidth=2em]{5}
+\bitheader{0-8} \\
+\bitbox{1}{A} & \bitbox{1}{;} & \bitbox{1}{ID} & \bitbox{1}{;} & \bitbox{1}{T} & \bitbox{1}{,} & \bitbox{1}{W} & \bitbox{1}{,$_2$} & \bitbox{1}{W$_2$}
+\end{bytefield}
+\\
+\\
+\texttt{\underline{Legende:}\\ A = Typ der Nachricht (m = Nachricht, r = m erhalten, a = r erhalten)\\ F = Funktion die aufgerufen werden soll\\ W = Zahlwert \\ T = Typ der Antwort\\ $_2$ = optional}
+
+\caption{Kommunikationsprotokoll 3-way-handshake}\label{protokoll_alt}
+\end{figure}
+\\
+\begin{figure}[h]
+Kommunikation PC $\rightarrow$ NXT:$\qquad$
+\begin{bytefield}[bitwidth=2em]{5}
+\bitheader{0-4} \\
+\bitbox{1}{ID} & \bitbox{1}{;} & \bitbox{1}{F} & \bitbox{1}{,} & \bitbox{1}{W}
+\end{bytefield}\\
+~\\
+Kommunikation PC $\leftarrow$ NXT:$\qquad$
+\begin{bytefield}[bitwidth=2em]{5}
+\bitheader{0-6} \\
+\bitbox{1}{ID} & \bitbox{1}{;} & \bitbox{1}{T} & \bitbox{1}{,} & \bitbox{1}{W} & \bitbox{1}{,$_2$} & \bitbox{1}{W$_2$}
+\end{bytefield}
+\\
+\\
+\texttt{\underline{Legende:}\\ F = Funktion die aufgerufen werden soll\\ W = Zahlwert \\ T = Typ der Antwort\\ $_2$ = optional}
+
+\caption{Kommunikationsprotokoll}\label{protokoll}
+\end{figure}
 \subsection{Kommunikation mit dem MCC}
 \section{Logik}
+Problem das der Robo blockiert, das Program aber nicht
 \subsection{Explorationsalgorithmen}
+In der Welt der autonomen Rasenmäh- und Staubsaugroboter haben sich vier Algorithmen durchgesetzt:
+\begin{enumerate}
+\item Touch and Go\footnote{hier simple genannt}
+\item circle
+\item radar
+\item Wandverfolgung
+\end{enumerate}
+1 -- 3 werden im Folgenden näher besprochen. 4 konnte aufgrund der begrenzten Anzahl an Sensoren nicht implementiert werden und bleibt deshalb außen vor. 
 \subsubsection{Exploration -- simple}
 \subsubsection{Exploration -- circle}
 \subsubsection{Exploration -- radar}
