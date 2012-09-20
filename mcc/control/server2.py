@@ -169,10 +169,10 @@ class MCCProtocol(amp.AMP):
                     self.factory._view.gui.dummy_register_map(robo.map_overlay)
                     self.update_position(robo, self.positions[self.rcount][0], self.positions[self.rcount][1],self.positions[self.rcount][2], True)
                     self.rcount += 1
-                if self.rcount == 1:
-                    self.stateTimer.start()
-#                if robo._robot_type == NAO_TYPE:
+#                if self.rcount == 1:
 #                    self.stateTimer.start()
+                if robo._robot_type == NAO_TYPE:
+                    self.stateTimer.start()
                 
                 return {'ack': 'got activate'}
         raise command.CommandHandleError('No robot with handle')

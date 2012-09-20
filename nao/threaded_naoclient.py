@@ -77,7 +77,7 @@ class NAOProtocol(RobotProtocol):
     
     def follow_red_ball(self):
         print 'Following NXT with red ball'
-        #blockieren
+        self.factory.robot.walk()
         return {'ack': 'followed'}
     command.FollowRedBall.responder(follow_red_ball)
     
@@ -155,7 +155,7 @@ class NAO():
             self.walk_state2_lock.acquire()
             if not self.walk_state2:
                 self.walk_state1 = True
-                if self.nao_walk:
+                if self.nao_walk == None:
                     self.nao_walk = NaoWalk.NaoWalk()
                 try:
                     print 'walkInit'
@@ -182,6 +182,7 @@ class NAO():
                 self.walk_state1 = True
                 self.walk_state2_lock.release()
                 self.walk_state1_lock.release()
+                self.state_lock.acquire()
                 continue
         self.state_lock.release()                        
         raise Exception("no calibration in state " + str(self.state))

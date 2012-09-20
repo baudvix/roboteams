@@ -22,7 +22,7 @@ import time
 import random
 
 #from mcc.view import view
-from mcc.view import view_wx
+from mcc.view import view_wx, view
 from mcc.model.robot import NXT_TYPE, NAO_TYPE
 
 from nao.NAOCalibration import NXTNotFoundException
@@ -261,10 +261,10 @@ class MCCProtocol(amp.AMP):
                     self.factory._view.gui.dummy_register_map(robo.map_overlay)
                     self.update_position(robo, self.positions[self.rcount][0], self.positions[self.rcount][1],self.positions[self.rcount][2], True)
                     self.rcount += 1
-                if self.rcount == 1:
-                    self.stateTimer.start()
-#                if robo._robot_type == NAO_TYPE:
+#                if self.rcount == 1:
 #                    self.stateTimer.start()
+                if robo._robot_type == NAO_TYPE:
+                    self.stateTimer.start()
                 
                 return {'ack': 'got activate'}
         raise command.CommandHandleError('No robot with handle')
@@ -433,7 +433,7 @@ class MCCFactory(Factory):
         #self._viewThread = view.View(self.maps[0])
         #self._viewThread.daemon = True
         #self._viewThread.start()
-
+        
 
 class MCCServer(object):
     """
