@@ -37,12 +37,13 @@ class MCCProtocol(amp.AMP):
         self.factory = None
         self.rcount = 0
         #self.positions = [(100,100,90),(-40,0,90),(40,0,90)]
-        self.positions = [(0,0,90),(-15,-15,210),(15,-15,330)]
+        self.positions = [(0,60,90),(-15,-15,210),(15,-15,330)]
         self.stateTimer = threading.Thread(target = self.stateChange, args = ())
         self.stateTimer.setDaemon(True)
         self.wahl = 0
         self.blocked_lock = threading.Lock()
         self.blocked = False
+        self.nxt_arrived = False
 
     def stateChange(self):
         tmpNXT = 0
@@ -67,26 +68,29 @@ class MCCProtocol(amp.AMP):
                             time.sleep(1)
                             break    
                         self.blocked = True
-                        self.blocked_lock.release()  
-                        latest_nxt = (latest_nxt + 1)
+                        self.blocked_lock.release()
                         if latest_nxt > 2:
                             latest_nxt = 0
                             self.factory.state_machine.fset_state(state.STATE_AUTONOM_EXPLORATION)
                             break
                         self.go_to_position(robo, -60+latest_nxt*60, 80)
-                        time.sleep(10)               
+                        while not self.nxt_arrived:
+                            time.sleep(2)
+                        self.nxt_arrived = False
+                        latest_nxt = (latest_nxt + 1)              
                         deffered = nao.connection.callRemote(command.PerformCalibration,
                             nao_handle=nao.handle,
                             nxt_handle=robo.handle,
                             color=robo.color)
                         deffered.addCallback(self.updatePosition)
+                        deffered.addErrback(self.default_failure)
                         
             if self.factory.state_machine.fget_state() == state.STATE_INIT or self.factory.state_machine.fget_state() == state.STATE_AUTONOM_EXPLORATION:
                 self.factory.state_machine.fset_state(state.STATE_AUTONOM_EXPLORATION)
                 print "state: %d" % state.STATE_AUTONOM_EXPLORATION
                 for robo in self.factory.robots:
                     self.update_state(robo, self.factory.state_machine.fget_state())
-                time.sleep(60)
+                time.sleep(30)
         
                 self.factory.state_machine.fset_state(state.STATE_GUIDED_EXPOLRATION)
                 print "state: %d" % state.STATE_GUIDED_EXPOLRATION
@@ -106,14 +110,14 @@ class MCCProtocol(amp.AMP):
                     self.blocked_lock.release()
                     self.go_to_position(self.factory.robots[0], self.factory.path[latest_point][0], self.factory.path[latest_point][1])
                     latest_point += 1
-                    time.sleep(5)
+                    time.sleep(10)
                     deferred = nao.connection(command.FollowRedBall)
                     deferred.addCallback(self.nextPosition)
                     deferred.addErrback(self.lastPosition)
                 else:
                    self.factory.state_machine.fset_state(state.STATE_DONE) 
 
-            else:
+            if self.factory.state_machine.fget_state() == state.STATE_DONE:
                 print "Finally DONE !!!"
                 break
             
@@ -360,6 +364,7 @@ class MCCProtocol(amp.AMP):
         """
         #TODO: calculate new go_to_position
         print '#%d Arrived at \t(%d, %d)' % (handle, x_axis, y_axis)
+        self.nxt_arrived = True
         return {'ack': 'got arrival'}
     command.ArrivedPoint.responder(arrived_point)
 

@@ -260,7 +260,7 @@ class Explorer():
             self.blockiert_lock.acquire()
             if not self.blockiert:
                 self.blockiert = True
-                self.blockiert_lock.release()
+                self.blockiert_lock.relSease()
                 dbg_print("exploration_simple - wahl=%d" % state,1, self.identitaet)
 
                 if state == 0:

@@ -37,7 +37,8 @@ class MCCProtocol(amp.AMP):
         self.factory = None
         self.rcount = 0
         #self.positions = [(100,100,90),(-40,0,90),(40,0,90)]
-        self.positions = [(-30,80,90),(25,0,90),(-40,0,90)]
+        self.positions = [(-80,0,90),(-40,0,90),(40,0,90)]
+        self.targets = [(-80,10),(-40,10),(40,10)]
         self.stateTimer = threading.Thread(target = self.stateChange, args = ())
         self.stateTimer.setDaemon(True)
         self.wahl = 0
@@ -46,25 +47,25 @@ class MCCProtocol(amp.AMP):
         tmpNXT = 0
         tmpColor = 0
         
-#        self.factory.state_machine.fset_state(state.STATE_AUTONOM_EXPLORATION)
-#        print "state: %d" % state.STATE_AUTONOM_EXPLORATION
-#        for robo in self.factory.robots:
-#            self.update_state(robo, self.factory.state_machine.fget_state())
-#        time.sleep(120)
-#        self.factory.state_machine.fset_state(state.STATE_GUIDED_EXPOLRATION)
-#        print "state: %d" % state.STATE_GUIDED_EXPOLRATION
-#        for robo in self.factory.robots:
-#            self.update_state(robo, self.factory.state_machine.fget_state())
-#            
-#        self.update_position(robo, -20, 64, 90)
-#        self.go_to_position(robo, 30, 80)
-
-        self.factory.state_machine.fset_state(state.STATE_NAOWALK)
+        self.factory.state_machine.fset_state(state.STATE_AUTONOM_EXPLORATION)
+        print "state: %d" % state.STATE_AUTONOM_EXPLORATION
         for robo in self.factory.robots:
             self.update_state(robo, self.factory.state_machine.fget_state())
-        self.go_to_position(self.factory.robots[0], self.factory.path[0][0], self.factory.path[0][1])
-        deferred = self.factory.robots[3].connection(command.SendPath, handle = self.factory.robots[3].handle, path = self.factory.path)
-        deferred.callBack(self.print_out)
+        time.sleep(60)
+        self.factory.state_machine.fset_state(state.STATE_GUIDED_EXPOLRATION)
+        print "state: %d" % state.STATE_GUIDED_EXPOLRATION
+        for robo in self.factory.robots:
+            self.update_state(robo, self.factory.state_machine.fget_state())
+        
+        for robo in self.factory.robots:
+            self.go_to_position(robo, self.targets[robo.handle][0], self.targets[robo.handle][1])
+
+#        self.factory.state_machine.fset_state(state.STATE_NAOWALK)
+#        for robo in self.factory.robots:
+#            self.update_state(robo, self.factory.state_machine.fget_state())
+#        self.go_to_position(self.factory.robots[0], self.factory.path[0][0], self.factory.path[0][1])
+#        deferred = self.factory.robots[3].connection(command.SendPath, handle = self.factory.robots[3].handle, path = self.factory.path)
+#        deferred.callBack(self.print_out)
             
         #FIXME: zu testzwecken
         
@@ -169,10 +170,11 @@ class MCCProtocol(amp.AMP):
                     self.factory._view.gui.dummy_register_map(robo.map_overlay)
                     self.update_position(robo, self.positions[self.rcount][0], self.positions[self.rcount][1],self.positions[self.rcount][2], True)
                     self.rcount += 1
-#                if self.rcount == 1:
-#                    self.stateTimer.start()
-                if robo._robot_type == NAO_TYPE:
+                if self.rcount == 3:
+                    time.sleep(10)
                     self.stateTimer.start()
+#                if robo._robot_type == NAO_TYPE:
+#                    self.stateTimer.start()
                 
                 return {'ack': 'got activate'}
         raise command.CommandHandleError('No robot with handle')

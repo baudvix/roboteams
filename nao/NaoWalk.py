@@ -114,13 +114,13 @@ class NaoWalk():
 #                    # !!
 #                    # meldung ans mcc dass nxt weiterlaufen soll
                     # !!
-#                   time.sleep(1)
-#                   self.tts.say("You have 5 seconds to get this Lego out of my way")
-#                   time.sleep(5)
+                time.sleep(1)
+                self.tts.say("You have 5 seconds to get this Lego out of my way")
+                time.sleep(5)
                 # walkToPosition() muss vom mcc aufgerufen werden und hier entfernt werden
-#                 self.walkToPosition()
-#                 self.__setTopCamera()
-#                  break
+                self.walkToPosition()
+                self.__setTopCamera()
+                break
                 return
 
     # has to be called after walkUpToBall() and the nxt`s gone

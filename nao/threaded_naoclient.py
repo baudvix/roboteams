@@ -4,7 +4,7 @@ from twisted.internet.protocol import _InstanceFactory
 from twisted.protocols import amp
 from mcc.control import command
 from nao import NAOCalibration
-from nao import NaoWalk, config
+from nao import NaoWalk2, config
 from naoqi import ALProxy
 from naoqi import ALBroker
 import threading
@@ -51,16 +51,23 @@ class NAOProtocol(RobotProtocol):
 
     def perform_calibration(self, nao_handle, nxt_handle, color):
         print 'Performing calibration on NXT #%d, color=%d' % (nxt_handle, color)
+#        while True:
+#            self.factory.robot.blocked_lock.acquire()
+#            if self.factory.robot.blocked:
+#                self.factory.robot.blocked_lock.release()
+#                print "waiting ..."
+#                time.sleep(5)
+#                continue
         try:
-            self.factory.robot.blocked_lock.acquire()
-            while self.factory.robot.blocked:
-                self.factory.robot.blocked_lock.release()
-                pass
-            self.factory.robot.blocked = True
-            self.factory.robot.blocked_lock.release()
-            result = self.factory.robot.calibrate(color)            
+#                self.factory.robot.blocked = True
+#                self.factory.robot.blocked_lock.release()
+            print "calibration started"
+            result = self.factory.robot.calibrate(color) 
+#                self.factory.robot.blocked_lock.acquire()
+#                self.factory.robot.blocked = False
+#                self.factory.robot.blocked_lock.release()
             return {'nao_handle': nao_handle,'nxt_handle': nxt_handle,'x_axis':result[0],'y_axis':result[1],'yaw': result[2]}
-        except NAOCalibration.NXTNotFoundException, e:
+        except Exception, e:
             raise e
             
     command.PerformCalibration.responder(perform_calibration)
@@ -117,36 +124,33 @@ class NAO():
         
       
     def calibrate(self, nxt_color):
-        self.state_lock.acquire()
-        while self.state == state.STATE_GUIDED_EXPOLRATION:
-            self.state_lock.release()
+        while True:
             self.blocked_lock.acquire()
             if self.blocked:
                 self.blocked_lock.release()
-                time.sleep(1)
+                time.sleep(5)
+                print "waiting for calibration"
                 continue
             if self.calibration == None:
                 self.calibration = NAOCalibration.NAOCalibration()
             try:
+                self.blocked_lock.release()
                 self.calibration.changeBodyOrientation("init")
                 result = self.calibration.performCalibration(nxt_color)
                 config.setHeadMotion(self.calibration.motionProxy, 0, 0)
                 self.calibration.changeBodyOrientation("knee")
+                self.blocked_lock.acquire()
                 self.blocked = False
                 self.blocked_lock.release()
                 return result
             except NAOCalibration.NXTNotFoundException, e:
-                print "client.calibrate ", type(e)
                 config.setHeadMotion(self.calibration.motionProxy, 0, 0)
                 self.calibration.changeBodyOrientation("knee")
                 raise e
-        self.state_lock.release()
-        raise Exception("no calibration in state " + str(self.state))
+
     
     def walk(self):
-        self.state_lock.acquire()
-        while self.state == state.STATE_NAOWALK:
-            self.state_lock.release()
+        while True:
             self.walk_state1_lock.acquire()
             if self.walk_state1:
                 self.walk_state1_lock.release()
@@ -182,9 +186,7 @@ class NAO():
                 self.walk_state1 = True
                 self.walk_state2_lock.release()
                 self.walk_state1_lock.release()
-                self.state_lock.acquire()
-                continue
-        self.state_lock.release()                        
+                continue                        
         raise Exception("no calibration in state " + str(self.state))
     
     def update_state(self, state):
@@ -198,7 +200,7 @@ class NAOClient():
     def __init__(self):
         self.protocol = None
         self.factory = None
-        self.host = '194.95.174.181'
+        self.host = '194.95.174.147'
         self.port = 5000
         self.color = 0
         self.handle = None
