@@ -236,7 +236,7 @@ class PerformCalibration(Command):
                 ('y_axis', Integer()),
                 ('yaw', Integer())]
     errors = [(Exception, 'CALIBRATION_ERROR'),
-              (NXTNotFoundException, 'NXT_NOT_FOUND')]
+              (Exception, 'NXT_NOT_FOUND')]
 
 class FollowRedBall(Command):
     """
@@ -244,7 +244,7 @@ class FollowRedBall(Command):
     """
     arguments = []
     response = [('ack', String())]
-    errors = [(RedBallNotFoundException, 'RED_BALL_LOST')]
+    errors = [(Exception, 'RED_BALL_LOST')]
 
 class SendPath(Command):
     """
