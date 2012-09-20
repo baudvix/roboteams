@@ -40,7 +40,7 @@ class NaoWalk():
     # the target area.
 
     def __init__(self):
-        self.myBroker = ALBroker("myBroker","0.0.0.0",0,"germanopen3.local",9559)
+        self.myBroker = ALBroker("myBroker","0.0.0.0",0,"194.95.174.146",9559)
         self.motion = ALProxy("ALMotion")
         self.tracker = ALProxy("ALRedBallTracker")
         self.vision = ALProxy("ALVideoDevice")
