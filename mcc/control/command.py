@@ -7,7 +7,7 @@ Those commands are based on amp the twisted Asynchronous Message Protocol.
 
 from twisted.protocols.amp import Command, Integer, String, AmpList, Float
 from nao.NAOCalibration import NXTNotFoundException
-from nao.NaoWalk import RedBallNotFoundException
+#from nao.NaoWalk import RedBallNotFoundException
 
 
 class CommandTypeError(Exception):
