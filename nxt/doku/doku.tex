@@ -7,7 +7,29 @@
 \usepackage{makeidx}
 \usepackage{graphicx}
 \usepackage{bytefield2}
-\usepackage{marginnote}
+\usepackage{pgf}
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata}
+\usepackage{listings}
+\lstset{
+   basicstyle=\normalsize\ttfamily,
+   keywordstyle=\bfseries\ttfamily\color{orange},
+   stringstyle=\color{green}\ttfamily,
+   commentstyle=\color{middlegray}\ttfamily,
+   emph={square}, 
+   emphstyle=\color{blue}\texttt,
+   emph={[2]root,base},
+   emphstyle={[2]\color{yac}\texttt},
+   showstringspaces=false,
+   flexiblecolumns=false,
+   tabsize=2,
+   numbers=left,
+   numberstyle=\tiny,
+   numberblanklines=false,
+   stepnumber=1,
+   numbersep=10pt,
+   xleftmargin=15pt
+ }
 \usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \author{Sven Schröder, Jens Bork}
 \title{Dokumentation -- NXT}
@@ -70,7 +92,7 @@ Cons:
 \item hohe Ungenauigkeit beim drehen des Radarkopfes durch das Getriebe
 \end{itemize}
 \subsubsection{Fazit}
-Die Idee ist alles in allem nicht schlecht aber die Umsetzung mittels LEGO$^\copyright$ ist nicht praktikabel. Die hohen Ungenauigkeiten und die komplett Aussetzer des Ultraschallsensors lassen uns keine andere Wahl als eine neues Fahrzeug zu entwerfen. Hierbei muss sowohl der Antrieb als auch die Sensorkonstruktion überdacht werden. An einen Einsatz dieses Models ist nicht zu denken.
+Die Idee ist alles in allem nicht schlecht aber die Umsetzung mittels LEGO$^\copyright$ ist nicht praktikabel. Die hohen Ungenauigkeiten und die komplett Aussetzer des Ultraschallsensors lassen uns keine andere Wahl als ein neues Fahrzeug zu entwerfen. Hierbei muss sowohl der Antrieb als auch die Sensorkonstruktion überdacht werden. An einen Einsatz dieses Modells ist nicht zu denken.
 \subsection{Idee 2 $\rightarrow$ Modell 2}%angepasstes Grundmodell + riesiger Stoßdämpfer
 \subsubsection{Idee}
 Da wir bei unserer ersten Idee feststellen mussten das ein kettengetriebenes Fahrzeug zu hohe Ungenauigkeiten verursachte, musste hier eine Alternative gefunden werden, welche aber keine Einschränkungen bei der Bewegungsfreiheit des Fahrzeuges macht d.h. möglichst genaues (vorwärts/rückwärts) Fahren und auf der Stelle wenden können.\\
@@ -145,6 +167,9 @@ Das zweite Model überzeugt durch seine Genauigkeit beim Fahren und auch die Aus
 Von allen Model schneidet das dritte am besten ab. Es erbt die guten Fahrteigenschaften des zweiten Models und biete uns dazu noch die Möglichkeit durch seine überarbeitete Sensoranordnung möglichst intelligent das Problem zu lösen. 
 \section{Kommunikation}
 \subsection{Bluetooth}
+Bluetooth ist ein Funkstandard speziell für die Nahbereichskommunikation. Er wurde in den 1990er-Jahren von der Bluetooth Special Interest Group (SIG) entwickelt und in IEEE 802.15.1 festgeschrieben. Grundsätzlich sind verbindunglose und verbindungsorientierte Übertragungen möglich. 
+
+Bei der Konzeptionierung von LEGO$^\copyright$ Mindstorms$^\copyright$ NXT hat LEGO$^\copyright$ die Verbindungorientierung für ihre Geräte festgelegt. 
 \subsection{Kommunikationsprotokoll PC $\leftrightarrow$ NXT}
 Bei einem der Treffen im Rahmen des Semesterprojektes wurde durch den begleitenden Professor  angeregt, dass durch das Team NXT sicherzustellen sei, dass alle Steuerkommandos und Antworten (über Bluetooth) auch von der Gegenstelle erhalten werden müssen. Als Denkanstoß verwies er auf den 3-way-handshake des TCP. Dieser Aspekt wurde von uns mit dem Protokoll aus Abbildung \ref{protokoll_alt} implementiert, sodass auf jede Nachricht vom Typ "`m"' eine Antwort vom Typ "`r"' folgte und der Sende diese Typ "`r"' Nachricht mit einer abschließenden Typ "`a"' Nachricht quittierte. Dieses Protokoll hatte eine Datenflut zur Folge, die kaum zu beherrschen war, da bei überschreiten von Fristen Nachrichten wiederholt gesandt werden mussten. 
 
@@ -213,19 +238,163 @@ Kommunikation PC $\leftarrow$ NXT:$\qquad$
 \caption{Kommunikationsprotokoll}\label{protokoll}
 \end{figure}
 \subsection{Kommunikation mit dem MCC}
+Für die Kommunikation mit dem MCC kam das Python Framework Twisted\footnote{http://twistedmatrix.com} zum Einsatz. Twisted ist ein sogenanntes "`event-driven"' framework, das heißt der Programmierer stellt für Aktionen Callback-Funktionen bereit. Twisted abstrahiert von der darunterliegenden Netzwerkarchitektur und dem verfügbaren Netzwerkprotokollstack (wenn auch nicht vollständig transparent), dies vereinfacht die Programmierung eines Verteilten Systems erheblich.
 \section{Logik}
-Problem das der Robo blockiert, das Programm aber nicht
+Für die logische Programmierung des "`Explorers"' bestand vorwiegend das Problem, dass die Hardware (der Brick) Zeit benötigt um die Aktionen auszuführen, also blockiert, jedoch die Softwarekomponente asynchrones Messaging nutzt. Um diese Hürde zu überwinden wurde bei der Konzeptionierung des Systems darauf geachtet, dass auf jedes Steuerkommando, welches eine Handlung der Hardware hervorruft, nach Abschluss der Handlung eine Antwort des Brick gesendet werden muss. Dass versetzte uns in die Lage mit einer synchronisierten boole'schen Variablen (blockiert = True) die Software solange zu blockieren, bis die Antwort vom Brick eingegangen ist und damit die boole'sche Variable wieder auf False gesetzt wird.
 \subsection{Explorationsalgorithmen}
-In der Welt der autonomen Rasenmäh- und Staubsaugroboter haben sich vier Algorithmen durchgesetzt:
+In der Welt der autonomen Rasenmäh- und Staubsaugroboter haben sich vier Algorithmen durchgesetzt\footnote{Quelle: Roboter mit Mikrocontrollern, Heinz Schmid, Franzis Verlag, 2011}:
 \begin{enumerate}
-\item Touch and Go\footnote{hier simple genannt}
+\item Touch and Go\footnote{hier simple genannt} 
 \item circle
 \item radar
 \item Wandverfolgung
 \end{enumerate}
 1 -- 3 werden im Folgenden näher besprochen. 4 konnte aufgrund der begrenzten Anzahl an Sensoren nicht implementiert werden und bleibt deshalb außen vor. 
 \subsubsection{Exploration -- simple}
+Der erste und auch gleichzeitig einfachste Algorithmus. Der Roboter fährt solange geradeaus bis er auf ein Hindernis trifft. Nach dem Auslösen eines Sensors wechselt der Roboter beliebig seine Fahrtrichtung und fährt wieder geradeaus bis zum nächsten Ereignis. Der Explorer wechselt die Richtung nicht vollständig beliebig, er wählt die Drehrichtung in Abhängigkeit von dem auslösenden Sensor, soll heißen wenn der linke Sensor angeschlagen wurde, dreht sich der Explorer um einen beliebigen Winkel zwischen 30° und 160° nach rechts.
 \subsubsection{Exploration -- circle}
+Wie in Abbildung \ref{circle} zu sehen ist macht der Explorer eine Bewegungsabfolge in Form einer eckigen Nautilusschnecke. Durch diese Bewegungsfolge wird der Bereich in dem sich der Explorer befindet schnell erkundet.
+
+In Abbildung \ref{state_circle} wird an Hand eines Zustandsautomaten gezeigt, wie der Explorationsalgorithmus umgesetzt ist. Es gibt keinen ausgezeichneten Endzustand, was damit begründet ist, dass der Algorithmus von einem externen Zähler abgebrochen wird. Der Abbruch kann in jedem der Zustände geschehen. Man kann erkennen, dass zusätzlich zur reinen Bewegung weitere Zustände und Transitionen eingefügt wurden um Messungen mit dem Ultraschallsensor durchzuführen. Die Messungen dienen als Grundlage zur Berechnung eines Korrekturfaktors für alle Bewegungen.
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2.8cm,
+                    semithick]
+  \tikzstyle{every state}=[fill=red,draw=none,text=white]
+
+  \coordinate  (A) at (0,0);
+  \coordinate  (B) at (0,1);
+  \coordinate  (C) at (-1,1);
+  \coordinate  (D) at (-1,-1);
+  \coordinate  (E) at (1,-1);
+  \coordinate  (F) at (1,2);
+  \coordinate  (G) at (-2,2);
+
+  \path (A) edge (B)
+        (B) edge (C)
+        (C) edge (D)
+        (D) edge (E)
+        (E) edge (F)
+        (F) edge (G);
+
+\end{tikzpicture}
+\caption{Bewegungsmuster Exploration -- circle}
+\label{circle}
+\end{figure}
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2.8cm,
+                    semithick]
+  \tikzstyle{every state}=[draw,text=black]
+
+  \node[initial,state] (z0)                     {$z_0$};
+  \node[state]         (z1) [above right of=z0] {$z_1$};
+  \node[state]         (z2) [below right of=z1] {$z_2$};
+  \node[state]         (z3) [below right of=z0] {$z_3$};
+
+
+  \path (z0) edge node {messen} (z1)
+        (z1) edge node {fahren} (z2)
+        (z2) edge node {messen} (z3)
+        (z3) edge node {drehen} (z0);
+
+\end{tikzpicture}
+\caption{state-machine Exploration -- circle}
+\label{state_circle}
+\end{figure}
 \subsubsection{Exploration -- radar}
+Wie in Abbildung \ref{radar} zu sehen ist, macht der Explorer eine Bewegungsabfolge in Form einer eckigen Wellenausbreitung. Durch diese Bewegungsfolge wird der Bereich vor dem Explorer schnell erkundet und der Explorer verlässt langsam seinen bisherigen Bereich.
+
+Wie im Abschnitt Exploration -- circle wird hier auch ein Zustandsautomat (Abbildung \ref{state_radar}) zur Darstellung des Algorithmus verwendet. Er unterliegt den gleichen Kriterien wie oben.
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2.8cm,
+                    semithick]
+  \tikzstyle{every state}=[fill=red,draw=none,text=white]
+
+  \coordinate  (A) at (0,0);
+  \coordinate  (B) at (0,1);
+  \coordinate  (C) at (2,1);
+  \coordinate  (D) at (2,2);
+  \coordinate  (E) at (-3,2);
+  \coordinate  (F) at (-3,3);
+  \coordinate  (G) at (5,3);
+
+  \path (A) edge (B)
+        (B) edge (C)
+        (C) edge (D)
+        (D) edge (E)
+        (E) edge (F)
+        (F) edge (G);
+
+\end{tikzpicture}
+\caption{Bewegungsmuster Exploration -- radar}
+\label{radar}
+\end{figure}
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2.8cm,
+                    semithick]
+  \tikzstyle{every state}=[draw,text=black]
+
+  \node[state] 		   (z0)                     {$z_0$};
+  \node[state]         (z1) [above right of=z0] {$z_1$};
+  \node[state]         (z2) [right of=z1] {$z_2$};
+  \node[state]         (z3) [right of=z2] {$z_3$};
+  \node[state]         (z4) [below right of=z3] {$z_4$};
+  \node[initial,state]         (z5) [below left of=z4] {$z_5$};
+  \node[state]         (z6) [above left of=z5] {$z_6$};
+  \node[state]         (z7) [left of=z6] {$z_7$};
+
+
+  \path (z0) edge node {drehen} (z1)
+        (z1) edge node {messen} (z2)
+        (z2) edge node {fahren} (z3)
+        (z3) edge node {messen} (z4)
+        (z4) edge node {drehen} (z5)
+        (z5) edge node {messen} (z6)
+        (z6) edge node {fahren(kurz)} (z7)
+        (z7) edge node {messen} (z0);
+
+\end{tikzpicture}
+\caption{state-machine Exploration -- radar}
+\label{state_radar}
+\end{figure}
 \subsection{GoToPoint}
+Für die GoToPoint -- Funktionalität wurden die zwei Funktionen aus Listing \ref{listing1} und Listing \ref{listing2} benötigt. Mit der Funktion berechnePunkt() kann aus der eigenen Ausrichtung, der gefahrenen Entfernung und dem ehemaligen Standort der neu Standort berechnet werden. Die Funktion berechneVektor() aus Listing \ref{listing2} berechnet zu zwei gegebenen Punkten den verbindenden Vektor, dazu wird erst ein relatives Koordinatensystem geschaffen, dann wird über den Satz von Pythagoras die Entfernung, d.h. der Betrag des Vektor berechnet und danach Winkel berechnet.
+\begin{figure}[h]
+\begin{lstlisting}[language={python}, caption={berechnePunkt()}\label{listing1},captionpos=t]
+def berechnePunkt(ausrichtung, entfernung, standort = {'x':0.0, 'y':0.0}):
+    return {'x': standort['x'] + entfernung * GRAD2CM * 
+    			 math.cos(ausrichtung * (math.pi / 180.0)),
+            'y': standort['y'] + entfernung * GRAD2CM * 
+            	 math.sin(ausrichtung * (math.pi / 180.0))}
+\end{lstlisting}
+\end{figure}
+\begin{figure}[h]
+\begin{lstlisting}[language={python}, caption={berechneVektor()}\label{listing2},captionpos=t]
+def berechneVektor(standort = {'x':0.0, 'y':0.0}, ziel = {'x': 0.0, 'y': 0.0}):
+    relativ_ziel = {'x': abs(ziel['x'] - standort['x']), 
+    				'y': abs(ziel['y'] - standort['y'])}
+    dbg_print("StO: (%d,%d), Z: (%d,%d), rZ: (%d,%d)"%(standort['x'],
+                                                       standort['y'],
+                                                       ziel['x'], 
+                                                       ziel['y'], 
+                                                       relativ_ziel['x'], 
+                                                       relativ_ziel['y']), 1, 0)
+    entfernung = math.sqrt(relativ_ziel['x'] ** 2 + relativ_ziel['y'] ** 2)
+    if relativ_ziel['x'] == 0:
+        winkel = 90
+    elif relativ_ziel['x'] < 0:
+        winkel = math.atan(float(relativ_ziel['y']) / float(relativ_ziel['x'])) * 
+        		 (180.0 / math.pi) + 180
+    else:
+        winkel = math.atan(float(relativ_ziel['y']) / float(relativ_ziel['x'])) * 
+        		 (180.0 / math.pi) + 360
+    return {'winkel': winkel % 360, 
+    		'entfernung': entfernung, 
+    		'rel_x': relativ_ziel['x'], 
+    		'rel_y': relativ_ziel['y']}
+\end{lstlisting}
+\end{figure}
 \end{document}
