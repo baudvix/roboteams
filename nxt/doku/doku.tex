@@ -14,6 +14,7 @@
 \begin{document}
 \maketitle
 \tableofcontents
+\part{LEGO$^\copyright$ Mindstorms$^\copyright$ zur Erkundung der Karte}
 \section{Entwurf}
 \subsection{Software}
 Beim Entwurf der Software für unseren Teil der Aufgabe hatten wir zwei Dinge zu beachten, die eingeschränkte Rechenleistung\footnote{8-Bit ARM mit 48 MHz Takt, 64KB RAM} des LEGO$^\copyright$ Mindstorms$^\copyright$ NXT Brick (im folgenden nur noch Brick genannt) und die durch LEGO$^\copyright$ begrenzte Anzahl von Robotern auf maximal 4. 
@@ -145,7 +146,37 @@ Von allen Model schneidet das dritte am besten ab. Es erbt die guten Fahrteigens
 \section{Kommunikation}
 \subsection{Bluetooth}
 \subsection{Kommunikationsprotokoll PC $\leftrightarrow$ NXT}
-anfänglich 3-way-handshake wegen missverständnis
+Bei einem der Treffen im Rahmen des Semesterprojektes wurde durch den begleitenden Professor  angeregt, dass durch das Team NXT sicherzustellen sei, dass alle Steuerkommandos und Antworten (über Bluetooth) auch von der Gegenstelle erhalten werden müssen. Als Denkanstoß verwies er auf den 3-way-handshake des TCP. Dieser Aspekt wurde von uns mit dem Protokoll aus Abbildung \ref{protokoll_alt} implementiert, sodass auf jede Nachricht vom Typ "`m"' eine Antwort vom Typ "`r"' folgte und der Sende diese Typ "`r"' Nachricht mit einer abschließenden Typ "`a"' Nachricht quittierte. Dieses Protokoll hatte eine Datenflut zur Folge, die kaum zu beherrschen war, da bei überschreiten von Fristen Nachrichten wiederholt gesandt werden mussten. 
+
+Da bei LEGO$^\copyright$ NXT Bluetooth verbindungsorientiert verwendet wird, war die oben beschriebene Herangehensweise nicht nötig, da bei Verbindungsorientiertheit die Zustellung von Nachrichten garantiert wird. Aus diesem Grund wurde das Protokoll auf das in Abbildung \ref{protokoll} reduziert.
+
+Definitions- und Wertebereich der im jüngsten Protokoll (Abbildung \ref{protokoll}) verwendeten Platzhalter:\\
+\\
+Kommunikation PC $\rightarrow$ NXT:\\
+\begin{tabular}{|l|l|p{133mm}|}
+\hline \textbf{F} & \textbf{W} & \textbf{Beschreibung} \\ 
+\hline 0 & beliebig & Stopp, der NXT in Hardware bricht alle seine Aktionen ab und wartet auf weitere Kommandos\\ 
+\hline 1 & 0 -- MAX\_INT & Vorwärtsfahren: bei W = 0 bis Steuerkommando 0 oder Auslösen eines Sensors, bei W~$>$~0 vorwärts fahren für W Grad in Motorumdrehungen\\ 
+\hline 2 & 1 -- MAX\_INT & rückwärts fahren für W Grad in Motorumdrehungen  \\ 
+\hline 3 & 1 -- MAX\_INT & Fahrzeugachse um W Grad nach links drehen \\ 
+\hline 4 & 1 -- MAX\_INT & Fahrzeugachse um W Grad nach rechts drehen \\ 
+\hline 5 & beliebig & Messung mit dem Ultraschallsensor ausführen \\ 
+\hline 
+\end{tabular} \\
+\\
+\\
+Kommunikation PC $\leftarrow$ NXT:\\
+\begin{tabular}{|l|l|p{133mm}|}
+\hline \textbf{T} & \textbf{W} & \textbf{Beschreibung} \\ 
+\hline 1 & 0 -- MAX\_INT & ständige Standortmeldung: für W cm vorwärts gefahren (ohne Kollision)\\
+\hline 2 & 1 -- MAX\_INT & Kollision: W cm vorwärts gefahren, Sensor $W_2$ hat ausgelöst\\ 
+\hline 3 & 1 -- MAX\_INT & Fahrziel erreicht: für W cm vorwärts gefahren (ohne Kollision) \\ 
+\hline 4 & beliebig & Drehung/Rückwärtsfahren beendet \\ 
+\hline 5 & 0 -- 255  & Ergebnis der Messung mit dem Ultraschallsensor \\ 
+\hline 9 & beliebig & Bodensensor hat Ziel gefunden \\ 
+\hline 
+\end{tabular} \\
+\\
 \begin{figure}[h]
 Kommunikation PC $\rightarrow$ NXT:$\qquad$
 \begin{bytefield}[bitwidth=2em]{7}
@@ -161,10 +192,8 @@ Kommunikation PC $\leftarrow$ NXT:$\qquad$
 \\
 \\
 \texttt{\underline{Legende:}\\ A = Typ der Nachricht (m = Nachricht, r = m erhalten, a = r erhalten)\\ F = Funktion die aufgerufen werden soll\\ W = Zahlwert \\ T = Typ der Antwort\\ $_2$ = optional}
-
 \caption{Kommunikationsprotokoll 3-way-handshake}\label{protokoll_alt}
 \end{figure}
-\\
 \begin{figure}[h]
 Kommunikation PC $\rightarrow$ NXT:$\qquad$
 \begin{bytefield}[bitwidth=2em]{5}
