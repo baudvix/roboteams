@@ -37,7 +37,7 @@ Die Kombination von nxc und nxt-python wurde wie folgt realisiert. Es wurde in e
 \subsubsection{Idee}
 Unsere erste Idee bestand im Prinzip aus zwei unabhängigen Ideen. Zum Einen wollten wir ein Fahrgestell konzipieren, das auch bei unwegsamen Gelände eine kontrollierte Bewegung des Explorer ermöglichen würde und zum Anderen wollten wir einen Sensor der schon viele Informationen über die Umgebung sammelt ohne, dass der Explorer jeden Quadratzentimeter abfahren muss.
 \subsubsection{Konstruktion}
-Die Konstruktion bestand aus einem kettengetriebenen Fahrzeug, welches mit Hilfe eines Radars seine Umgebung wahrnahm (siehe Abbildung \ref{protokoll} auf Seite \pageref{protokoll}). Die Ketten waren dabei fest gespannt um mögliches schlüpfen der Kette über die Achse zu vermeiden und so eine Ungenauigkeit bei der Fahrt zu vermeiden. Des Weiteren bestanden sie aus Gummi und hatten eine große Auflagefläche zum Boden und somit eine möglichst hohe Reibung zum Boden. Der Radar bestand aus einem Motor der über einige Zahnräder und einer Schnecke einen Ultraschallsensor bewegte.\\
+Die Konstruktion bestand aus einem kettengetriebenen Fahrzeug, welches mit Hilfe eines Radars seine Umgebung wahrnahm (siehe Abbildung \ref{modell1} auf Seite \pageref{modell1}). Die Ketten waren dabei fest gespannt um mögliches schlüpfen der Kette über die Achse zu vermeiden und so eine Ungenauigkeit bei der Fahrt zu vermeiden. Des Weiteren bestanden sie aus Gummi und hatten eine große Auflagefläche zum Boden und somit eine möglichst hohe Reibung zum Boden. Der Radar bestand aus einem Motor der über einige Zahnräder und einer Schnecke einen Ultraschallsensor bewegte.\\
 Verbaute Sensoren und Motoren:
 \begin{itemize}
 \item zwei Motoren für den Antrieb
@@ -45,6 +45,12 @@ Verbaute Sensoren und Motoren:
 \item ein Kompass-Sensor zur Ermittlung der Ausrichtung des Fahrzeuges
 \item ein Lichtstärke-Sensor zur Zielfindung
 \end{itemize}
+\begin{figure}[ht]
+	\centering
+  \includegraphics[width=0.9\textwidth, angle=0]{modell1.png}
+	\caption{Modell 1}
+	\label{modell1}
+\end{figure}
 \subsubsection{Test}
 Getestet haben wir sowohl das Fahrverhalten des Kettenfahrzeuges als auch die Möglichkeit mit dem Radar die Umgebung wahrzunehmen. Hierbei wurde besonders Wert darauf gelegt die Abweichung zum Ist-Wert zu ermitteln.\\
 Beim Fahrzeug war es wichtig herauszufinden ob es geradeaus fahren kann und ja mit welcher Abweichung auf verschieden Distanzen (20cm, 50cm, 1m) zu rechnen war. Des Weiteren musste ermittelt werden ob das Fahrzeug in der Lage war sich auf der Stelle zu drehen und dies möglichst genau nach der Vorgabe eines vorher angegeben Winkels. Hierfür wurden mehrere Test mit verschiedensten Winkeln durchgeführt bei denen das Fahrzeug sich so oft drehen musste bis es wieder auf seine Ausgangsposition angelangt ist z.B. vier mal eine Drehung um 90° im Uhrzeigersinn.
@@ -69,13 +75,19 @@ Die Idee ist alles in allem nicht schlecht aber die Umsetzung mittels LEGO$^\cop
 Da wir bei unserer ersten Idee feststellen mussten das ein kettengetriebenes Fahrzeug zu hohe Ungenauigkeiten verursachte, musste hier eine Alternative gefunden werden, welche aber keine Einschränkungen bei der Bewegungsfreiheit des Fahrzeuges macht d.h. möglichst genaues (vorwärts/rückwärts) Fahren und auf der Stelle wenden können.\\
 Auch eine Alternative für den Radar musste her. Hierbei wurde in Kooperation mit dem MCC-Team vereinbart das nicht Hindernisse gefunden werden, sondern davon ausgegangen wird das die gefahren Strecke des Explores frei ist, sozusagen wurde das Bild der Karte invertiert. Dies ermöglichte uns nur auf Hindernisse reagieren zu müssen und nicht wie vorher Informationen über den Bereiche des Einsatzgebietes zu sammeln.
 \subsubsection{Konstruktion}
-Unsere Konstruktion 0.2 erhielt nun ein 2-Achsen Antrieb, welcher es uns ermöglichte durch gleichzeitiges ansteuern der Motoren gerade Strecken zu fahren, als auch durch entgegengesetztes ansteuern sich auf der Stelle zu drehen. Als Zusatz wurde noch ein Omni-Wheel verbaut, welches dem Gefährt mehr Stabilität verleihen sollte. Um auf Hindernisse reagieren zu können, wurden an der Vorderseite des Fahrzeuges drei Touchsensoren befestigt. Diese sollten auslösen sobald das Fahrzeug vor ein Hindernis fuhr.\\
+Unsere Konstruktion 2 (siehe Abbildung \ref{modell2} auf Seite \pageref{modell2}) erhielt nun ein 2-Achsen Antrieb, welcher es uns ermöglichte durch gleichzeitiges ansteuern der Motoren gerade Strecken zu fahren, als auch durch entgegengesetztes ansteuern sich auf der Stelle zu drehen. Als Zusatz wurde noch ein Omni-Wheel verbaut, welches dem Gefährt mehr Stabilität verleihen sollte. Um auf Hindernisse reagieren zu können, wurden an der Vorderseite des Fahrzeuges drei Touchsensoren befestigt. Diese sollten auslösen sobald das Fahrzeug vor ein Hindernis fuhr.\\
 Verbaute Sensoren und Motoren:
 \begin{itemize}
 \item zwei Motoren für den Antrieb
 \item drei Touch-Sensoren um Hindernisse zu finden
 \item ein Lichtstärke-Sensor zur Zielfindung
 \end{itemize}
+\begin{figure}[ht]
+	\centering
+  \includegraphics[width=0.9\textwidth, angle=0]{modell2.jpg}
+	\caption{Modell 2}
+	\label{modell2}
+\end{figure}
 \subsubsection{Test}
 Auch beim zweiten Model wurden die oben schon beschrieben Tests für den Antrieb durchgeführt. Die Sensoren wurden in ihrer Anordnung getestet um eine möglichst optimale Anordnung zu finden. 
 \subsubsection{Pros \& Cons}
@@ -97,7 +109,7 @@ Bei der zweiten Konstruktion überzeugt das Antriebsmodel durch seine geringen A
 \subsubsection{Idee}
 Das in Idee 2 entwickelte Antriebsmodel hat uns überzeugt. Im dritten Anlauf wird sollte nur noch die Sensoranordnung überdacht werden. Dem Bereich vor dem Fahrzeug sollte dabei mehr Beachtung geschenkt werden, um bessere und intelligentere Entscheidungen treffen zu können.
 \subsubsection{Konstruktion}
-Bei der dritten Konstruktion wurde das Antriebsmodel der zweiten Konstruktion übernommen. Bei den Sensoren wurde der mittlere Touch-Sensor durch ein Ultraschall-Sensor ersetzt. Dieser ermöglichte es die freie Strecke vor dem Fahrzeug zu ermitteln.\\
+Bei der dritten Konstruktion (siehe Abbildung \ref{modell3} auf Seite \pageref{modell3}) wurde das Antriebsmodel der zweiten Konstruktion übernommen. Bei den Sensoren wurde der mittlere Touch-Sensor durch ein Ultraschall-Sensor ersetzt. Dieser ermöglichte es die freie Strecke vor dem Fahrzeug zu ermitteln.\\
 Verbaute Sensoren und Motoren:
 \begin{itemize}
 \item zwei Motoren für den Antrieb
@@ -105,6 +117,12 @@ Verbaute Sensoren und Motoren:
 \item ein Ultraschall-Sensor um den Bereich vor dem Fahrzeug zu überblicken.
 \item ein Lichtstärke-Sensor zur Zielfindung
 \end{itemize}
+\begin{figure}[ht]
+	\centering
+  \includegraphics[width=0.9\textwidth, angle=0]{modell3.jpg}
+	\caption{Modell 3}
+	\label{modell3}
+\end{figure}
 \subsubsection{Test}
 Auch beim dritten Model wurden alle Antriebstests durchgeführt. Die neue Sensoranordnung wurde mit mehreren Testaufbauten auf ihre Einsatztauglichkeit geprüft. Hierbei wurden mögliche Anordnungen von Hindernissen konstruiert und die Sensorevents ausgewertet.
 \subsubsection{Pros \& Cons}
@@ -167,7 +185,7 @@ Kommunikation PC $\leftarrow$ NXT:$\qquad$
 \end{figure}
 \subsection{Kommunikation mit dem MCC}
 \section{Logik}
-Problem das der Robo blockiert, das Program aber nicht
+Problem das der Robo blockiert, das Programm aber nicht
 \subsection{Explorationsalgorithmen}
 In der Welt der autonomen Rasenmäh- und Staubsaugroboter haben sich vier Algorithmen durchgesetzt:
 \begin{enumerate}
