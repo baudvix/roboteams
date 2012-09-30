@@ -16,7 +16,7 @@
 \tableofcontents
 \section{Entwurf}
 \subsection{Software}
-Beim Entwurf der Software für unseren Teil der Aufgabe hatten wir zwei Dinge zu beachten, die mäßige Rechenleistung\footnote{8-Bit ARM mit 48 MHz Takt, 64KB RAM} des LEGO$^\copyright$ Mindstorms$^\copyright$ NXT Brick (im folgenden nur noch Brick genannt) und die durch LEGO$^\copyright$ begrenzte Anzahl von Robotern auf maximal 4. 
+Beim Entwurf der Software für unseren Teil der Aufgabe hatten wir zwei Dinge zu beachten, die eingeschränkte Rechenleistung\footnote{8-Bit ARM mit 48 MHz Takt, 64KB RAM} des LEGO$^\copyright$ Mindstorms$^\copyright$ NXT Brick (im folgenden nur noch Brick genannt) und die durch LEGO$^\copyright$ begrenzte Anzahl von Robotern auf maximal 4. 
 \subsubsection{nxc -- Not eXactly C}
 nxc ist die für LEGO$^\copyright$ NXT native Programmiersprache. Obwohl die Syntax von nxc der Programmiersprache C ähnlich ist, ist sie in ihrem Umfang erheblich eingeschränkt. Aus dem Fehlen des Pointerkonzept resultiert unter anderem der Verlust auf die Speicherverwaltung direkt einwirken zu können.
 \subsubsection{nxt-python-framework}
@@ -59,13 +59,13 @@ Unsere erste Idee bestand im Prinzip aus zwei unabhängigen Ideen. Zum Einen wol
 anfänglich 3-way-handshake wegen missverständnis
 \begin{figure}[h]
 Kommunikation PC $\rightarrow$ NXT:$\qquad$
-\begin{bytefield}[bitwidth=2em]{5}
+\begin{bytefield}[bitwidth=2em]{7}
 \bitheader{0-6} \\
 \bitbox{1}{A} & \bitbox{1}{;} & \bitbox{1}{ID} & \bitbox{1}{;} & \bitbox{1}{F} & \bitbox{1}{,} & \bitbox{1}{W}
 \end{bytefield}\\
 ~\\
 Kommunikation PC $\leftarrow$ NXT:$\qquad$
-\begin{bytefield}[bitwidth=2em]{5}
+\begin{bytefield}[bitwidth=2em]{9}
 \bitheader{0-8} \\
 \bitbox{1}{A} & \bitbox{1}{;} & \bitbox{1}{ID} & \bitbox{1}{;} & \bitbox{1}{T} & \bitbox{1}{,} & \bitbox{1}{W} & \bitbox{1}{,$_2$} & \bitbox{1}{W$_2$}
 \end{bytefield}
@@ -84,7 +84,7 @@ Kommunikation PC $\rightarrow$ NXT:$\qquad$
 \end{bytefield}\\
 ~\\
 Kommunikation PC $\leftarrow$ NXT:$\qquad$
-\begin{bytefield}[bitwidth=2em]{5}
+\begin{bytefield}[bitwidth=2em]{7}
 \bitheader{0-6} \\
 \bitbox{1}{ID} & \bitbox{1}{;} & \bitbox{1}{T} & \bitbox{1}{,} & \bitbox{1}{W} & \bitbox{1}{,$_2$} & \bitbox{1}{W$_2$}
 \end{bytefield}
