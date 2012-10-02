@@ -1,0 +1,11 @@
+Mitentwicklung Requirements
+Mitentwicklung Modell (State-Machine, Klassendiagramme, Aktivitätsdiagramme)
+
+Implementation der Karte (Initiale Erstellung, Dynamische Erweiterung) - model.map
+Eintragung von Punkten in die Karte - model.map
+Aktualisierung der Karte anhand von Positions- und Ausrichtungsangaben der NXT - control.map_update
+Interpolation des tatsächlichen Weges anhand der Kalibrierungsinformation des NAO's - control.interpolate
+Erstellung eines einfachen Simulators zum Testen der Kartendarstellung - test.simpleTest
+Berechnung der noch zu erkundenden Gebiete für die Phase "Guided Exploration" - test.guidedExploration
+
+Erstellung der Präsentation: Requirements - Aufgabe und Lösung
