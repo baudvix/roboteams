@@ -13,7 +13,7 @@ Projektumsetzung
 		Architekturmodell
 		Verfahren zur Problemlösung
 			Kommunikation
-			Interne Darstellung der Karte
+			Auswertung der Kalibrierung
 			Geführte Erkundung
 			Pfad zum Ziel			
 	NXT - Gruppe
