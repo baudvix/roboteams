@@ -1,0 +1,58 @@
+MCC is started and listens on 5000
+NEW robot: type=0 color=0
+got activate 0 
+#0 activated
+#0 Send data 0:	(0, 60, 90.000000)
+#0 Send data 0:	(0, 60, 90.000000)
+#0 Send data 0:	(0, 60, 90.000000)
+#0 Send data 0:	(0, 60, 90.000000)
+#0 Send data 0:	(0, 60, 90.000000)
+#0 Send data 0:	(0, 60, 90.000000)
+#0 Send data 0:	(0, 60, 90.000000)
+#0 Send data 0:	(0, 60, 90.000000)
+#0 Send data 0:	(0, 60, 90.000000)
+#0 Send data 0:	(0, 60, 90.000000)
+#0 Send data 0:	(0, 60, 90.000000)
+#0 Send data 0:	(0, 60, 90.000000)
+#0 Send data 0:	(0, 60, 90.000000)
+#0 Send data 0:	(0, 60, 90.000000)
+#0 Send data 0:	(0, 60, 90.000000)
+#0 Send data 0:	(0, 60, 90.000000)
+#0 Send data 0:	(0, 60, 90.000000)
+NEW robot: type=1 color=0
+got activate 1 
+#1 activated
+state: 1
+Unhandled Error
+Traceback (most recent call last):
+  File "/usr/lib/python2.7/site-packages/twisted/python/log.py", line 84, in callWithLogger
+    return callWithContext({"system": lp}, func, *args, **kw)
+  File "/usr/lib/python2.7/site-packages/twisted/python/log.py", line 69, in callWithContext
+    return context.call({ILogContext: newCtx}, func, *args, **kw)
+  File "/usr/lib/python2.7/site-packages/twisted/python/context.py", line 118, in callWithContext
+    return self.currentContext().callWithContext(ctx, func, *args, **kw)
+  File "/usr/lib/python2.7/site-packages/twisted/python/context.py", line 81, in callWithContext
+    return func(*args,**kw)
+--- <exception caught here> ---
+  File "/usr/lib/python2.7/site-packages/twisted/internet/posixbase.py", line 614, in _doReadOrWrite
+    why = selectable.doRead()
+  File "/usr/lib/python2.7/site-packages/twisted/internet/tcp.py", line 203, in doRead
+    return self._dataReceived(data)
+  File "/usr/lib/python2.7/site-packages/twisted/internet/tcp.py", line 209, in _dataReceived
+    rval = self.protocol.dataReceived(data)
+  File "/usr/lib/python2.7/site-packages/twisted/protocols/amp.py", line 2180, in dataReceived
+    return Int16StringReceiver.dataReceived(self, data)
+  File "/usr/lib/python2.7/site-packages/twisted/protocols/basic.py", line 755, in dataReceived
+    self.stringReceived(packet)
+  File "/usr/lib/python2.7/site-packages/twisted/protocols/basic.py", line 864, in stringReceived
+    self.state = statehandler(string)
+  File "/usr/lib/python2.7/site-packages/twisted/protocols/amp.py", line 2233, in proto_key
+    self.boxReceiver.ampBoxReceived(self._currentBox)
+  File "/usr/lib/python2.7/site-packages/twisted/protocols/amp.py", line 911, in ampBoxReceived
+    self._answerReceived(box)
+  File "/usr/lib/python2.7/site-packages/twisted/protocols/amp.py", line 841, in _answerReceived
+    question = self._outstandingRequests.pop(box[ANSWER])
+exceptions.KeyError: '2'
+Connection Lost to robo 0 
+state: 2
+send NXT #0 to (-60, 80)

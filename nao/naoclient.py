@@ -4,7 +4,11 @@ from twisted.internet.protocol import _InstanceFactory
 from twisted.protocols import amp
 from mcc.control import command
 from nao.NAOCalibration import *
+from nao.NaoWalk import *
+from naoqi import ALProxy
+from naoqi import ALBroker
 
+NAOControl = None
 
 class RobotProtocol(amp.AMP):
 
@@ -42,18 +46,29 @@ class NAOProtocol(RobotProtocol):
     def perform_calibration(self, nao_handle, nxt_handle, color):
         print 'Performing calibration on NXT #%d, color=%d' % (nxt_handle, color)
         try:
-            calibrationResult = performCalibration(color)
+            calibrationResult = self.factory.protocol.NAOControl.calibrate(color)
             return {'handle': nao_handle,'nxt_handle': nxt_handle,'x_axis':calibrationResult[0],'y_axis':calibrationResult[1],'yaw': calibrationResult[2]}
         except NXTNotFoundException, e:
-            raise e
+            print e
     command.PerformCalibration.responder(perform_calibration)
 
-    def send_path(self, path):
-        print 'Follow path'
+    def send_path(self, nxt_handle, path):
+        print 'Following red ball on path'
         pprint.pprint(path)
-        return {'ack': 'follow path'}
-    command.SendPath.responder(send_path)
+        for way in path:
+            while not NAOControl.followRedBall('first'):
+                deffered = self.factory.protocol.callRemote(command.NXTLost, handle = self.factory.protocol.handle, nxt_handle = nxt_handle)
+#                deffered.addCallback(pass)
+            deffered = self.factory.protocol.callRemote(command.NXTFollowed, handle = self.factory.protocol.handle, nxt_handle = nxt_handle, x_axis = path[0], y_axis = path[1])
+            
 
+        return {'ack': 'followed path'}
+    command.SendPath.responder(send_path)
+    
+    def nxt_moved(self, nxt_handle):
+        print 'NXT moved - go to point'
+        NAOControl.followRedBall('second')
+    command.NXTMoved.responder(nxt_moved)
 
 class RobotFactory(_InstanceFactory):
     def __init__(self, reactor, instance, deferred):
@@ -64,12 +79,14 @@ class NAOClient():
 
     def __init__(self):
         self.protocol = None
-        self.host = '194.95.174.187'
+        self.host = '194.95.174.180'
         self.port = 5000
         self.color = 0
         self.handle = None
         self.active = False
         self.robot_type = 1
+        self.calibration = NAOCalibration()
+        self.walk = NaoWalk()
         self.connect()
         loop = task.LoopingCall(self.run)
         loop.start(1.0)
@@ -91,7 +108,7 @@ class NAOClient():
     def connected(self, protocol):
         self.protocol = protocol
         print 'connected to mcc'
-        deffered = protocol.callRemote(command.Register, robot_type=self.robot_type, color=self.color)
+        deffered = protocol.callRemote(command.Register, robot_type=self.robot_type, rhandle = 4, color=self.color)
         deffered.addCallback(self.activate)
         deffered.addErrback(self.failure)
 
@@ -105,6 +122,8 @@ class NAOClient():
     def activated(self, ack):
         print 'active'
         self.active = True
+#        self.connectToNao()
+        
 
     def success(self, ack):
         print 'Success: %s:%s::%s' % (self.host, self.port, ack)
@@ -112,6 +131,23 @@ class NAOClient():
     def failure(self, error):
         print 'Error: %s:%s::%s' % (self.host, self.port, error)
 
+    def connectToNao(self):
+        try:
+#            for i in range(0,5):
+            try:
+#                clientbroker = ALBroker("clientbroker", "0.0.0.0", 0, config.NAO_IP, config.NAO_PORT)
+                self.NAOControl = ALProxy("NAOControl", config.NAO_IP, config.NAO_PORT)
+#                break
+            except Exception, e:
+                print "Connection to NAO not established: ", str(e)
+                print "Please check NAO. Automatic retry in 30 seconds."
+                time.sleep(30)
+            time.sleep(10)
+            print "Send NXTSpotted to MCC"
+            deffered = self.protocol.callRemote(command.NXTSpotted(handle = self.handle, nxt_handle = 0))
+        except KeyboardInterrupt:
+            print "Stopped"
+            sys.exit(0)
+
 if __name__ == '__main__':
     nao_client = NAOClient()
-    print 'x'

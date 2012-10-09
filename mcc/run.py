@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 import sys
 sys.path.append("..")
 from mcc.control import server

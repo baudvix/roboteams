@@ -6,6 +6,8 @@ Those commands are based on amp the twisted Asynchronous Message Protocol.
 """
 
 from twisted.protocols.amp import Command, Integer, String, AmpList, Float
+#from nao.NAOCalibration import NXTNotFoundException
+#from nao.NaoWalk import RedBallNotFoundException
 
 
 class CommandTypeError(Exception):
@@ -125,6 +127,26 @@ class NXTFollowed(Command):
     error = [(CommandMissionCompleteError, 'COMMAND_MISSION_COMPLETE_ERROR'),
              (CommandHandleError, 'COMMAND_HANDLE_ERROR'),
              (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR')]
+    
+class NXTMoved(Command):
+    """
+    The MCC notifies the NAO that the NXT has moved
+    """
+    arguments = [('handle', Integer()),
+                 ('nxt_handle', Integer())]
+    response = [('ack', String())]
+    error = [(CommandHandleError, 'COMMAND_HANDLE_ERROR'),
+             (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR')]
+
+class NXTLost(Command):
+    """
+    The NAO informs the MCC that he lost the red ball
+    """
+    arguments = [('handle', Integer()),
+                 ('nxt_handle', Integer())]
+    response = [('ack', String())]
+    error = [(CommandHandleError, 'COMMAND_HANDLE_ERROR'),
+             (CommandNXTHandleError, 'COMMAND_NXT_HANDLE_ERROR')]
 
 
 #Commands from NXT to MCC
@@ -205,7 +227,7 @@ class PerformCalibration(Command):
     """
     The MCC requests a calibration of a given NXT
     """
-    arguments = [('handle', Integer()),
+    arguments = [('nao_handle', Integer()),
                  ('nxt_handle', Integer()),
                  ('color', Integer())]
     response = [('nao_handle', Integer()),
@@ -213,9 +235,16 @@ class PerformCalibration(Command):
                 ('x_axis', Integer()),
                 ('y_axis', Integer()),
                 ('yaw', Integer())]
-    # errors = [(Exception, 'CALIBRATION_ERROR'),
-    #          (NXTNotFoundException, 'NXT_NOT_FOUND')]
+    errors = [(Exception, 'CALIBRATION_ERROR'),
+              (Exception, 'NXT_NOT_FOUND')]
 
+class FollowRedBall(Command):
+    """
+    The MCC makes the NAO to follow the red ball
+    """
+    arguments = []
+    response = [('ack', String())]
+    errors = [(Exception, 'RED_BALL_LOST')]
 
 class SendPath(Command):
     """

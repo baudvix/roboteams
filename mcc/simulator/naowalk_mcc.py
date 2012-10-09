@@ -20,7 +20,7 @@ class NaoWalkProtocol(server.MCCProtocol):
         raise command.CommandHandleError("No robot with handle")
 
     def calc_action(self, x_axis, y_axis):
-        if self.factory.state_machine.state == state.STATE_NAOWALK:
+        if self.factory.state_machine.wahl == state.STATE_NAOWALK:
             x, y = self.factory.naowalk_logic.get_next_point(robot.NAO_TYPE)
             if x == None:
                 raise command.CommandMissionCompletedError("Mission complete")
