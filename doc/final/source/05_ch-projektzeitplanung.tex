@@ -1,0 +1,24 @@
+\chapter{Projekt- / Zeitplanung}\label{prjzeitplanung}
+
+
+\section{Gruppenaufteilung}
+
+Ausgehend von der Anforderungserhebung kann das Projekt in drei große Teilaufgaben gegliedert werden:
+\begin{itemize}
+\item Implementation des Mission Control Centers
+\item Konstruktion der NXT's und Implementation der für die Roboter benötigten Routinen
+\item Implementation der für die NAO's benötigten Routinen
+\end{itemize}
+Diese drei Teilaufgaben wurden durchgehend von jeweils einer Gruppe von 2-4 Studenten bearbeitet, wobei ein Student im speziellen die Kommunikation zwischen dem MCC und dem NAO-Roboter bearbeitet hat.
+Durch diese Einteilung konnte - nachdem die exakten Schnittstellen zwischen den Gruppen, bzw. den Programmen festgelegt wurden - die Projektarbeit auf drei Kleingruppen heruntergebrochen werden. Innerhalb dieser Kleingruppen wurden die anstehenden Aufgaben in der Regel gemeinschaftlich oder zumindest in durchgängiger Absprache durchgeführt.
+
+
+\section{Grobe Ablaufplanung}
+
+In der Anforderungserhebung ist bereits die zu entwickelnde Funktionalität beschrieben - darauf basierend wird die Mission mit folgendem Ablauf implementiert:
+\begin{enumerate}
+\item Die NXT's erkunden die Umgebung in ausreichendem Maße, so dass für den NAO ein Weg zum Ziel existiert. Die Informationen werden dem MCC übermittelt und in einer Karte visualisiert, um den Ablauf der Mission verfolgen zu können.
+\item Das MCC hat ide Möglichkeit die auftretenden Ungenauigkeiten zu reduzieren, indem eine Kalibrierung eines NXT's durch einen NAO erfolgt.
+\item Nachdem die Karte ausreichend erkundet ist und ein Weg zum Ziel berechnet wurde, wird der NAO, geführt von einem NXT, zum Ziel gebracht um dort den Becher abzustellen.
+Formal ist der Ablauf der Mission in einer ``State-Machine''implementiert (s. dazu ``Statusorientierter Ablauf''). 
+\end{enumerate}

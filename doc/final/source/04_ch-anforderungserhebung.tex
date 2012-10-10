@@ -1,0 +1,125 @@
+\chapter{Anforderungserhebung}\label{Anforderungserhebung}
+
+Die Anforderungserhebung wurde aus der groben Aufgabenstellung (s. dazu ``Aufgabenstellung'') und einer Einigung der Projektteilnehmer über den konkreten Ablauf der Mission erstellt. Sie ist in System- und Benutzeranforderungen gegliedert maßgeblich für das gesamte Projekt:
+
+﻿\section{Systemanforderungen}
+\begin{enumerate}
+    \item NAO
+    \begin{enumerate}
+        \item Der NAO soll helfen können die NXT's zu kalibrieren
+        \begin{enumerate}
+            \item Die NXT's tragen TAGs die gemäß der Bedienungsanleitung vom NAO optisch erkennbar sind, wenn der NXT in einem Abstand von 30 - 100 cm vom NAO ist
+
+
+            \item Der NAO muss das ganze ihm mögliche Sichtfeld absuchen können in dem er im Stehen sein Kopf bewegt
+
+            \item Wenn ein NAO ein freies Sichtfeld auf den NXT hat, sendet er dem MCC auf Anfrage Informationen über die relative Lage, sonst muss der NAO dem MCC den Fehler, dass der NXT nicht gesehen werden kann, melden
+        \end{enumerate}
+        \item Der NAO muss sich zu Beginn nach dem Aufstehen und wenn er hinfällt mit Hilfe der NXT's auf 2 cm genau kalibrieren können
+        \begin{enumerate}
+            \item Der NAO hat ein freies Sichtfeld auf 2 NXT's, sonst muss der NAO dem MCC den Fehler, dass er einen oder beide NXT's nicht sehen kann, melden
+        
+            \item Die NXT's sind in einem Abstand von 30 - 100 cm, sonst muss der NAO dem MCC den Fehler, dass ein oder beide NXT's nicht im gewünschten Radius sind, melden
+        \end{enumerate}
+        \item Der NAO muss sich anhand von Orientierungspunkten (Steine, NXT's, Tags??) einem gegebenen Pfad mit einem Fehler von höchstens 5 cm folgen können
+
+
+    \end{enumerate}
+    \item NXT
+    \begin{enumerate}
+        \item Der NXT muss zu einem gegebenen Punkt fahren können mit einer maximalen Abweichung von 10 cm
+
+        \item Der NXT darf für 1 m Luftlinie maximal 1 min brauchen
+
+        \item Der NXT muss das Ziel identifizieren können wenn er darüber fährt
+
+        \item Der NXT muss selbstständig Kollisionen verarbeiten können, so dass er anschließend weiter fahren kann
+
+        \item Der NXT muss sich selbstständig, effektiv in einem unbekannten Gebiet bewegen können
+        
+        \item Der NXT muss seine Position, den Winkel seiner aktuellen Ausrichtung und ob er sich auf dem Ziel befindet oder nicht laufend an das MCC übermitteln können
+
+
+    \end{enumerate}
+    \item MCC
+    \begin{enumerate}
+        \item Das MCC muss mit 2 NAO's kommunizieren können
+
+        \item Das MCC muss mit bis zu 5 NXT's kommunizieren können
+        
+        \item Das MCC muss die 5 Zustände \textit{Initial}, \textit{AutonomicExploration}, \textit{GuidedExploration}, \textit{PathVerification} und \textit{NAOWalk} mit folgenden Zustandsübergangsanforderungen verwalten können:
+        \begin{description}
+             \item[Initial] \hfill \\
+             Tritt nach Beginn der Mission ein
+             \item[AutonomicExploration] \hfill \\
+             Tritt ein nachdem die NAO's stehen, kalibriert sind und die NXT's ihre absolute Position erhalten haben
+             \item[GuidedExploration] \hfill \\
+             Tritt nach 5 Minuten des vorherigen Zustands ein
+             \item[PathVerification] \hfill \\
+             Tritt ein nachdem das Ziel gefunden wurde, ein Pfad dorthin berechnet wurde und 80% des Gebiets erkundet wurden
+             \item[NAOWalk] \hfill \\
+             Tritt ein nachdem die vorherige Phase erfolgreich abgeschlossen wurde; sonst wird die \textit{GuidedExploration} wiederholt
+        \end{description}     
+        \begin{enumerate}
+            \item Das MCC muss den NAO's und den NXT's die aktuelle Missionsphase mitteilen können
+        \end{enumerate}
+        \item Das MCC muss eine Karte aus den Messungen der NXT's generieren können
+        \begin{enumerate}
+            \item Das MCC kann die Karten in vereinfachter Form an die Roboter schicken können
+
+            \item Das MCC muss nach einer Kalibrierung die Messfehler mit Hilfe der Abweichung, die die Kalibrierung ergeben hat, verringern können 
+        \end{enumerate}
+        \item Das MCC muss mit Hilfe der beiden NAO's einen NXT kalibrieren können
+        \begin{enumerate}
+            \item Das MCC muss die Funktion kalibrieren bereit stellen, Die eine Anfrage an die beiden NAO's stellt einen bestimmten NXT zu kalibrieren
+
+            \item Wenn beide NAO's relavtive Koordinaten für den NXT liefern, dann ermittelt das MCC die absolute Position des NXTs und teilt ihm diese mit
+
+            \item Nach erfolgter Kalibrierung, sendet das MCC dem NXT seine aktuelle Koordinaten.
+
+            \item Das MCC muss den NXT auf 2 cm genau identifizieren können
+            
+            \item Wenn ein oder beide NAO's den Fehler melden, dass der NXT nicht in Sichtfeld ist, muss das MCC dem NXT eine neue Position geben können, die das Problem möglicherweise behebt
+        \end{enumerate}
+    \end{enumerate}
+    \item NAOWalk
+    \begin{enumerate}
+        \item Das MCC muss einen Pfad zum Ziel bestimmen und diesen an den NAO übermitteln können
+
+        \item Der NAO muss mit Hilfe von einem NXT mit einem roten Ball zum Ziel laufen können
+        \begin{enumerate}
+            \item Der NAO muss dem 1 Meter enfernten NXT mit dem roten Ball folgen können und ihm mitteilen, dass er angekommen ist
+
+            \item Der NAO muss sich das letzte Teilstück zum NXT merken und auf die ehemalige position des NXT laufen können wenn dieser sich weiterbewegt hat.
+        \end{enumerate}
+        \item Der NAO muss den Becher am Ziel platzieren können
+    \end{enumerate}
+\end{enumerate}
+    
+\section{Benutzeranforderungen}
+\begin{enumerate}
+    \item Der Benutzer muss die Roboter auf initiale Positionen bringen, so dass alle NXT's im Sichtfeld beider NAO's sind
+
+    \item Der Benutzer muss die Mission starten können
+
+    \item Die Mission muss bis auf den Systemstart ohne menschlichen Eingriff ablaufen und nach maximal 30 Minuten erfolgreich beendet sein
+
+    \item Es sollen 2 NAOs und bis zu 5 NXT's verwendet werden
+
+    \item Das Spielfeld soll eine Größe von 3m * 3m haben
+
+    \item Auf dem Spielfeld befinden sich Hindernisse
+    \begin{enumerate}
+        \item Die verwendeten Hindernisse sind so zu plazieren, dass mindestens ein möglicher Weg vom NAO zum Ziel existiert
+
+        \item Die Hindernisse sind von den NXT's erkennbar, d.h. sie dürfen sich nicht verschieben oder umfallen, wenn der NXT dagegen fährt
+
+        \item Die Größe der Hindernisse entsprechen den Kalkziegelsteinen von Hellweg für 89 Cent
+    \end{enumerate}
+    \item Am Ende der Mission muss ein Becher auf dem Zielpunkt positioniert sein
+    \begin{enumerate}
+        \item Der Durchmesser des Ziels beträgt mindestens 15 cm.
+
+        \item Im Umfeld von 30 cm um das Ziel befinden sich keine Hindernisse.
+    \end{enumerate}
+\end{enumerate}

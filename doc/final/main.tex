@@ -1,0 +1,121 @@
+\documentclass[10pt,a4paper]{report}
+
+
+\usepackage[utf8x]{inputenc}
+\usepackage{ngerman}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{graphicx}
+\usepackage{bytefield2}
+\usepackage{pgf}
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata}
+\usepackage{listings}
+
+\usepackage{eso-pic}
+\newcommand\BackgroundPic{
+\put(0,0){
+\parbox[b][\paperheight]{\paperwidth}{%
+\vfill
+\centering
+\includegraphics[width=\paperwidth,height=\paperheight,
+keepaspectratio]{img/titlepage-background.png}%
+\vfill
+}}}
+
+\renewcommand\maketitle{%
+\begin{titlepage}
+    \hspace{90mm}\parbox{70mm}{\vspace{30mm}{\Huge\bfseries Dokumentation\\\\}
+    \vfill
+    {\LARGE\bfseries Semesterprojekt - Softwaretechnik für autonome Roboterteams\\\\}
+    \vfill
+    {\textit{Jens Bork, Denis Erfurt, Lorenz Fichte, Robert Fritz, Josef Hufnagl, Sebastian Günther, Sven Schröder, Jonathan Sielhorst und Cordt Voigt}}
+    {\\\\\\\\ Berlin, Sevilla, Zuerich; den 10.10.2012}
+    }
+\end{titlepage}%
+}
+
+
+\usepackage{titlesec,titletoc}  
+
+\titleclass{\part}{top}
+\titleformat{\part}
+  {\centering\normalfont\Huge\bfseries}{\thepart\ }{0pt}{}
+
+\setcounter{secnumdepth}{5}
+
+\renewcommand\contentsname{Inhaltsverzeichnis}
+\renewcommand\listfigurename{Bildverzeichnis}
+\renewcommand\listtablename{Tabellenverzeichnis}
+\renewcommand\indexname{Index}
+\renewcommand\figurename{Bild}
+\renewcommand\tablename{Tabelle}
+\renewcommand\chaptername{Kapitel}
+\renewcommand\partname{Teil}
+\renewcommand\appendixname{Anhang}
+\renewcommand\abstractname{Abstrakt}
+
+\renewcommand{\labelenumi}{\arabic{enumi}.}
+\renewcommand{\labelenumii}{\labelenumi\arabic{enumii}.}
+\renewcommand{\labelenumiii}{\labelenumii\arabic{enumiii}.}
+
+
+\newcommand{\rtHrule}{{\hrule height 1.3pt}}
+\lstset{
+   basicstyle=\normalsize\ttfamily,
+   keywordstyle=\bfseries\ttfamily\color{orange},
+   stringstyle=\color{green}\ttfamily,
+   commentstyle=\color{middlegray}\ttfamily,
+   emph={square}, 
+   emphstyle=\color{blue}\texttt,
+   emph={[2]root,base},
+   emphstyle={[2]\color{yac}\texttt},
+   showstringspaces=false,
+   flexiblecolumns=false,
+   tabsize=2,
+   numbers=left,
+   numberstyle=\tiny,
+   numberblanklines=false,
+   stepnumber=1,
+   numbersep=10pt,
+   xleftmargin=15pt
+ }
+\usepackage[left=3cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+
+\begin{document}
+\AddToShipoutPicture*{\BackgroundPic}
+\maketitle
+\tableofcontents
+\part{Allgemein}
+\startcontents[parts]
+\rtHrule
+\vskip 20pt
+\printcontents[parts]{}{0}{\setcounter{tocdepth}{5}}
+\vskip 20pt
+\rtHrule
+\input{source/01_ch-vorwort.tex}
+\input{source/02_ch-einleitung.tex}
+\input{source/03_ch-aufgabenstellung.tex}
+\input{source/04_ch-anforderungserhebung.tex}
+\input{source/05_ch-projektzeitplanung.tex}
+\part{Projektumsetzung}
+\startcontents[parts]
+\rtHrule
+\vskip 20pt
+\printcontents[parts]{}{0}{\setcounter{tocdepth}{5}}
+\vskip 20pt
+\rtHrule
+\input{source/06_ch-MCC.tex}
+\input{source/07_ch-NXT.tex}
+\input{source/08_ch-NAO.tex}
+\part{Fazit}
+\startcontents[parts]
+\rtHrule
+\vskip 20pt
+\printcontents[parts]{}{0}{\setcounter{tocdepth}{5}}
+\vskip 20pt
+\rtHrule
+\input{seouce/09_ch-fazit.tex}
+\end{document}
