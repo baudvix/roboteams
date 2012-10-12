@@ -21,41 +21,41 @@
 \contentsline {subsection}{\numberline {6.3.1}Kommunikation}{13}
 \contentsline {subsection}{\numberline {6.3.2}Auswertung der Kalibrierung}{13}
 \contentsline {subsection}{\numberline {6.3.3}Gef\IeC {\"u}hrte Erkundung}{14}
-\contentsline {subsection}{\numberline {6.3.4}Pfad zum Ziel}{14}
-\contentsline {chapter}{\numberline {7}NXT}{19}
-\contentsline {section}{\numberline {7.1}Entwurf}{19}
-\contentsline {subsection}{\numberline {7.1.1}Software}{19}
-\contentsline {subsubsection}{\numberline {7.1.1.1}nxc -- Not eXactly C}{19}
-\contentsline {subsubsection}{\numberline {7.1.1.2}nxt-python-framework}{19}
-\contentsline {subsubsection}{\numberline {7.1.1.3}hybrider Ansatz}{19}
-\contentsline {subsection}{\numberline {7.1.2}Idee 1 $\rightarrow $ Modell 1}{20}
-\contentsline {subsubsection}{\numberline {7.1.2.1}Idee}{20}
-\contentsline {subsubsection}{\numberline {7.1.2.2}Konstruktion}{20}
-\contentsline {subsubsection}{\numberline {7.1.2.3}Test}{20}
-\contentsline {subsubsection}{\numberline {7.1.2.4}Pros \& Cons}{21}
-\contentsline {subsubsection}{\numberline {7.1.2.5}Fazit}{21}
-\contentsline {subsection}{\numberline {7.1.3}Idee 2 $\rightarrow $ Modell 2}{21}
-\contentsline {subsubsection}{\numberline {7.1.3.1}Idee}{21}
-\contentsline {subsubsection}{\numberline {7.1.3.2}Konstruktion}{21}
-\contentsline {subsubsection}{\numberline {7.1.3.3}Test}{21}
-\contentsline {subsubsection}{\numberline {7.1.3.4}Pros \& Cons}{22}
-\contentsline {subsubsection}{\numberline {7.1.3.5}Fazit}{22}
-\contentsline {subsection}{\numberline {7.1.4}Idee 3 $\rightarrow $ Modell 3}{22}
-\contentsline {subsubsection}{\numberline {7.1.4.1}Idee}{22}
-\contentsline {subsubsection}{\numberline {7.1.4.2}Konstruktion}{23}
-\contentsline {subsubsection}{\numberline {7.1.4.3}Test}{23}
-\contentsline {subsubsection}{\numberline {7.1.4.4}Pros \& Cons}{23}
-\contentsline {subsubsection}{\numberline {7.1.4.5}Fazit}{24}
-\contentsline {subsection}{\numberline {7.1.5}Fazit und Entscheidung}{24}
-\contentsline {section}{\numberline {7.2}Kommunikation}{24}
-\contentsline {subsection}{\numberline {7.2.1}Bluetooth}{24}
-\contentsline {subsection}{\numberline {7.2.2}Kommunikationsprotokoll PC $\leftrightarrow $ NXT}{24}
-\contentsline {subsection}{\numberline {7.2.3}Kommunikation mit dem MCC}{25}
-\contentsline {section}{\numberline {7.3}Logik}{25}
-\contentsline {subsection}{\numberline {7.3.1}Explorationsalgorithmen}{26}
-\contentsline {subsubsection}{\numberline {7.3.1.1}Exploration -- simple}{26}
-\contentsline {subsubsection}{\numberline {7.3.1.2}Exploration -- circle}{26}
-\contentsline {subsubsection}{\numberline {7.3.1.3}Exploration -- radar}{27}
-\contentsline {subsection}{\numberline {7.3.2}GoToPoint}{27}
-\contentsline {part}{III\hspace {1em}Fazit}{29}
+\contentsline {subsection}{\numberline {6.3.4}Pfad zum Ziel}{15}
+\contentsline {chapter}{\numberline {7}NXT}{20}
+\contentsline {section}{\numberline {7.1}Entwurf}{20}
+\contentsline {subsection}{\numberline {7.1.1}Software}{20}
+\contentsline {subsubsection}{\numberline {7.1.1.1}nxc -- Not eXactly C}{20}
+\contentsline {subsubsection}{\numberline {7.1.1.2}nxt-python-framework}{20}
+\contentsline {subsubsection}{\numberline {7.1.1.3}hybrider Ansatz}{20}
+\contentsline {subsection}{\numberline {7.1.2}Idee 1 $\rightarrow $ Modell 1}{21}
+\contentsline {subsubsection}{\numberline {7.1.2.1}Idee}{21}
+\contentsline {subsubsection}{\numberline {7.1.2.2}Konstruktion}{21}
+\contentsline {subsubsection}{\numberline {7.1.2.3}Test}{21}
+\contentsline {subsubsection}{\numberline {7.1.2.4}Pros \& Cons}{22}
+\contentsline {subsubsection}{\numberline {7.1.2.5}Fazit}{22}
+\contentsline {subsection}{\numberline {7.1.3}Idee 2 $\rightarrow $ Modell 2}{22}
+\contentsline {subsubsection}{\numberline {7.1.3.1}Idee}{22}
+\contentsline {subsubsection}{\numberline {7.1.3.2}Konstruktion}{22}
+\contentsline {subsubsection}{\numberline {7.1.3.3}Test}{22}
+\contentsline {subsubsection}{\numberline {7.1.3.4}Pros \& Cons}{23}
+\contentsline {subsubsection}{\numberline {7.1.3.5}Fazit}{23}
+\contentsline {subsection}{\numberline {7.1.4}Idee 3 $\rightarrow $ Modell 3}{23}
+\contentsline {subsubsection}{\numberline {7.1.4.1}Idee}{23}
+\contentsline {subsubsection}{\numberline {7.1.4.2}Konstruktion}{24}
+\contentsline {subsubsection}{\numberline {7.1.4.3}Test}{24}
+\contentsline {subsubsection}{\numberline {7.1.4.4}Pros \& Cons}{24}
+\contentsline {subsubsection}{\numberline {7.1.4.5}Fazit}{25}
+\contentsline {subsection}{\numberline {7.1.5}Fazit und Entscheidung}{25}
+\contentsline {section}{\numberline {7.2}Kommunikation}{25}
+\contentsline {subsection}{\numberline {7.2.1}Bluetooth}{25}
+\contentsline {subsection}{\numberline {7.2.2}Kommunikationsprotokoll PC $\leftrightarrow $ NXT}{25}
+\contentsline {subsection}{\numberline {7.2.3}Kommunikation mit dem MCC}{26}
+\contentsline {section}{\numberline {7.3}Logik}{26}
+\contentsline {subsection}{\numberline {7.3.1}Explorationsalgorithmen}{27}
+\contentsline {subsubsection}{\numberline {7.3.1.1}Exploration -- simple}{27}
+\contentsline {subsubsection}{\numberline {7.3.1.2}Exploration -- circle}{27}
+\contentsline {subsubsection}{\numberline {7.3.1.3}Exploration -- radar}{28}
+\contentsline {subsection}{\numberline {7.3.2}GoToPoint}{28}
+\contentsline {part}{III\hspace {1em}Fazit}{30}
 \contentsfinish 

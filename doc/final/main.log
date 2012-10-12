@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2012.7.29)  12 OCT 2012 15:19
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2012.7.29)  12 OCT 2012 15:30
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -773,50 +773,56 @@ LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
 Kapitel 6.
 [12
 
-] [13]
-Underfull \hbox (badness 10000) in paragraph at lines 62--64
+] [13] <img/guided_exploration_1.png, id=61, 1003.75pt x 450.68375pt>
+File: img/guided_exploration_1.png Graphic file (type png)
+
+<use img/guided_exploration_1.png>
+Package pdftex.def Info: img/guided_exploration_1.png used on input line 56.
+(pdftex.def)             Requested size: 409.71692pt x 183.96318pt.
+ [14 <./img/guided_exploration_1.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 68--70
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 62--64
+Underfull \hbox (badness 10000) in paragraph at lines 68--70
 
  []
 
-[14] <img/p2.png, id=64, 596.2275pt x 598.235pt>
+<img/p2.png, id=66, 596.2275pt x 598.235pt>
 File: img/p2.png Graphic file (type png)
  <use img/p2.png>
-Package pdftex.def Info: img/p2.png used on input line 67.
+Package pdftex.def Info: img/p2.png used on input line 73.
 (pdftex.def)             Requested size: 409.71692pt x 411.09386pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 70--71
+Underfull \hbox (badness 10000) in paragraph at lines 76--77
 
  []
 
-<img/p3.png, id=65, 599.23875pt x 599.23875pt>
+<img/p3.png, id=67, 599.23875pt x 599.23875pt>
 File: img/p3.png Graphic file (type png)
  <use img/p3.png>
-Package pdftex.def Info: img/p3.png used on input line 75.
+Package pdftex.def Info: img/p3.png used on input line 81.
 (pdftex.def)             Requested size: 409.71692pt x 409.72629pt.
 
-<img/p4.png, id=66, 599.23875pt x 601.24625pt>
+<img/p4.png, id=68, 599.23875pt x 601.24625pt>
 File: img/p4.png Graphic file (type png)
  <use img/p4.png>
-Package pdftex.def Info: img/p4.png used on input line 80.
+Package pdftex.def Info: img/p4.png used on input line 86.
 (pdftex.def)             Requested size: 409.71692pt x 411.09889pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 84--85
+Underfull \hbox (badness 10000) in paragraph at lines 90--91
 
  []
 
-[15 <./img/p2.png>] <img/p5.png, id=70, 598.235pt x 598.235pt>
+<img/p5.png, id=69, 598.235pt x 598.235pt>
 File: img/p5.png Graphic file (type png)
-
-<use img/p5.png>
-Package pdftex.def Info: img/p5.png used on input line 88.
+ <use img/p5.png>
+Package pdftex.def Info: img/p5.png used on input line 94.
 (pdftex.def)             Requested size: 409.71692pt x 409.72461pt.
-) (./source/07_ch-NXT.tex [16 <./img/p3.png>] [17 <./img/p4.png>] [18 <./img/p5
-.png>]
+)
+(./source/07_ch-NXT.tex [15] [16 <./img/p2.png>] [17 <./img/p3.png>] [18 <./img
+/p4.png>] [19 <./img/p5.png>]
 Kapitel 7.
 
 Underfull \hbox (badness 10000) in paragraph at lines 8--18
@@ -838,28 +844,28 @@ Underfull \hbox (badness 10000) in paragraph at lines 8--18
 
  []
 
-[19
+[20
 
-] <img/modell1.png, id=85, 1124.2pt x 616.3025pt>
+] <img/modell1.png, id=90, 1124.2pt x 616.3025pt>
 File: img/modell1.png Graphic file (type png)
  <use img/modell1.png>
 Package pdftex.def Info: img/modell1.png used on input line 35.
 (pdftex.def)             Requested size: 409.71692pt x 224.60529pt.
 
-[20 <./img/modell1.png>] <img/modell2.jpg, id=89, 1300.86pt x 927.465pt>
+[21 <./img/modell1.png>] <img/modell2.jpg, id=94, 1300.86pt x 927.465pt>
 File: img/modell2.jpg Graphic file (type jpg)
 
 <use img/modell2.jpg>
 Package pdftex.def Info: img/modell2.jpg used on input line 72.
 (pdftex.def)             Requested size: 409.71692pt x 292.11057pt.
- [21] [22 <./img/modell2.jpg>]
-<img/modell3.jpg, id=96, 1393.205pt x 1055.945pt>
+ [22] [23 <./img/modell2.jpg>]
+<img/modell3.jpg, id=101, 1393.205pt x 1055.945pt>
 File: img/modell3.jpg Graphic file (type jpg)
  <use img/modell3.jpg>
 Package pdftex.def Info: img/modell3.jpg used on input line 107.
 (pdftex.def)             Requested size: 409.71692pt x 310.53433pt.
 
-[23 <./img/modell3.jpg>]
+[24 <./img/modell3.jpg>]
 \height=\dimen181 (locally)
 \depth=\dimen182 (locally)
 \totalheight=\dimen183 (locally)
@@ -1022,7 +1028,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 140--202
 
  []
 
-[24] [25] [26] (/usr/share/texmf-dist/tex/latex/listings/lstlang1.sty
+[25] [26] [27] (/usr/share/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2004/09/05 1.3 listings language file
 )
 LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
@@ -1071,18 +1077,18 @@ Overfull \hbox (70.0549pt too wide) in paragraph at lines 354--355
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-) [27] [28] (./main.ptc) (./source/09_ch-fazit.tex)
+) [28] [29] (./main.ptc) (./source/09_ch-fazit.tex)
 \tf@ptc=\write5
 \openout5 = `main.ptc'.
 
- [29
+ [30
 
 ] (./main.aux) ) 
 Here is how much of TeX's memory you used:
- 15604 strings out of 494912
- 278218 string characters out of 3177705
- 412551 words of memory out of 3000000
- 18444 multiletter control sequences out of 15000+200000
+ 15610 strings out of 494912
+ 278392 string characters out of 3177705
+ 412617 words of memory out of 3000000
+ 18449 multiletter control sequences out of 15000+200000
  13536 words of font info for 52 fonts, out of 3000000 for 9000
  62 hyphenation exceptions out of 8191
  49i,16n,68p,1866b,1288s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -1096,10 +1102,10 @@ e/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fon
 ts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/publi
 c/amsfonts/cm/cmsy7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/c
 mti10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on main.pdf (30 pages, 3609086 bytes).
+Output written on main.pdf (31 pages, 3641538 bytes).
 PDF statistics:
- 162 PDF objects out of 1000 (max. 8388607)
- 107 compressed objects within 2 object streams
+ 168 PDF objects out of 1000 (max. 8388607)
+ 110 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
- 53 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 58 words of extra memory for PDF output out of 10000 (max. 10000000)
 
