@@ -70,7 +70,7 @@ Der Algorithmus verwendet die Daten vom Map-Modell und berechnet den Mittelpunkt
 
 \begin{figure}[ht]
     \centering
-	\includegraphics[width=0.9\textwidth, angle=0]{img/p2.png} 
+	\includegraphics[width=0.7\textwidth, angle=0]{img/p2.png} 
 \end{figure}
 \subsection*{2. Repositioniertung}
 	Die Breitensuche sollte nun einen Pfad zurückliefern. Dieser Pfad ist jedoch auf die minimale Distanz optimiert. Einen Roboter entlang dieses Pfades zu schicken ist nicht möglich, da der Pfad oft an möglichen Hindernissen langführt und die Breite der Roboter nicht berücksichtigt. Da die Position der Hindernisse auf der Karte auch einem Fehler unterliegen ist es sicherer den Roboter in der ``Mitte'' eines ``Ganges'' zu schicken. Die Repositionierung sträbt nun an aus dem Pfad der Breitensuche einen solchen optimalen Pfad an, der möglichst weit weg von möglichen hindernissen ist. Dazu wird durch jeden Punkt des Pfades 4 Linien geführt: Die Horizontale, Vertikale und beide Diagonalen, die jewels dort enden, wo diese an ein mögliches Hindernis stoßen. Um eine Abschätzung des Optimalen Punktes zu bekommen, wird nun der Mittelpunkt der kürzisten Linie genommen und aus ihr wird ein Kreis mit der Diagonale der Linie konstruiert. Das Ergebnis ist eine Menge M von Kreisen auf der Karte. \\
@@ -78,12 +78,12 @@ Der Algorithmus verwendet die Daten vom Map-Modell und berechnet den Mittelpunkt
 
 \begin{figure}[ht]
     \centering
-	\includegraphics[width=0.9\textwidth, angle=0]{img/p3.png}
+	\includegraphics[width=0.7\textwidth, angle=0]{img/p3.png}
 \end{figure}
 
 \begin{figure}[ht]
     \centering
-	\includegraphics[width=0.9\textwidth, angle=0]{img/p4.png} 
+	\includegraphics[width=0.7\textwidth, angle=0]{img/p4.png} 
 \end{figure}
 
 \subsection*{3. Optimierung}
@@ -91,5 +91,5 @@ Der Algorithmus verwendet die Daten vom Map-Modell und berechnet den Mittelpunkt
 	
 \begin{figure}[ht]
     \centering
-	\includegraphics[width=0.9\textwidth, angle=0]{img/p5.png} 
+	\includegraphics[width=0.7\textwidth, angle=0]{img/p5.png} 
 \end{figure}

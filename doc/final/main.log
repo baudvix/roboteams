@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2012.7.29)  12 OCT 2012 15:36
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2012.7.29)  12 OCT 2012 15:45
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -793,36 +793,36 @@ Underfull \hbox (badness 10000) in paragraph at lines 68--70
 File: img/p2.png Graphic file (type png)
  <use img/p2.png>
 Package pdftex.def Info: img/p2.png used on input line 73.
-(pdftex.def)             Requested size: 409.71692pt x 411.09386pt.
+(pdftex.def)             Requested size: 318.66948pt x 319.73764pt.
 
 Underfull \hbox (badness 10000) in paragraph at lines 76--77
 
  []
 
-<img/p3.png, id=67, 599.23875pt x 599.23875pt>
+[15 <./img/p2.png>] <img/p3.png, id=70, 599.23875pt x 599.23875pt>
 File: img/p3.png Graphic file (type png)
- <use img/p3.png>
-Package pdftex.def Info: img/p3.png used on input line 81.
-(pdftex.def)             Requested size: 409.71692pt x 409.72629pt.
 
-<img/p4.png, id=68, 599.23875pt x 601.24625pt>
+<use img/p3.png>
+Package pdftex.def Info: img/p3.png used on input line 81.
+(pdftex.def)             Requested size: 318.66948pt x 318.67398pt.
+ <img/p4.png, id=71, 599.23875pt x 601.24625pt>
 File: img/p4.png Graphic file (type png)
- <use img/p4.png>
+
+<use img/p4.png>
 Package pdftex.def Info: img/p4.png used on input line 86.
-(pdftex.def)             Requested size: 409.71692pt x 411.09889pt.
+(pdftex.def)             Requested size: 318.66948pt x 319.74155pt.
 
 Underfull \hbox (badness 10000) in paragraph at lines 90--91
 
  []
 
-<img/p5.png, id=69, 598.235pt x 598.235pt>
+<img/p5.png, id=72, 598.235pt x 598.235pt>
 File: img/p5.png Graphic file (type png)
  <use img/p5.png>
 Package pdftex.def Info: img/p5.png used on input line 94.
-(pdftex.def)             Requested size: 409.71692pt x 409.72461pt.
+(pdftex.def)             Requested size: 318.66948pt x 318.66962pt.
 )
-(./source/07_ch-NXT.tex [15] [16 <./img/p2.png>] [17 <./img/p3.png>] [18 <./img
-/p4.png>] [19 <./img/p5.png>]
+(./source/07_ch-NXT.tex [16 <./img/p3.png>] [17 <./img/p4.png> <./img/p5.png>]
 Kapitel 7.
 
 Underfull \hbox (badness 10000) in paragraph at lines 8--18
@@ -844,28 +844,28 @@ Underfull \hbox (badness 10000) in paragraph at lines 8--18
 
  []
 
-[20
+[18
 
-] <img/modell1.png, id=90, 1124.2pt x 616.3025pt>
+] <img/modell1.png, id=84, 1124.2pt x 616.3025pt>
 File: img/modell1.png Graphic file (type png)
  <use img/modell1.png>
 Package pdftex.def Info: img/modell1.png used on input line 35.
 (pdftex.def)             Requested size: 409.71692pt x 224.60529pt.
 
-[21 <./img/modell1.png>] <img/modell2.jpg, id=94, 1300.86pt x 927.465pt>
+[19 <./img/modell1.png>] <img/modell2.jpg, id=88, 1300.86pt x 927.465pt>
 File: img/modell2.jpg Graphic file (type jpg)
 
 <use img/modell2.jpg>
 Package pdftex.def Info: img/modell2.jpg used on input line 72.
 (pdftex.def)             Requested size: 409.71692pt x 292.11057pt.
- [22] [23 <./img/modell2.jpg>]
-<img/modell3.jpg, id=101, 1393.205pt x 1055.945pt>
+ [20] [21 <./img/modell2.jpg>]
+<img/modell3.jpg, id=95, 1393.205pt x 1055.945pt>
 File: img/modell3.jpg Graphic file (type jpg)
  <use img/modell3.jpg>
 Package pdftex.def Info: img/modell3.jpg used on input line 107.
 (pdftex.def)             Requested size: 409.71692pt x 310.53433pt.
 
-[24 <./img/modell3.jpg>]
+[22 <./img/modell3.jpg>]
 \height=\dimen181 (locally)
 \depth=\dimen182 (locally)
 \totalheight=\dimen183 (locally)
@@ -1028,7 +1028,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 140--202
 
  []
 
-[25] [26] [27] (/usr/share/texmf-dist/tex/latex/listings/lstlang1.sty
+[23] [24] [25] (/usr/share/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2004/09/05 1.3 listings language file
 )
 LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
@@ -1038,35 +1038,39 @@ LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-) [28] [29] (./main.ptc) (./source/09_ch-fazit.tex)
+) [26] [27] (./main.ptc) (./source/09_ch-fazit.tex)
 \tf@ptc=\write5
 \openout5 = `main.ptc'.
 
- [30
+ [28
 
-] (./main.aux) ) 
+] (./main.aux)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
 Here is how much of TeX's memory you used:
  15610 strings out of 494912
  278392 string characters out of 3177705
- 543617 words of memory out of 3000000
+ 543618 words of memory out of 3000000
  18449 multiletter control sequences out of 15000+200000
  13536 words of font info for 52 fonts, out of 3000000 for 9000
  62 hyphenation exceptions out of 8191
  49i,16n,68p,1866b,1303s stack positions out of 5000i,500n,10000p,200000b,50000s
-</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pf
-b></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-dist/fon
-ts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public
-/amsfonts/cm/cmr5.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr
-6.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/shar
-e/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fon
-ts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/publi
-c/amsfonts/cm/cmsy7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/c
-mti10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on main.pdf (31 pages, 3641563 bytes).
+</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texmf-dist/fon
+ts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-dist/fonts/type1/publi
+c/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/c
+mr5.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/sh
+are/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-dist/f
+onts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/publi
+c/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/
+cmsy7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></us
+r/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on main.pdf (29 pages, 3641318 bytes).
 PDF statistics:
- 168 PDF objects out of 1000 (max. 8388607)
- 110 compressed objects within 2 object streams
+ 161 PDF objects out of 1000 (max. 8388607)
+ 105 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  58 words of extra memory for PDF output out of 10000 (max. 10000000)
 
