@@ -2,7 +2,7 @@
 
 \section{Statusorientierter Ablauf}
 
-Um die Lösung der Aufgabe zu strukturieren, aber auch um die Möglichkeit zu haben, die Mission in Teilaufgaben zu unterteilen, ist der Ablauf grundsätzlich in 5 verschiedene Status unterteilt. Jeder einzelne Status besteht aus einem definierten Ziel und dementsprechend Abbruch-, bzw. Abschlusskriterien. Die Implementierung ist in Form einer "META-State-Machine" vorgenommen, die den (inneren) Status der Mission kennt und bei Änderung diesen an die einzelenen Teilsysteme propagiert. Die im folgenden beschriebenen Status geben die konzeptionellen Bedingungen und Aktionen innerhalb dieses Status wieder, es werden jedoch keine konkreten Abläufe, bzw. Implementierungen dieser Aktionen erläutert. Eine genaue Beschreibung der Abläufe wird in späteren Kapiteln nachgeholt. Die einzelnen von der State-Machine verwalteten Status sind:
+Um die Lösung der Aufgabe zu strukturieren, aber auch um die Möglichkeit zu haben, die Mission in Teilaufgaben zu unterteilen, ist der Ablauf grundsätzlich in 5 verschiedene Status unterteilt. Jeder einzelne Status besteht aus einem definierten Ziel und dementsprechend Abbruch-, bzw. Abschlusskriterien. Die Implementierung ist in Form einer ``META-State-Machine'' vorgenommen, die den (inneren) Status der Mission kennt und bei Änderung diesen an die einzelenen Teilsysteme propagiert. Die im folgenden beschriebenen Status geben die konzeptionellen Bedingungen und Aktionen innerhalb dieses Status wieder, es werden jedoch keine konkreten Abläufe, bzw. Implementierungen dieser Aktionen erläutert. Eine genaue Beschreibung der Abläufe wird in späteren Kapiteln nachgeholt. Die einzelnen von der State-Machine verwalteten Status sind:
 
 \begin{enumerate}
 \item Initial
@@ -19,7 +19,7 @@ Nach der zweiten Erkundungsphase wird der vom MCC berechnete Pfad zum Ziel (s. h
 
 \item NAO Walk
 In der letzten Phase wird der NAO von einem NXT zum Ziel geführt. Der NXT wird dabei vom NAO als Fixpunkt genutzt und bewältigt die Strecke abschnittsweise (s. hierzu NAOWalk).
-
+\end{enumerate}
 
 \section{Architekturmodell}
 Bevor eine grobe Architektur entworfen werden kann, muss man sich klar machen, welche Funktionen das zu implementierende Stück Software leisten soll. Aus der Anforderungserhebung geht hervor, dass eine Karte existieren muss, in die die erhaltenen Erkundungsinformationen des NXT eingetragen werden können und die in vereinfachter Form an die NXT's geschickt werden kann. Zusätzlich ist es hilfreich, wenn auch nicht zwingend gefordert, dass während des Missionsablaufs die aktuelle gesamte Karte visualisiert wird, um den Missionsfortschritt und das Verhalten der Roboter transparent zu machen.
@@ -50,7 +50,7 @@ Als Ausgangspunkt kann festgehalten werden, dass jeder der Roboter mit jeder Bew
 
 Die größte Schwierigkeit bei der geführten Erkundung ist, festzustellen, welche Bereiche des Gebiets für den weiteren Verlauf der Mission relevant sind, insbesondere da nicht bekannt ist wo die Grenzen des Gebietes liegen und wo das Ziel ist - falls es bisher noch nicht gefunden wurde. Davon ausgehend, dass die NXT's sich während der autonomen Erkundung zumindest ungefähr im Bereich des Ziels befinden (diese Annahme ist ausgehend von der Anforderungserhebung im Bezug auf die Ausmaße des Gebiets und die Geschwindigkeit der NXT's gerechtfertigt) wird bei der geführten Erkundung versucht das bereits gefahrene Gebiet so zu erweitern, dass eine möglichst zusammenhängende erkundete Fläche entsteht. Das Prinzip veranschaulicht !!!untenstehende Grafik!!!.
 
-!!!!Grafik: (a) Karte nach der autonomen Erkundung (b) Der rote Bereich markiert das Gebiet, dass in der geführten Erkundung hinzukommen soll!!! (guided_exploration_1.gif)
+%!!!!Grafik: (a) Karte nach der autonomen Erkundung (b) Der rote Bereich markiert das Gebiet, dass in der geführten Erkundung hinzukommen soll!!! (guided_exploration_1.gif)
 
 Der Algorithmus verwendet die Daten vom Map-Modell und berechnet den Mittelpunkt aller bisher befahrenen Punkte. Von diesem Punkt ausgehend wird im Rotationsprinzip jeder Punkt der noch nicht befahren wurde ermittelt, wobei solange Punkte gesucht werden bis ein gewisser Schwellwert erreicht wird. Dieser Schwellwert kann abhängig von den Ausgangsbedingungen angepasst werden. Anschließend gibt es eine Menge von Punkten die Grundlage für die geführte Erkundung sind. Im nächsten Schritt wird die Menge aller Punkte in so viele Gebiete unterteilt wie es NXT's gibt. Ausgehend von der aktuellen Position der NXT's werden diese Gebiete zugeordnet und die NXT's fahren einzelne Punkte ab, um einen möglichst großen Teil der Ihnen zugeordneten Gebiete zu erkunden. Dabei kann nicht gefordert werden, dass die NXT's jeweils das ganze ihnen zugeordnete Gebiet erkunden, da nicht bekannt ist ob sich in den Bereichen Hindernisse befinden. Die Maßgabe für das erfolgreiche Beenden der Phase ist daher, dass das Ziel so wie ein Weg dorthin gefunden wurden. 
 
@@ -61,15 +61,29 @@ Der Algorithmus verwendet die Daten vom Map-Modell und berechnet den Mittelpunkt
 \subsection*{1. Breitensuche}
 	Bei der Representation der Karte handelt es sich um ein 2-Deminsionallen Binären Array, wobei 1 für ein Hindernis stehen und 0 für einen Freifläche. Die Breitensuche geht nun folgendermaßen vor: Sie weist iterativ jedem Punkt die Entfernung zum Startpunkt zu. Dies geschieht indem jeder Punkt am Horizont, also der noch nicht betrachtet wurde und an einen bereits betrachteten Punkt grenzt, den Abstand des bisherigen Punktes + 1 annimmt. Dies geschieht so lange der Endpunkt noch nicht gefunden wurde. Ist ein Endpunkt gefunden Konstruiert man den Pfad vom Endpunkt zum Startpunkt aus, in dem jeweils immer der kleinste Folgepunkt dem Pfad hinzugefügt wird, bis man bei dem Startpunkt angekommen ist. Das Resultat ist ein Pfad an Punkten.\\
 	\\
-	\includegraphics[scale=0.45]{p2.png} 
-\subsection*{2. Repositioniertung}
-	Die Breitensuche sollte nun einen Pfad zurückliefern. Dieser Pfad ist jedoch auf die minimale Distanz optimiert. Einen Roboter entlang dieses Pfades zu schicken ist nicht möglich, da der Pfad oft an möglichen Hindernissen langführt und die Breite der Roboter nicht berücksichtigt. Da die Position der Hindernisse auf der Karte auch einem Fehler unterliegen ist es sicherer den Roboter in der "Mitte" eines "Ganges" zu schicken. Die Repositionierung sträbt nun an aus dem Pfad der Breitensuche einen solchen optimalen Pfad an, der möglichst weit weg von möglichen hindernissen ist. Dazu wird durch jeden Punkt des Pfades 4 Linien geführt: Die Horizontale, Vertikale und beide Diagonalen, die jewels dort enden, wo diese an ein mögliches Hindernis stoßen. Um eine Abschätzung des Optimalen Punktes zu bekommen, wird nun der Mittelpunkt der kürzisten Linie genommen und aus ihr wird ein Kreis mit der Diagonale der Linie konstruiert. Das Ergebnis ist eine Menge M von Kreisen auf der Karte. \\
 
-	\\
-	\includegraphics[scale=0.45]{p3.png} \\ \\
-	\includegraphics[scale=0.45]{p4.png} 
+\begin{figure}[ht]
+    \centering
+	\includegraphics[width=0.9\textwidth, angle=0]{img/p2.png} 
+\end{figure}
+\subsection*{2. Repositioniertung}
+	Die Breitensuche sollte nun einen Pfad zurückliefern. Dieser Pfad ist jedoch auf die minimale Distanz optimiert. Einen Roboter entlang dieses Pfades zu schicken ist nicht möglich, da der Pfad oft an möglichen Hindernissen langführt und die Breite der Roboter nicht berücksichtigt. Da die Position der Hindernisse auf der Karte auch einem Fehler unterliegen ist es sicherer den Roboter in der ``Mitte'' eines ``Ganges'' zu schicken. Die Repositionierung sträbt nun an aus dem Pfad der Breitensuche einen solchen optimalen Pfad an, der möglichst weit weg von möglichen hindernissen ist. Dazu wird durch jeden Punkt des Pfades 4 Linien geführt: Die Horizontale, Vertikale und beide Diagonalen, die jewels dort enden, wo diese an ein mögliches Hindernis stoßen. Um eine Abschätzung des Optimalen Punktes zu bekommen, wird nun der Mittelpunkt der kürzisten Linie genommen und aus ihr wird ein Kreis mit der Diagonale der Linie konstruiert. Das Ergebnis ist eine Menge M von Kreisen auf der Karte. \\
+
+
+\begin{figure}[ht]
+    \centering
+	\includegraphics[width=0.9\textwidth, angle=0]{img/p3.png}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+	\includegraphics[width=0.9\textwidth, angle=0]{img/p4.png} 
+\end{figure}
 
 \subsection*{3. Optimierung}
 	In der Optimierungsphase werden alle Kreise aus M, die sich überschneiden, miteinander verbunden. Das Ergebnis ist ein Graph. Auf dem resultierendem Graphen wird nun noch einmal eine Breitensuche vorgenommen, wobei die Länge der Verbindung mit einberechnet wird. Der resultierende Pfad aus dieser Breitensuche ist der gesuchte Pfad und wird zurückgegeben. \\
-	\\
-	\includegraphics[scale=0.45]{p5.png} 
+	
+\begin{figure}[ht]
+    \centering
+	\includegraphics[width=0.9\textwidth, angle=0]{img/p5.png} 
+\end{figure}
