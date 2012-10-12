@@ -21,9 +21,19 @@ Die Anforderungserhebung wurde aus der groben Aufgabenstellung (s. dazu ``Aufgab
         
             \item Die NXT's sind in einem Abstand von 30 - 100 cm, sonst muss der NAO dem MCC den Fehler, dass ein oder beide NXT's nicht im gewünschten Radius sind, melden
         \end{enumerate}
-        \item Der NAO muss sich anhand von Orientierungspunkten (Steine, NXT's, Tags??) einem gegebenen Pfad mit einem Fehler von höchstens 5 cm folgen können
+        \item Der NAO muss sich anhand von Orientierungspunkten (Steine, NXT's) einem gegebenen Pfad mit einem Fehler von höchstens 5 cm folgen können
+		\item NAOWalk
+    	\begin{enumerate}
+        	\item Das MCC muss einen Pfad zum Ziel bestimmen und diesen an den NAO übermitteln können
 
+       		\item Der NAO muss mit Hilfe von einem NXT mit einem roten Ball zum Ziel laufen können
+        	\begin{enumerate}
+            	\item Der NAO muss dem 1 Meter enfernten NXT mit dem roten Ball folgen können und ihm mitteilen, dass er angekommen ist
 
+            	\item Der NAO muss sich das letzte Teilstück zum NXT merken und auf die ehemalige Position des NXT laufen können wenn dieser sich weiterbewegt hat.
+        	\end{enumerate}
+        	\item Der NAO muss den Becher am Ziel platzieren können
+		\end{enumerate}
     \end{enumerate}
     \item NXT
     \begin{enumerate}
@@ -81,19 +91,7 @@ Die Anforderungserhebung wurde aus der groben Aufgabenstellung (s. dazu ``Aufgab
             
             \item Wenn ein oder beide NAO's den Fehler melden, dass der NXT nicht in Sichtfeld ist, muss das MCC dem NXT eine neue Position geben können, die das Problem möglicherweise behebt
         \end{enumerate}
-    \end{enumerate}
-    \item NAOWalk
-    \begin{enumerate}
-        \item Das MCC muss einen Pfad zum Ziel bestimmen und diesen an den NAO übermitteln können
-
-        \item Der NAO muss mit Hilfe von einem NXT mit einem roten Ball zum Ziel laufen können
-        \begin{enumerate}
-            \item Der NAO muss dem 1 Meter enfernten NXT mit dem roten Ball folgen können und ihm mitteilen, dass er angekommen ist
-
-            \item Der NAO muss sich das letzte Teilstück zum NXT merken und auf die ehemalige position des NXT laufen können wenn dieser sich weiterbewegt hat.
-        \end{enumerate}
-        \item Der NAO muss den Becher am Ziel platzieren können
-    \end{enumerate}
+    \end{enumerate}    
 \end{enumerate}
     
 \section{Benutzeranforderungen}
