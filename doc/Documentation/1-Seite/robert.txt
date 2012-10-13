@@ -1,0 +1,11 @@
+Erarbeitung von Phase 4 | Zielführung
+
+Entwicklung / Implementierung eines Algorithmus zur Korrektur der Laufbahnabweichung vom Nao
+Entwicklung / Implementierung eines Algorithmus zur Abstandsbestimmung per ALVisionDetection
+
+Modellierung der NaoWalk-Funktionalität
+Implementierung / Test der NaoWalk-Funktionalität
+
+Vortrag "Requirements"
+stellv. Oberzeremonienmeister
+Konstruktion der Befestigung für RedBall und Marker
