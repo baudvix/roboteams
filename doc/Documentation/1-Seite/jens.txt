@@ -1,0 +1,15 @@
+Entwicklung der NXT's (LEGO)
+Weiterentwickung der NXT's um Ungenauigkeiten zu minimieren 
+Konstruktion der NXT's (LEGO)
+
+Zuständig für die Befestigung der Marker (Marker wurden von der NAO Gruppe gebaut)
+
+Entwicklung auf den NXT's mittels NXC:
+- explorer.nxc (Threats // Events)
+- explorer.h
+- libinfra.nxc (Communication NXC <-> python)
+- libinfra.h
+- libmov.nxc (Movements)
+- libmov.h
+
+Mitgearbeitet an der Präsentation: Projektmanagement & Softwaretechniken
