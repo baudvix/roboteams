@@ -18,8 +18,8 @@
 \contentsline {subsection}{\numberline {6.2.2}NAO/NXT Model}{14}
 \contentsline {subsection}{\numberline {6.2.3}Controler / View}{14}
 \contentsline {section}{\numberline {6.3}Verfahren zur Probleml\IeC {\"o}sung}{14}
-\contentsline {subsection}{\numberline {6.3.1}Kommunikation}{14}
-\contentsline {subsection}{\numberline {6.3.2}Auswertung der Kalibrierung}{14}
+\contentsline {subsection}{\numberline {6.3.1}Kommunikation}{15}
+\contentsline {subsection}{\numberline {6.3.2}Auswertung der Kalibrierung}{15}
 \contentsline {subsection}{\numberline {6.3.3}Gef\IeC {\"u}hrte Erkundung}{15}
 \contentsline {subsection}{\numberline {6.3.4}Pfad zum Ziel}{16}
 \contentsline {chapter}{\numberline {7}NXT}{18}
