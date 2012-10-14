@@ -1,65 +1,15 @@
 import pygame
 from mcc.test.guidedExploration import *
-from mcc.control.controller import Controller
+from mcc.control.map_update import UpdateNXTData
 import random
 
 def main():
-    """
-    main run method
-    """
-
-    # Create Map
-
-    controller = Controller()
-    controller.sim.generate_list()
-    test = FindFreeSpace(controller.map)
 
 
-    for i in range(50, 100):
-        for j in range(50, 80):
-            controller.map.set_point(i, j)
-
-    for i in range(10, 45):
-        for j in range(10, 45):
-            controller.map.set_point(i, j)
-
-    for _ in range(0, 20):
-        rand1 = random.randint(0, 170)
-        rand2 = random.randint(0, 170)
-        for i in range(rand1, rand1 + 30):
-            for j in range(rand2, rand2 + 30):
-                controller.map.set_point(i, j)
-
-        for i in range(rand1, rand1 + 30):
-            for j in range(rand2, rand2 + 30):
-                controller.map.set_point(i, j)
-
-    list = test.run()
-
-    # Fill Map with simulated content
-    for p in list:
-        controller.map.set_point(p[0], p[1])
-        controller.map.set_point(p[0], p[1])
-        controller.map.set_point(p[0], p[1])
-
-    clock = pygame.time.Clock()
-
-
-
-    #Main Loop
-    while True:
-        clock.tick(30)
-
-        #Event Handling
-        events = pygame.event.get()
-
-        for event in events:
-            if event.type == pygame.QUIT:
-                return
-
-
-        #controller.view.log( p.x_coord.__str__()+" "+p.y_coord.__str__() )
-        controller.view.update(events)
+    test = UpdateNXTData()
+    test.insert_position_data(5, 10, 0)
+    test.insert_position_data(15, 20, 0)
+    test.insert_position_data(25, 30, 0)
 
 
 #this calls the 'main' function when this script is executed

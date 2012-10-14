@@ -1,0 +1,7 @@
+Messen und Auswerten von Abweichungen beim NAO:
+beim Laufen auf verschiedenen Distanzen, Schrittweiten und Drehrichtungen
+beim Erkennen  der NAO-Marker in verschiedenen Größen auf unterschiedlichen Entfernungen und Lichtverhältnissen und Berechnen der Entfernung zum Marker
+Mitarbeit bei Kalibrierung und Farberkennung des NAO
+Mitarbeit bei Konstruktion und Anfertigung der NAO-Marker
+Teile der NAO-Doku geschrieben
+Ausarbeitung und Präsentation des Vortrags zu Projektmanagement und Softwaretechnik

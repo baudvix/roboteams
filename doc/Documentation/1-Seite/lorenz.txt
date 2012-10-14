@@ -1,0 +1,6 @@
+Messreihen mit Analyse, Diagrammen usw. für NAOWalk, Sonar, NAOMarker
+Kalibrierung: theoretische Überlegungen (Triangulation, Fehlerkorrektur) und praktische Umsetzung (z.B. optimale Position für den NAO finden und konfigurieren, sodass er diese immer einbehält und vor allem coden)  für Abstandsberechnungen zum NXT mH. von Markern; NAOCalibration.py geschrieben (komplett), Markerkonsturktion überlegt und gebaut
+Farberkennung: Recherche, Beispielcodes ausprobiert, colourDetectionConfig.py mitgewirkt (Programm, um die Farbbereiche für Rot, Grün und Blau auf die jeweilige Lichtsituation anzupassen)
+Doku: Themen und Inhalt ausgearbeitet zu Vorüberlegungen, Software NAO, Hardware NAO, (insb.) Messungen & Tests, (insb.) Kalibrierungsphase, Farberkennung, Probleme & Lösungen
+Präsentation: Vortrag Servicerobotik - Einlesen, Recherge und alle Folien der Präsentation erstellt und dann mit Denis besprochen und vorgetragen, Raussuchen von passenden Videos
+Backupmaterial: Aufnehmen von NAOCalibration-Routine aus der Sicht des NAOs (also von der Kamera) und aus der Totalen
