@@ -5,19 +5,19 @@
 Um die Lösung der Aufgabe zu strukturieren, aber auch um die Möglichkeit zu haben, die Mission in Teilaufgaben zu unterteilen, ist der Ablauf grundsätzlich in 5 verschiedene Status unterteilt. Jeder einzelne Status besteht aus einem definierten Ziel und dementsprechenden Abbruch-, bzw. Abschlusskriterien. Die Implementierung ist in Form einer ``META-State-Machine'' vorgenommen, die den (inneren) Zustand der Mission kennt und bei Änderung diesen an die einzelenen Teilsysteme propagiert. Die im folgenden beschriebenen Status geben die konzeptionellen Bedingungen und Aktionen innerhalb dieses Status wieder, es werden jedoch keine konkreten Abläufe, bzw. Implementierungen dieser Aktionen erläutert. Eine genaue Beschreibung der Abläufe wird in späteren Kapiteln nachgeholt. Die einzelnen von der State-Machine verwalteten Status sind:
 
 \begin{enumerate}
-\item Initial
+\item Initial\\
 Der Initial-Zustand wird automatisch von allen (Teil-)Systemen zu Beginn der Mission eingenommen ohne von der State-Machine propagiert werden zu müssen. Der Initial-Zustand stellt grundsätzliche einige Vorbedingungen sicher, damit die eigentliche Mission gestarted werden kann. Damit die Kalibirerung (s. u.) der NXT's durch den NAO möglichst geringe Fehler produziert, wird zunächst der NAO aufgestellt (falls er nicht bereits steht) und anschließend mit Hilfe von zwei NXT's auf eine Position innerhalb der Karte kalibriert. Anhand dieser Daten werden auch die Positionen der NXT's bestimmt - sollte es noch weitere NXT's geben, werden diese im Abschluss ebenfalls kalibriert. Für den Übergang in den nächsten Status muss der NAO stehen und alle NXT's und der NAO müssen kalibriert sein.
 
-\item Autonomic Exploration
+\item Autonomic Exploration\\
 Die Autonomic Exploration ist die erste Phase in der das unbekannte Gebiet erkundet wird. Zur Erkundung verwenden die NXT's verschiedene Explorationsalgorithmen (s. dazu die Kapitel zum NXT) mit dem Ziel, innerhalb einer vorgegebenen Zeit einen möglichst großen Bereich zu erkunden. Die zeit die für diese Phase veranschlagt ist beträgt 5:00 Minuten. Dieser Wert ist allerdings sehr von der gestellten Aufgabe abhängig - je nach Größe des zu erkundenden Gebietes sollte der Wert entsprechend angepasst werden, damit nach Ablauf der Zeit ein adequater Bereich erkundet wurde.
 
-\item Guided Exploration
+\item Guided Exploration\\
 In dieser Phase wird zielgerichtet versucht, nicht erkundete Gebiete von den NXT's abfahren zu lassen. Da nicht bekannt ist, wie groß das gesamte zu erkundende Gebiet ist oder welche Ausmaße es hat, muss man Areale, die noch abgefahren werden sollen, nach gewissen Kriterien aussuchen (s. hierzu Geführte Erkundung). Die Punkte die dann letztendlich noch abgefahren werden sollen, werden direkt vom MCC an die entsprechenden NXT's geschickt. Maßgeblich für den Übergang in die nächste Phase ist, dass das Ziel gefunden wurde. Mögliche Adaptionen sind bei Kenntnis des Gebietsumfangs die Erkundung bis ein bestimmter Schwellwert an erkundetem Gebiet relativ zum Gesamtgebiet überschritten wird und das Vorhandensein eines ausreichend großen Weges zum Ziel.
 
-\item Path Verification
+\item Path Verification\\
 Nach der zweiten Erkundungsphase wird der vom MCC berechnete Pfad zum Ziel (s. hierzu Pfad zum Ziel) durch einen NXT verifiziert. Es soll dabei sichergestellt werden, dass der berechnete Weg ausreichende Ausmaße hat, um vom NAO abgelaufen zu werden. Sollte der Weg als ungenügend erkannt werden, wird zur vorigen Phase zurück gesprungen. In dieser kann zielgerichtet versucht werden entweder den berechneten Pfad zu ändern, einen Neuen zu finden oder ein größeres Gebiet zu erkunden, um neue Wege zu finden.
 
-\item NAO Walk
+\item NAO Walk\\
 In der letzten Phase wird der NAO von einem NXT zum Ziel geführt. Der NXT wird dabei vom NAO als Fixpunkt genutzt und bewältigt die Strecke abschnittsweise (s. hierzu NAOWalk).
 \end{enumerate}
 
@@ -39,7 +39,14 @@ Die Aufgabe des Controlers ist es, Änderungen der Daten an das Model zu propagi
 Die Aufgabe des MCC besteht nicht nur darin eine geregelte Kommunikation zwischen den Robotergruppen und eine Visualisierung des Missionsablaufs zu ermöglichen, sondern auch gewisse Problemstellungen währen der Mission zu lösen. Die einzelnen Problemstellungen werden im Weiteren detailliert erläutert.
 
 \subsection{Kommunikation}
-%TODO Jonathan
+Die Kommunikation zwischen den beiden Robotergruppen und dem MCC ist zentral im MCC implementiert. Der generelle Aufbau entspricht grob einer Client-Server Architektur, wobei das MCC als 
+Server fungiert und jeder einzelne Roboter als Client angemeldet wird. Nach einer erfolgreichen Anmeldung steht den einzelnen Instanzen der Roboter ein Satz von Funktionen zur Verfügung
+(im Falle der NXT wird tatsächlich lediglich eine Funktion aufgerufen um Daten zu übermitteln - in diesen ist der Zweck genau definiert), bzw. das MCC hat die Möglichkeit Funktionen in den 
+Roboterinstanzen aufzurufen. Diese Funktionen implementieren die durch die Anforderungserhebung formulierten Aktionen, die während der 
+Mission durchgeführt werden. Für den Aufbau einer Verbindung sendet jede Roboter-Instanz ein ``Connection-Request'' an das MCC - dieses wird durch die Vergabe eines Handles an den Roboter quittiert. 
+Mit diesem Handle kann der Roboter nun das MCC ansprechen um Daten zu übermitteln. Die Funktionen für NAO'S und NXT's müssen nicht durch die Angabe des spezifischen Modells beschrieben werden,
+das übergebene Handle ist für die Erkennung ausreichend. Lediglich bei der initialen Regristrierung wird der Typ und im Falle des NXT die Farbe, die für die Erkennung durch den NAO wichtig ist, 
+übergeben. Das Handle selbst ist ein Integer, der mit jeder Registrierung inkrementiert wird.
 
 \subsection{Auswertung der Kalibrierung}
 
@@ -61,7 +68,7 @@ Die größte Schwierigkeit bei der geführten Erkundung ist, festzustellen, welc
 Der Algorithmus verwendet die Daten vom Map-Modell und berechnet den Mittelpunkt aller bisher befahrenen Punkte. Von diesem Punkt ausgehend wird im Rotationsprinzip jeder Punkt der noch nicht befahren wurde ermittelt, wobei solange Punkte gesucht werden bis ein gewisser Schwellwert erreicht wird. Dieser Schwellwert kann abhängig von den Ausgangsbedingungen angepasst werden. Anschließend gibt es eine Menge von Punkten die Grundlage für die geführte Erkundung sind. Im nächsten Schritt wird die Menge aller Punkte in so viele Gebiete unterteilt wie es NXT's gibt. Ausgehend von der aktuellen Position der NXT's werden diese Gebiete zugeordnet und die NXT's fahren einzelne Punkte ab, um einen möglichst großen Teil der Ihnen zugeordneten Gebiete zu erkunden. Dabei kann nicht gefordert werden, dass die NXT's jeweils das ganze ihnen zugeordnete Gebiet erkunden, da nicht bekannt ist ob sich in den Bereichen Hindernisse befinden. Die Maßgabe für das erfolgreiche Beenden der Phase ist daher, dass das Ziel so wie ein Weg dorthin gefunden wurden. 
 
 \subsection{Pfad zum Ziel}
-%TODO Jonathan: Bilder-Pfade und Latex anpassen - das ist der Teil von Denis
+
 \subsection*{Überblick}
 	Im folgenden wird der Pathfinding Algorithmus näher beschrieben bei welchem aus einer erkundeten Karte und einem Start und Zielpunkt ein optimaler Pfad berechnet wird. Bedingungen hierfür sind jedoch eine erkundete Topologie. Übergeben wird diese als binärer Zweidimensionaler Array, sowie einem Startpunkt des Nao's und dem gefundenen Endpunkt. Der Algorithmus teilt sich in 3 Phasen: 
 \begin{enumerate}

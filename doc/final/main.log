@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.6.14)  14 OCT 2012 22:06
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.6.14)  15 OCT 2012 13:56
 entering extended mode
  %&-line parsing enabled.
 **main.tex
@@ -738,32 +738,31 @@ Kapitel 6.
 ] [14] <img/guided_exploration_1.png, id=63, 1003.75pt x 450.68375pt>
 File: img/guided_exploration_1.png Graphic file (type png)
 
-<use img/guided_exploration_1.png> [15 <./img/guided_exploration_1.png (PNG cop
-y)>]
-Underfull \hbox (badness 10000) in paragraph at lines 74--76
+<use img/guided_exploration_1.png> [15]
+Underfull \hbox (badness 10000) in paragraph at lines 81--83
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 74--76
+Underfull \hbox (badness 10000) in paragraph at lines 81--83
 
  []
 
-<img/p2.png, id=68, 596.2275pt x 598.235pt>
+<img/p2.png, id=67, 596.2275pt x 598.235pt>
 File: img/p2.png Graphic file (type png)
  <use img/p2.png>
-Underfull \hbox (badness 10000) in paragraph at lines 82--83
+Underfull \hbox (badness 10000) in paragraph at lines 89--90
 
  []
 
-[16 <./img/p2.png (PNG copy)>] <img/p3.png, id=72, 599.23875pt x 599.23875pt>
+[16 <./img/guided_exploration_1.png (PNG copy)> <./img/p2.png (PNG copy)>]
+<img/p3.png, id=72, 599.23875pt x 599.23875pt>
 File: img/p3.png Graphic file (type png)
-
-<use img/p3.png> <img/p4.png, id=73, 599.23875pt x 601.24625pt>
+ <use img/p3.png>
+<img/p4.png, id=73, 599.23875pt x 601.24625pt>
 File: img/p4.png Graphic file (type png)
-
-<use img/p4.png>
-Underfull \hbox (badness 10000) in paragraph at lines 92--93
+ <use img/p4.png>
+Underfull \hbox (badness 10000) in paragraph at lines 99--100
 
  []
 
@@ -1098,7 +1097,7 @@ fb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/sh
 are/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texmf-te
 xlive/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texmf-texlive/fonts
 /type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on main.pdf (42 pages, 5640700 bytes).
+Output written on main.pdf (42 pages, 5641704 bytes).
 PDF statistics:
  211 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

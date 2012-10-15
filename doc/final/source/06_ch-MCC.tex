@@ -39,7 +39,14 @@ Die Aufgabe des Controlers ist es, Änderungen der Daten an das Model zu propagi
 Die Aufgabe des MCC besteht nicht nur darin eine geregelte Kommunikation zwischen den Robotergruppen und eine Visualisierung des Missionsablaufs zu ermöglichen, sondern auch gewisse Problemstellungen währen der Mission zu lösen. Die einzelnen Problemstellungen werden im Weiteren detailliert erläutert.
 
 \subsection{Kommunikation}
-%TODO Jonathan
+Die Kommunikation zwischen den beiden Robotergruppen und dem MCC ist zentral im MCC implementiert. Der generelle Aufbau entspricht grob einer Client-Server Architektur, wobei das MCC als 
+Server fungiert und jeder einzelne Roboter als Client angemeldet wird. Nach einer erfolgreichen Anmeldung steht den einzelnen Instanzen der Roboter ein Satz von Funktionen zur Verfügung
+(im Falle der NXT wird tatsächlich lediglich eine Funktion aufgerufen um Daten zu übermitteln - in diesen ist der Zweck genau definiert), bzw. das MCC hat die Möglichkeit Funktionen in den 
+Roboterinstanzen aufzurufen. Diese Funktionen implementieren die durch die Anforderungserhebung formulierten Aktionen, die während der 
+Mission durchgeführt werden. Für den Aufbau einer Verbindung sendet jede Roboter-Instanz ein ``Connection-Request'' an das MCC - dieses wird durch die Vergabe eines Handles an den Roboter quittiert. 
+Mit diesem Handle kann der Roboter nun das MCC ansprechen um Daten zu übermitteln. Die Funktionen für NAO'S und NXT's müssen nicht durch die Angabe des spezifischen Modells beschrieben werden,
+das übergebene Handle ist für die Erkennung ausreichend. Lediglich bei der initialen Regristrierung wird der Typ und im Falle des NXT die Farbe, die für die Erkennung durch den NAO wichtig ist, 
+übergeben. Das Handle selbst ist ein Integer, der mit jeder Registrierung inkrementiert wird.
 
 \subsection{Auswertung der Kalibrierung}
 
@@ -61,7 +68,7 @@ Die größte Schwierigkeit bei der geführten Erkundung ist, festzustellen, welc
 Der Algorithmus verwendet die Daten vom Map-Modell und berechnet den Mittelpunkt aller bisher befahrenen Punkte. Von diesem Punkt ausgehend wird im Rotationsprinzip jeder Punkt der noch nicht befahren wurde ermittelt, wobei solange Punkte gesucht werden bis ein gewisser Schwellwert erreicht wird. Dieser Schwellwert kann abhängig von den Ausgangsbedingungen angepasst werden. Anschließend gibt es eine Menge von Punkten die Grundlage für die geführte Erkundung sind. Im nächsten Schritt wird die Menge aller Punkte in so viele Gebiete unterteilt wie es NXT's gibt. Ausgehend von der aktuellen Position der NXT's werden diese Gebiete zugeordnet und die NXT's fahren einzelne Punkte ab, um einen möglichst großen Teil der Ihnen zugeordneten Gebiete zu erkunden. Dabei kann nicht gefordert werden, dass die NXT's jeweils das ganze ihnen zugeordnete Gebiet erkunden, da nicht bekannt ist ob sich in den Bereichen Hindernisse befinden. Die Maßgabe für das erfolgreiche Beenden der Phase ist daher, dass das Ziel so wie ein Weg dorthin gefunden wurden. 
 
 \subsection{Pfad zum Ziel}
-%TODO Jonathan: Bilder-Pfade und Latex anpassen - das ist der Teil von Denis
+
 \subsection*{Überblick}
 	Im folgenden wird der Pathfinding Algorithmus näher beschrieben bei welchem aus einer erkundeten Karte und einem Start und Zielpunkt ein optimaler Pfad berechnet wird. Bedingungen hierfür sind jedoch eine erkundete Topologie. Übergeben wird diese als binärer Zweidimensionaler Array, sowie einem Startpunkt des Nao's und dem gefundenen Endpunkt. Der Algorithmus teilt sich in 3 Phasen: 
 \begin{enumerate}
